@@ -22,14 +22,16 @@ const Navbar = () => {
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', borderLeft: '1px solid var(--glass-border)', paddingLeft: '1.5rem' }}>
           {user ? (
             <>
-              <div className="user-profile" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Link to="/profile" className="user-profile" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: 'inherit', transition: 'var(--transition)' }}>
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '0.85rem', fontWeight: '600' }}>{user.username}</div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--gold)' }}>{user.loyalty_points} PTS</div>
                 </div>
-                <User size={20} color="var(--gold)" />
-              </div>
-              <button onClick={logout} className="btn-gold" style={{ padding: '0.5rem', borderRadius: '50%' }}>
+                <div style={{ background: 'var(--gold-glow)', padding: '5px', borderRadius: '50%' }}>
+                  <User size={20} color="var(--gold)" />
+                </div>
+              </Link>
+              <button onClick={logout} className="btn-gold" style={{ padding: '0.5rem', borderRadius: '50%', background: 'transparent', border: 'none' }}>
                 <LogOut size={16} />
               </button>
             </>
