@@ -34,6 +34,8 @@ const Floors = () => {
     fetchServices();
   }, [selectedFloor, api]);
 
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+
   const handleBooking = async (e) => {
     e.preventDefault();
     if (!user) {
@@ -48,8 +50,11 @@ const Floors = () => {
         stylist_name: stylist,
         booking_time: `${date}T${time}:00`
       });
-      alert(`Booking confirmed for ${bookingService.name}! Booking ID: ${response.data.id}`);
-      setBookingService(null);
+      setBookingSuccess(true);
+      setTimeout(() => {
+        setBookingSuccess(false);
+        setBookingService(null);
+      }, 5000);
     } catch (err) {
       alert("Booking failed. Please try again.");
     }
@@ -111,58 +116,71 @@ const Floors = () => {
       {/* Booking Modal (Simplified) */}
       {bookingService && (
         <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', zIndex: 1100, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <div className="glass-card" style={{ maxWidth: '500px', width: '90%', padding: '3rem', position: 'relative' }}>
-            <h2 className="serif" style={{ fontSize: '2.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>RESERVE <span style={{ color: 'var(--gold)' }}>SESSION</span></h2>
-            <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '1.4rem', marginBottom: '0.3rem' }}>{bookingService.name}</div>
-              <div style={{ fontSize: '1rem', color: 'var(--gold)' }}>₹{bookingService.price} | Floor {selectedFloor}</div>
-            </div>
-
-            <form onSubmit={handleBooking} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>CHOOSE STYLIST</label>
-                <input 
-                  type="text" 
-                  value={stylist}
-                  onChange={(e) => setStylist(e.target.value)}
-                  placeholder="Preferred Stylist Name" 
-                  required
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--text-cream)', borderRadius: '10px', outline: 'none' }} 
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>DATE</label>
-                  <input 
-                    type="date" 
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    required
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--text-cream)', borderRadius: '10px', outline: 'none' }} 
-                  />
+          <div className="glass-card" style={{ maxWidth: '500px', width: '90%', padding: '3rem', position: 'relative', border: bookingSuccess ? '2px solid var(--gold)' : '1px solid var(--glass-border)' }}>
+            {bookingSuccess ? (
+              <div className="fade-in-up" style={{ textAlign: 'center', padding: '2rem 0' }}>
+                <div style={{ background: 'var(--gold)', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem auto', boxShadow: '0 0 30px var(--gold-glow)' }}>
+                  <Check size={40} color="var(--bg-dark)" />
                 </div>
-                <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>TIME</label>
-                  <input 
-                    type="time" 
-                    value={time}
-                    onChange={(e) => setTime(e.target.value)}
-                    required
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--text-cream)', borderRadius: '10px', outline: 'none' }} 
-                  />
+                <h2 className="serif" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>RESERVATION <span style={{ color: 'var(--gold)' }}>SECURED</span></h2>
+                <p style={{ color: 'var(--text-dim)', marginBottom: '2rem' }}>Your treatment at LUMIÈRE Atelier is confirmed. <br /> Check your profile for details.</p>
+                <button onClick={() => setBookingService(null)} className="btn-gold" style={{ padding: '0.8rem 2rem' }}>CLOSE ATELIER</button>
+              </div>
+            ) : (
+              <>
+                <h2 className="serif" style={{ fontSize: '2.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>RESERVE <span style={{ color: 'var(--gold)' }}>SESSION</span></h2>
+                <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.4rem', marginBottom: '0.3rem' }}>{bookingService.name}</div>
+                  <div style={{ fontSize: '1rem', color: 'var(--gold)' }}>₹{bookingService.price} | Floor {selectedFloor}</div>
                 </div>
-              </div>
 
-              <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
-                <button type="submit" className="btn-gold" style={{ flexGrow: 1, padding: '1.2rem' }}>
-                  CONFIRM APPOINTMENT
-                </button>
-                <button type="button" onClick={() => setBookingService(null)} className="btn-gold" style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)' }}>
-                  CANCEL
-                </button>
-              </div>
-            </form>
+                <form onSubmit={handleBooking} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>CHOOSE STYLIST</label>
+                    <input 
+                      type="text" 
+                      value={stylist}
+                      onChange={(e) => setStylist(e.target.value)}
+                      placeholder="Preferred Stylist Name" 
+                      required
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--text-cream)', borderRadius: '10px', outline: 'none' }} 
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>DATE</label>
+                      <input 
+                        type="date" 
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
+                        required
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--text-cream)', borderRadius: '10px', outline: 'none' }} 
+                      />
+                    </div>
+                    <div className="input-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '1px' }}>TIME</label>
+                      <input 
+                        type="time" 
+                        value={time}
+                        onChange={(e) => setTime(e.target.value)}
+                        required
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--text-cream)', borderRadius: '10px', outline: 'none' }} 
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+                    <button type="submit" className="btn-gold" style={{ flexGrow: 1, padding: '1.2rem' }}>
+                      CONFIRM APPOINTMENT
+                    </button>
+                    <button type="button" onClick={() => setBookingService(null)} className="btn-gold" style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)' }}>
+                      CANCEL
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}
