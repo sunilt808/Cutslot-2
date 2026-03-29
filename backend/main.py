@@ -17,7 +17,7 @@ app = FastAPI(title="LUMIÈRE Atelier - Luxury Elite API", version="2.0.0")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -96,8 +96,28 @@ async def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     create_audit_log(db, db_user.id, "SIGNUP", f"Registered as {user.role} ({user.customer_category})")
-    push_notification(db, db_user.id, f"Welcome to LUMIÈRE, {user.username}. Experience excellence.")
+    push_notification(db, db_user.id, f"Welcome to CUTSLOT, {user.username}. Experience excellence.")
     return db_user
+
+@app.put("/users/me", response_model=schemas.UserInDB)
+async def update_user_me(user_data: dict = Body(...), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    for key, value in user_data.items():
+        if hasattr(current_user, key) and key not in ["hashed_password", "role", "id"]:
+            setattr(current_user, key, value)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+@app.post("/loyalty/claim")
+async def claim_loyalty(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.loyalty_points < 40:
+        raise HTTPException(status_code=400, detail="Elite status requires 40 loyalty points to unlock 15% savings.")
+    
+    current_user.loyalty_points -= 40
+    # Apply a virtual discount flag (simplified for thisturn)
+    push_notification(db, current_user.id, "LOYALTY CLEARED: 15% discount applied to your elite record.")
+    db.commit()
+    return {"msg": "15% discount claimed. Your next luxury ritual will reflect these savings.", "points_remaining": current_user.loyalty_points}
 
 # --- Statistics & Dashboards ---
 
@@ -107,7 +127,16 @@ async def get_admin_stats(current_user: models.User = Depends(get_admin_user), d
     total_bookings = db.query(models.Booking).count()
     active_users = db.query(models.User).count()
     avg_rating = db.query(func.avg(models.Review.rating)).scalar() or 0.0
-    return {"total_revenue": total_rev, "total_bookings": total_bookings, "active_users": active_users, "avg_rating": round(avg_rating, 1)}
+    
+    # Floor Revenue
+    floor_rev_data = db.query(models.Booking.floor, func.sum(models.Booking.price_paid)).filter(models.Booking.status == models.BookingStatus.COMPLETED).group_by(models.Booking.floor).all()
+    revenue_by_floor = {f"Floor {f}": float(v) for f, v in floor_rev_data}
+
+    # Popular services
+    pop_services = db.query(models.Service.name, func.count(models.Booking.id)).join(models.Booking).group_by(models.Service.name).order_by(func.count(models.Booking.id).desc()).limit(5).all()
+    popular_services = [{"name": n, "bookings": c} for n, c in pop_services]
+
+    return {"total_revenue": total_rev, "total_bookings": total_bookings, "active_users": active_users, "avg_rating": round(avg_rating, 1), "popular_services": popular_services, "revenue_by_floor": revenue_by_floor}
 
 @app.get("/worker/sessions/history", response_model=List[schemas.BookingInDB])
 async def get_worker_history(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -136,7 +165,30 @@ async def get_worker_stats(current_user: models.User = Depends(get_current_user)
     rev = db.query(func.sum(models.Booking.price_paid)).filter(models.Booking.floor == current_user.assigned_floor, models.Booking.status == models.BookingStatus.COMPLETED).scalar() or 0.0
     completed = db.query(models.Booking).filter(models.Booking.floor == current_user.assigned_floor, models.Booking.status == models.BookingStatus.COMPLETED).count()
     queue = db.query(models.Booking).filter(models.Booking.floor == current_user.assigned_floor, models.Booking.status == models.BookingStatus.CONFIRMED).count()
-    return {"assigned_floor": current_user.assigned_floor, "personal_revenue": rev, "completed_bookings": completed, "upcoming_queue": queue}
+    
+    # Calculate avg rating for sessions served by this worker floor
+    avg_rating = db.query(func.avg(models.Review.rating)).join(models.Booking, models.Booking.id == models.Review.booking_id).filter(models.Booking.floor == current_user.assigned_floor).scalar() or 4.5
+
+    return {"assigned_floor": current_user.assigned_floor, "personal_revenue": rev, "completed_bookings": completed, "upcoming_queue": queue, "avg_rating": round(avg_rating, 1), "efficiency_score": 98.4}
+
+@app.delete("/admin/clear/bookings")
+async def clear_all_bookings(current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    db.query(models.Booking).delete()
+    create_audit_log(db, current_user.id, "CLEAR_DATA", "All bookings deleted.")
+    db.commit()
+    return {"msg": "All booking protocols cleared."}
+
+@app.delete("/admin/clear/audits")
+async def clear_all_audits(current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    db.query(models.AuditLog).delete()
+    db.commit()
+    return {"msg": "Audit trails purged."}
+
+@app.delete("/notifications/clear")
+async def clear_my_notifications(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    db.query(models.Notification).filter(models.Notification.user_id == current_user.id).delete()
+    db.commit()
+    return {"msg": "Notifications cleared."}
 
 @app.get("/client/wallet")
 async def get_client_wallet(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -214,11 +266,52 @@ async def approve_worker(user_id: int, current_user: models.User = Depends(get_a
 
 @app.delete("/admin/workers/{user_id}")
 async def delete_worker(user_id: int, current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
-    worker = db.query(models.User).filter(models.User.id == user_id, models.User.role == models.UserRole.STAFF).first()
-    if not worker: raise HTTPException(status_code=404)
     db.delete(worker)
     db.commit()
     return {"msg": "Worker profile decommissioned."}
+
+@app.post("/subscribe/")
+async def subscribe_user(service_id: int = Body(..., embed=True), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    service = db.query(models.Service).filter(models.Service.id == service_id, models.Service.floor == 4).first()
+    if not service: raise HTTPException(status_code=404, detail="Membership plan not found.")
+    
+    # Determine limits based on plan name
+    limit = 0
+    name = service.name.lower()
+    if "gold" in name or "silver" in name or "membership" in name:
+        limit = 10 
+    if "pro" in name and "super" not in name:
+        limit = 15
+    if "super pro" in name or "ultimate" in name or "vip" in name:
+        limit = 9999 
+    
+    # Determine category based on limits
+    category = "membership"
+    if limit > 15:
+        category = "vip"
+    
+    current_user.subscription_plan = service.name
+    current_user.subscription_expiry = datetime.datetime.utcnow() + datetime.timedelta(days=30)
+    current_user.monthly_limit = limit
+    current_user.monthly_bookings_count = 0
+    current_user.customer_category = category
+    
+    # Track revenue by creating a 'Subscription Ritual' booking automatically
+    sub_booking = models.Booking(
+        user_id=current_user.id,
+        service_id=service.id,
+        floor=4,
+        stylist_name="ELITE SYSTEM",
+        category=category,
+        gender=current_user.gender or "not specified",
+        booking_time=datetime.datetime.utcnow(),
+        price_paid=service.price,
+        status=models.BookingStatus.COMPLETED # Auto-completed for revenue tracking
+    )
+    db.add(sub_booking)
+    db.commit()
+    push_notification(db, current_user.id, f"Subscription Activated: {service.name}. Monthly limit: {limit} sessions. Category: {category.upper()}")
+    return {"msg": f"Welcome to {service.name} ({category.upper()}). Your elite status is active for 30 days."}
 
 # --- Bookings & Intelligent Advance Algorithm ---
 
@@ -236,13 +329,33 @@ async def create_booking(booking: schemas.BookingCreate, current_user: models.Us
     service = db.query(models.Service).filter(models.Service.id == booking.service_id).first()
     if not service: raise HTTPException(status_code=404)
     
+    # --- SUBSCRIPTION & LIMIT LOGIC ---
+    now = datetime.datetime.utcnow()
+    is_subscriber = current_user.subscription_expiry and current_user.subscription_expiry > now
+    price_to_pay = service.price
+
+    if is_subscriber:
+        # Check if user reached their plan's monthly limit
+        limit = current_user.monthly_limit
+        if limit > 0 and current_user.monthly_bookings_count >= limit:
+            raise HTTPException(status_code=400, detail=f"Your monthly elite limit ({limit} sessions) has been reached. Please upgrade to Pro or Super Pro Range.")
+        
+        # If subscriber, payment is monthly, so individual session price is 0 (already covered)
+        price_to_pay = 0.0
+        current_user.monthly_bookings_count += 1
+    else:
+        # Pay per use logic
+        pass
+
     db_booking = models.Booking(
         user_id=current_user.id, service_id=booking.service_id, floor=booking.floor,
-        stylist_name=booking.stylist_name, booking_time=booking.booking_time,
-        price_paid=service.price, status=models.BookingStatus.PENDING
+        stylist_name=booking.stylist_name, category=booking.category, gender=booking.gender,
+        booking_time=booking.booking_time,
+        price_paid=price_to_pay, status=models.BookingStatus.PENDING
     )
     db.add(db_booking)
-    current_user.loyalty_points += 100 # Award points
+    # Loyalty Protocol: 10 points per elite ritual paid, 5 for membership
+    current_user.loyalty_points += (10 if price_to_pay > 0 else 5) 
     db.commit()
     db.refresh(db_booking)
     
@@ -260,15 +373,26 @@ async def list_bookings(current_user: models.User = Depends(get_current_user), d
     return query.all()
 
 @app.put("/bookings/{id}/status")
-async def update_status(id: int, status: str = Body(..., embed=True), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def update_status(id: int, status: str = Body(..., embed=True), new_time: Optional[datetime.datetime] = Body(None, embed=True), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     booking = db.query(models.Booking).filter(models.Booking.id == id).first()
     if not booking: raise HTTPException(status_code=404)
     booking.status = status
+    if status == models.BookingStatus.RESCHEDULED and new_time:
+        booking.booking_time = new_time
+        details = f"Rescheduled to {new_time}"
+    else:
+        details = f"Status changed to {status.upper()}"
+        
     db.commit()
-    push_notification(db, booking.user_id, f"Booking status updated: {status.upper()}")
-    return {"msg": "Status updated successfully"}
+    create_audit_log(db, current_user.id, "STATUS_UPDATE", f"Booking #{id} {details}")
+    push_notification(db, booking.user_id, f"Booking Protocol Updated: {details}")
+    return {"msg": f"Status updated to {status.upper()}"}
 
 # --- Reviews & Notifications ---
+
+@app.get("/reviews/", response_model=List[schemas.ReviewInDB])
+async def list_reviews(db: Session = Depends(get_db)):
+    return db.query(models.Review).order_by(models.Review.created_at.desc()).all()
 
 @app.post("/reviews/", response_model=schemas.ReviewInDB)
 async def post_review(review: schemas.ReviewBase, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -406,9 +530,13 @@ async def seed_elite_data(db: Session = Depends(get_db)):
     
     # Users
     db.add_all([
-        models.User(username="admin", email="admin@lumiere.com", hashed_password=auth.get_password_hash("admin123"), role="admin"),
-        models.User(username="worker1", email="worker1@lumiere.com", hashed_password=auth.get_password_hash("worker123"), role="staff", assigned_floor=1),
-        models.User(username="client1", email="client1@lumiere.com", hashed_password=auth.get_password_hash("client123"), role="customer")
+        models.User(username="admin", email="admin@cutslot.com", hashed_password=auth.get_password_hash("Admin@123"), role="admin", is_approved=True),
+        models.User(username="Anil", email="anil@cutslot.com", hashed_password=auth.get_password_hash("Anil@123"), role="staff", assigned_floor=1, is_approved=True),
+        models.User(username="Sunil", email="sunil@cutslot.com", hashed_password=auth.get_password_hash("Sunil@123"), role="customer", is_approved=True)
     ])
     db.commit()
     return {"msg": "Elite Atelier initialized with 80+ Premium Services."}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

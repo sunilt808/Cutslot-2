@@ -40,7 +40,33 @@ const Services = () => {
       navigate('/auth');
       return;
     }
+    if (service.floor === 4) {
+        handleActivatePlan(service);
+        return;
+    }
     navigate('/booking', { state: { service } });
+  };
+
+  const [payingService, setPayingService] = useState(null);
+  const [cardNumber, setCardNumber] = useState("");
+
+  const handleActivatePlan = (service) => {
+      setPayingService(service);
+  };
+
+  const processPayment = async () => {
+      if(cardNumber.length < 16) {
+          alert("Elite credit protocol requires 16-digit authorization.");
+          return;
+      }
+      try {
+          await api.post('/subscribe/', { service_id: payingService.id });
+          alert(`${payingService.name.toUpperCase()} ACTIVATED. REVENUE RECORDED.`);
+          setPayingService(null);
+          window.location.reload();
+      } catch(err) {
+          alert(err.response?.data?.detail || "Transaction declined.");
+      }
   };
 
   // 🏛️ RENDERING LOGIC FOR EACH UNIQUE CATEGORY

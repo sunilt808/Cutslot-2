@@ -16,6 +16,8 @@ const Booking = () => {
   const [time, setTime] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [paymentStep, setPaymentStep] = useState(false);
+  const [category, setCategory] = useState("normal");
+  const [gender, setGender] = useState("male");
 
   const floors = [
     { id: 1, name: "Common", icon: <Scissors size={20} />, desc: "Elite Grooming (Males)" },
@@ -49,6 +51,8 @@ const Booking = () => {
         service_id: bookingService.id,
         floor: selectedFloor,
         stylist_name: stylist,
+        category: category,
+        gender: gender,
         booking_time: `${date}T${time}:00`
       });
       setBookingSuccess(true);
@@ -107,27 +111,70 @@ const Booking = () => {
               <div className="fade-in-up" style={{ textAlign: 'center' }}>
                 <Check size={60} color="var(--gold)" style={{ marginBottom: '2rem' }} />
                 <h2 className="serif" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>SECURED <span style={{ color: 'var(--gold)' }}>SESSION</span></h2>
-                <button onClick={() => setBookingService(null)} className="btn-gold" style={{ padding: '1rem 3rem', marginTop: '1.5rem' }}>EXIT ATELIER</button>
+                <button onClick={() => setBookingService(null)} className="btn-gold" style={{ padding: '1rem 3rem', marginTop: '1.5rem' }}>EXIT CUTSLOT</button>
               </div>
             ) : paymentStep ? (
                <div className="fade-in">
-                  <h2 className="serif" style={{ fontSize: '2rem', marginBottom: '2.5rem', textAlign: 'center' }}>BOUTIQUE <span style={{ color: 'var(--gold)' }}>PAYMENT</span></h2>
+                  <h2 className="serif" style={{ fontSize: '2rem', marginBottom: '2.5rem', textAlign: 'center' }}>{user.subscription_expiry && new Date(user.subscription_expiry) > new Date() ? 'MEMBERSHIP' : 'BOUTIQUE'} <span style={{ color: 'var(--gold)' }}>{user.subscription_expiry && new Date(user.subscription_expiry) > new Date() ? 'ACCESS' : 'PAYMENT'}</span></h2>
                   <div className="glass-card" style={{ background: 'rgba(255,255,255,0.03)', padding: '2rem', marginBottom: '2.5rem', textAlign: 'center' }}>
-                     <div style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '0.5rem' }}>TOTAL PAYABLE</div>
-                     <div className="serif" style={{ fontSize: '2.5rem', color: 'var(--gold)' }}>₹{bookingService.price}</div>
+                     {user.subscription_expiry && new Date(user.subscription_expiry) > new Date() ? (
+                        <>
+                           <div style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '0.5rem' }}>PROTOCOL STATUS</div>
+                           <div className="serif" style={{ fontSize: '1.8rem', color: 'var(--gold)' }}>COVERED BY {user.subscription_plan?.toUpperCase()}</div>
+                           <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '1rem' }}>SESSIONS REMAINING: {user.monthly_limit - user.monthly_bookings_count}</div>
+                        </>
+                     ) : (
+                        <>
+                           <div style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: '0.5rem' }}>TOTAL PAYABLE</div>
+                           <div className="serif" style={{ fontSize: '2.5rem', color: 'var(--gold)' }}>₹{bookingService.price}</div>
+                        </>
+                     )}
                   </div>
-                  <button onClick={handleFinalBooking} className="btn-gold" style={{ width: '100%', padding: '1.2rem' }}><Wallet size={20} /> AUTHORIZE PAYMENT</button>
+                  <button onClick={handleFinalBooking} className="btn-gold" style={{ width: '100%', padding: '1.2rem' }}><Wallet size={20} /> {user.subscription_expiry && new Date(user.subscription_expiry) > new Date() ? 'VALIDATE ENTRY' : 'AUTHORIZE PAYMENT'}</button>
                   <button onClick={() => setPaymentStep(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', width: '100%', padding: '1rem' }}>GO BACK</button>
                </div>
             ) : (
               <>
                 <h2 className="serif" style={{ fontSize: '2.2rem', marginBottom: '2.5rem', textAlign: 'center' }}>ELITE <span style={{ color: 'var(--gold)' }}>BOOKING</span></h2>
-                <form onSubmit={initiatePayment} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    <input type="text" value={stylist} onChange={(e) => setStylist(e.target.value)} placeholder="Artisan Name" required style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1.2rem', color: 'var(--text-cream)', borderRadius: '15px' }} />
-                    <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1.2rem', color: 'var(--text-cream)', borderRadius: '15px' }} />
-                    <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1.2rem', color: 'var(--text-cream)', borderRadius: '15px' }} />
-                  <button type="submit" className="btn-gold" style={{ padding: '1.2rem', marginTop: '1rem' }}>PROCEED TO TRANSACTION</button>
-                  <button type="button" onClick={() => setBookingService(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)' }}>CANCEL</button>
+                <form onSubmit={initiatePayment} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                       <label style={{ fontSize: '0.7rem', color: 'var(--gold)', letterSpacing: '1px' }}>ELITE ARTISAN</label>
+                       <input type="text" value={stylist} onChange={(e) => setStylist(e.target.value)} placeholder="Enter Artisan Name" required style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--text-cream)', borderRadius: '12px' }} />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <label style={{ fontSize: '0.7rem', color: 'var(--gold)', letterSpacing: '1px' }}>GENDER</label>
+                          <select value={gender} onChange={(e) => setGender(e.target.value)} required style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--text-cream)', borderRadius: '12px', appearance: 'none' }}>
+                             <option value="male" style={{ background: 'var(--bg-dark)' }}>MALE</option>
+                             <option value="female" style={{ background: 'var(--bg-dark)' }}>FEMALE</option>
+                             <option value="baby" style={{ background: 'var(--bg-dark)' }}>BABY / CHILD</option>
+                             <option value="others" style={{ background: 'var(--bg-dark)' }}>OTHERS</option>
+                          </select>
+                       </div>
+                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <label style={{ fontSize: '0.7rem', color: 'var(--gold)', letterSpacing: '1px' }}>CATEGORY</label>
+                          <select value={category} onChange={(e) => setCategory(e.target.value)} required style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--text-cream)', borderRadius: '12px', appearance: 'none' }}>
+                             <option value="normal" style={{ background: 'var(--bg-dark)' }}>NORMAL</option>
+                             <option value="vip" style={{ background: 'var(--bg-dark)' }}>VIP MEMBER</option>
+                             <option value="beauty_under_4" style={{ background: 'var(--bg-dark)' }}>BEAUTY UNDER 4</option>
+                          </select>
+                       </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <label style={{ fontSize: '0.7rem', color: 'var(--gold)', letterSpacing: '1px' }}>DATE</label>
+                          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--text-cream)', borderRadius: '12px' }} />
+                       </div>
+                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <label style={{ fontSize: '0.7rem', color: 'var(--gold)', letterSpacing: '1px' }}>TIME</label>
+                          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} required style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem', color: 'var(--text-cream)', borderRadius: '12px' }} />
+                       </div>
+                    </div>
+
+                  <button type="submit" className="btn-gold" style={{ padding: '1.2rem', marginTop: '1.5rem' }}>PROCEED TO TRANSACTION</button>
+                  <button type="button" onClick={() => setBookingService(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', fontSize: '0.8rem' }}>CANCEL RESERVATION</button>
                 </form>
               </>
             )}

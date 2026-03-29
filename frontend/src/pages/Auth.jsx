@@ -19,11 +19,11 @@ const Auth = () => {
   const { login, signup } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validation
-    const nameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+    const nameRegex = /^\w{3,20}$/;
     if (!nameRegex.test(username)) {
       alert("ERROR: Username must be 3-20 characters long and can only have letters, numbers, and underscores.");
       return;
@@ -41,10 +41,22 @@ const Auth = () => {
         alert("ERROR: Phone number must be exactly 10 digits.");
         return;
       }
-      if (password.length < 6) {
-        alert("ERROR: Password must be at least 6 characters long.");
+      
+      // Strong Password Validation
+      const hasUpper = /[A-Z]/.test(password);
+      const hasLower = /[a-z]/.test(password);
+      const hasNumber = /\d/.test(password);
+      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+      if (password.length < 8) {
+        alert("ERROR: Password must be at least 8 characters long.");
         return;
       }
+      if (!hasUpper || !hasLower || !hasNumber || !hasSpecial) {
+        alert("ERROR: Password must contain uppercase, lowercase, numbers, and special characters.");
+        return;
+      }
+
       if (!terms) {
         alert("ERROR: You must agree to the Terms & Conditions.");
         return;
@@ -146,6 +158,11 @@ const Auth = () => {
             <div onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '1.2rem', top: '1.2rem', cursor: 'pointer', color: 'var(--text-dim)' }}>
                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </div>
+            {!isLogin && (
+              <div style={{ padding: '1rem', fontSize: '0.7rem', color: 'var(--text-dim)', background: 'rgba(212,175,55,0.03)', borderRadius: '10px', marginTop: '1rem', border: '1px dashed var(--gold)' }}>
+                 MUST BE 8+ CHARS WITH: <b>A-Z</b>, <b>a-z</b>, <b>0-9</b>, and <b>SPECIAL CHARS</b>.
+              </div>
+            )}
           </div>
 
           {!isLogin && (

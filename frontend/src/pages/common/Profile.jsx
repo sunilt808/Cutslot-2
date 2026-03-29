@@ -1,16 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { User, Shield, Info, Smartphone, Mail, Settings, Layout, Search, Sparkles, Layers, ArrowRight, Save, Lock, Bell } from 'lucide-react';
+import { User, Shield, Info, Smartphone, Mail, Settings, Layout, Search, Sparkles, Layers, ArrowRight, Save, Lock, Bell, Trophy } from 'lucide-react';
 
 const ProfileSettings = () => {
     const { user, api, refreshUser } = useAuth();
     const [theme, setTheme] = useState('dark');
     const [notifications, setNotifications] = useState(true);
     const [username, setUsername] = useState(user?.username || "");
+    const [phone, setPhone] = useState(user?.phone || "");
+    const [gender, setGender] = useState(user?.gender || "male");
+
+    useEffect(() => {
+        if (user) {
+            setUsername(user.username || "");
+            setPhone(user.phone || "");
+            setGender(user.gender || "male");
+        }
+    }, [user]);
 
     const handleUpdate = async () => {
-        alert("Elite profile protocol updated. Changes synchronized with the Atelier database.");
-        refreshUser();
+        try {
+            await api.put('/users/me', { username, phone, gender });
+            alert("Elite profile protocol updated. Changes synchronized with the CUTSLOT database.");
+            refreshUser();
+        } catch(err) { alert("Error synchronized profile."); }
+    };
+
+    const handleClaimDiscount = async () => {
+        try {
+            const res = await api.post('/loyalty/claim');
+            alert(res.data.msg);
+            refreshUser();
+        } catch(err) { alert(err.response?.data?.detail || "Claim failed."); }
     };
 
     return (
@@ -31,6 +52,15 @@ const ProfileSettings = () => {
                     <div style={{ color: 'var(--gold)', letterSpacing: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>ACCESS CLEARANCE: {user?.role?.toUpperCase()}</div>
                     <div style={{ padding: '0.5rem 1.5rem', border: '1px solid var(--gold)', borderRadius: '20px', marginTop: '1.5rem', color: 'var(--gold)', fontSize: '0.7rem', fontWeight: 'bold' }}>
                         FLOOR {user?.assigned_floor || "ALL"} AUTHORIZED
+                    </div>
+                    
+                    <div style={{ marginTop: '3rem', padding: '2rem', background: 'rgba(212,175,55,0.05)', borderRadius: '25px', border: '1px solid rgba(212,175,55,0.2)' }}>
+                        <div style={{ color: 'var(--gold)', fontSize: '0.7rem', letterSpacing: '3px', fontWeight: 'bold', marginBottom: '1rem' }}>LOYALTY POINTS</div>
+                        <div className="serif" style={{ fontSize: '3.5rem', color: 'var(--text-cream)' }}>{user?.loyalty_points || 0}</div>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '1rem' }}>40 POINTS = 15% DISCOUNT</p>
+                        {user?.loyalty_points >= 40 && (
+                            <button onClick={handleClaimDiscount} className="btn-gold" style={{ marginTop: '1.5rem', padding: '0.8rem 1.5rem', borderRadius: '30px', fontSize: '0.8rem' }}>CLAIM 15% DISCOUNT</button>
+                        )}
                     </div>
                 </div>
 
@@ -56,10 +86,31 @@ const ProfileSettings = () => {
                             </div>
                         </div>
 
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem' }}>
+                            <div className="form-group">
+                                <label style={{ display: 'block', fontSize: '1rem', marginBottom: '1.2rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '2px' }}>CONTACT PHONE</label>
+                                <div style={{ position: 'relative' }}>
+                                    <Smartphone size={18} color="var(--gold)" style={{ position: 'absolute', left: '1.5rem', top: '1.5rem' }} />
+                                    <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} style={{ padding: '1.4rem 1.4rem 1.4rem 4rem', width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label style={{ display: 'block', fontSize: '1rem', marginBottom: '1.2rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '2px' }}>GENDER IDENTITY</label>
+                                <div style={{ position: 'relative' }}>
+                                    <Sparkles size={18} color="var(--gold)" style={{ position: 'absolute', left: '1.5rem', top: '1.5rem', pointerEvents: 'none' }} />
+                                    <select value={gender} onChange={(e) => setGender(e.target.value)} style={{ padding: '1.4rem 1.4rem 1.4rem 4rem', width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px', appearance: 'none' }}>
+                                        <option value="male" style={{ background: 'var(--bg-dark)' }}>MALE</option>
+                                        <option value="female" style={{ background: 'var(--bg-dark)' }}>FEMALE</option>
+                                        <option value="other" style={{ background: 'var(--bg-dark)' }}>OTHER</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="form-group">
                             <label style={{ display: 'block', fontSize: '1rem', marginBottom: '1.5rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '2px' }}>DISPLAY MODE</label>
                             <div style={{ display: 'flex', gap: '2rem' }}>
-                                <button onClick={() => setTheme('dark')} className={`btn-gold ${theme === 'dark' ? 'active' : ''}`} style={{ flex: 1, padding: '1.2rem', background: theme === 'dark' ? 'var(--gold)' : 'transparent', color: theme === 'dark' ? 'var(--bg-dark)' : 'var(--text-cream)' }}>DARK ATELIER</button>
+                                <button onClick={() => setTheme('dark')} className={`btn-gold ${theme === 'dark' ? 'active' : ''}`} style={{ flex: 1, padding: '1.2rem', background: theme === 'dark' ? 'var(--gold)' : 'transparent', color: theme === 'dark' ? 'var(--bg-dark)' : 'var(--text-cream)' }}>DARK CUTSLOT</button>
                                 <button onClick={() => setTheme('light')} className={`btn-gold ${theme === 'light' ? 'active' : ''}`} style={{ flex: 1, padding: '1.2rem', background: theme === 'light' ? 'var(--gold)' : 'transparent', color: theme === 'light' ? 'var(--bg-dark)' : 'rgba(255,255,255,0.3)', opacity: 0.5, borderStyle: 'dashed' }}>LIGHT (SOON)</button>
                             </div>
                         </div>

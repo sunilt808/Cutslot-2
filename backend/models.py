@@ -14,6 +14,8 @@ class BookingStatus(str, enum.Enum):
     CONFIRMED = "confirmed"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
+    ABSENT = "absent"
+    RESCHEDULED = "rescheduled"
 
 class User(Base):
     __tablename__ = "users"
@@ -26,6 +28,8 @@ class User(Base):
     loyalty_points = Column(Integer, default=0)
     subscription_plan = Column(String, nullable=True)
     subscription_expiry = Column(DateTime, nullable=True)
+    monthly_bookings_count = Column(Integer, default=0)
+    monthly_limit = Column(Integer, default=0)
     assigned_floor = Column(Integer, nullable=True)
     is_approved = Column(Boolean, default=True) # Workers set to False in signup
     gender = Column(String, nullable=True) # Male/Female/Other
@@ -57,6 +61,8 @@ class Booking(Base):
     service_id = Column(Integer, ForeignKey("services.id"))
     floor = Column(Integer)
     stylist_name = Column(String)
+    category = Column(String)
+    gender = Column(String)
     booking_time = Column(DateTime)
     price_paid = Column(Float, default=0.0)
     status = Column(String, default=BookingStatus.PENDING)

@@ -8,7 +8,18 @@ const WorkerPerformance = () => {
     const [stats, setStats] = useState({ revenue: 0, completed: 0, rating: 4.8 });
 
     useEffect(() => {
-        api.get('/worker/sessions/history').then(res => setHistory(res.data));
+        Promise.all([
+            api.get('/worker/sessions/history'),
+            api.get('/worker/stats')
+        ]).then(([hist, st]) => {
+            setHistory(hist.data);
+            setStats({ 
+                revenue: st.data.personal_revenue, 
+                completed: st.data.completed_bookings, 
+                rating: st.data.avg_rating,
+                accuracy: st.data.efficiency_score
+            });
+        });
     }, []);
 
     return (
@@ -29,7 +40,7 @@ const WorkerPerformance = () => {
             <div className="performance-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '4rem' }}>
                <div className="glass-card" style={{ padding: '2rem', textAlign: 'center' }}>
                   <Target color="var(--gold)" size={24} />
-                  <div className="serif" style={{ fontSize: '2rem', margin: '0.5rem 0' }}>98.5%</div>
+                  <div className="serif" style={{ fontSize: '2rem', margin: '0.5rem 0' }}>{stats.accuracy}%</div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>SLOT ACCURACY</div>
                </div>
                <div className="glass-card" style={{ padding: '2rem', textAlign: 'center' }}>
@@ -38,14 +49,14 @@ const WorkerPerformance = () => {
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>ELITE CLIENTS</div>
                </div>
                <div className="glass-card" style={{ padding: '2rem', textAlign: 'center' }}>
-                  <Clock color="var(--gold)" size={24} />
-                  <div className="serif" style={{ fontSize: '2rem', margin: '0.5rem 0' }}>42h</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>HOURS LOGGED</div>
+                  <CheckCircle color="var(--gold)" size={24} />
+                  <div className="serif" style={{ fontSize: '2rem', margin: '0.5rem 0' }}>{stats.completed}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>COMPLETED SESSIONS</div>
                </div>
                <div className="glass-card" style={{ padding: '2rem', textAlign: 'center', border: '1px solid var(--gold)' }}>
                   <TrendingUp color="var(--gold)" size={24} />
-                  <div className="serif" style={{ fontSize: '2rem', margin: '0.5rem 0' }}>₹15,400</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>FLOOR REVENUE</div>
+                  <div className="serif" style={{ fontSize: '2rem', margin: '0.5rem 0' }}>₹{stats.revenue}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>PERSONAL REVENUE</div>
                </div>
             </div>
 

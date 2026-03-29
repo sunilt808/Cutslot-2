@@ -41,7 +41,7 @@ const Layout = ({ children }) => {
               <Scissors color="black" size={22} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-               <span className="serif" style={{ fontSize: '1.8rem', fontWeight: 'bold', letterSpacing: '4px', color: 'var(--text-cream)', lineHeight: 1 }}>CutSlot</span>
+               <span className="serif" style={{ fontSize: '1.8rem', fontWeight: 'bold', letterSpacing: '4px', color: 'var(--text-cream)', lineHeight: 1 }}>CUTSLOT</span>
                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.65rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '2px' }}>
                   <Armchair size={10} /> LUXURY SALON <Sparkles size={10} />
                </div>

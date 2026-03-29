@@ -65,13 +65,44 @@ const Dashboard = () => {
          </div>
       </div>
 
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3rem', marginBottom: '4rem' }}>
+         <div className="glass-card" style={{ padding: '3rem' }}>
+            <h3 className="serif" style={{ fontSize: '2rem', marginBottom: '2rem' }}>REVENUE <span style={{ color: 'var(--gold)' }}>BY FLOOR</span></h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+               {Object.entries(stats.revenue_by_floor || {}).map(([floor, rev]) => (
+                  <div key={floor} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                     <span style={{ fontWeight: 'bold' }}>{floor.toUpperCase()}</span>
+                     <div style={{ flex: 1, height: '8px', background: 'rgba(212,175,55,0.1)', margin: '0 2rem', borderRadius: '4px', position: 'relative' }}>
+                        <div style={{ position: 'absolute', top: 0, left: 0, height: '100%', background: 'var(--gold)', borderRadius: '4px', width: `${(rev / (stats.total_revenue || 1)) * 100}%` }}></div>
+                     </div>
+                     <span className="serif">₹{rev}</span>
+                  </div>
+               ))}
+            </div>
+         </div>
+         <div className="glass-card" style={{ padding: '3rem' }}>
+            <h3 className="serif" style={{ fontSize: '2rem', marginBottom: '2rem' }}>POPULAR <span style={{ color: 'var(--gold)' }}>SERVICES</span></h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+               {(stats.popular_services || []).map((s, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                     <span>{s.name}</span>
+                     <span style={{ color: 'var(--gold)', fontWeight: 'bold' }}>{s.bookings} Bookings</span>
+                   </div>
+                ))}
+            </div>
+         </div>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3rem' }}>
          
          {/* 🔐 SECURITY AUDITS */}
          <section className="glass-card" style={{ padding: '3rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                <h3 className="serif" style={{ fontSize: '2.5rem' }}>SECURITY <span style={{ color: 'var(--gold)' }}>AUDITS</span></h3>
-               <Link to="/admin/audits" style={{ color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 'bold', textDecoration: 'none' }}>VIEW ALL LOGS <ArrowRight size={14} /></Link>
+               <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                  <button onClick={async () => { if(confirm("Clear all logs?")) { await api.delete('/admin/clear/audits'); fetchAudits(); } }} style={{ background: 'transparent', border: '1px solid #f44336', color: '#f44336', padding: '0.5rem 1rem', borderRadius: '5px', fontSize: '0.7rem' }}>PURGE LOGS</button>
+                  <Link to="/admin/audits" style={{ color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 'bold', textDecoration: 'none' }}>VIEW ALL LOGS <ArrowRight size={14} /></Link>
+               </div>
             </div>
             <div className="audit-list">
                {audits.map((a, i) => (
@@ -90,9 +121,9 @@ const Dashboard = () => {
                <h4 className="serif" style={{ fontSize: '1.8rem', marginBottom: '1.5rem' }}>QUICK ACTIONS</h4>
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <Link to="/admin/workers" className="btn-gold" style={{ justifyContent: 'flex-start' }}><Briefcase size={16} /> STAFF CONTROL</Link>
-                  <Link to="/admin/credentials" className="btn-gold" style={{ justifyContent: 'flex-start' }}><Key size={16} /> ACCESS CREDENTIALS</Link>
                   <Link to="/admin/revenue" className="btn-gold" style={{ justifyContent: 'flex-start' }}><TrendingUp size={16} /> REVENUE REPORTS</Link>
-                  <Link to="/admin/profile" className="btn-gold" style={{ justifyContent: 'flex-start' }}><Settings size={16} /> SYSTEM PREFERENCE</Link>
+                  <button onClick={async () => { if(confirm("Delete all booking history?")) { await api.delete('/admin/clear/bookings'); fetchStats(); } }} className="btn-gold" style={{ justifyContent: 'flex-start', background: 'transparent', border: '1px solid #f44336', color: '#f44336' }}><Database size={16} /> CLEAR BOOKINGS</button>
+                  <button onClick={async () => { if(confirm("Reset entire database?")) { await api.get('/reset-db'); window.location.reload(); } }} className="btn-gold" style={{ justifyContent: 'flex-start', background: 'var(--gold)', color: 'black' }}><Shield size={16} /> SYSTEM RESET</button>
                </div>
             </div>
 

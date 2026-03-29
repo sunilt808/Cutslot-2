@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
+import re
 from typing import List, Optional
 from datetime import datetime
 import enum
@@ -15,12 +16,36 @@ class UserCreate(UserBase):
     phone: Optional[str] = None
     customer_category: Optional[str] = "normal"
 
+    @validator('password')
+    def strong_password(cls, v):
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters long')
+        if not re.search(r"[A-Z]", v):
+            raise ValueError('Password must contain at least one uppercase letter')
+        if not re.search(r"[a-z]", v):
+            raise ValueError('Password must contain at least one lowercase letter')
+        if not re.search(r"\d", v):
+            raise ValueError('Password must contain at least one digit')
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", v):
+            raise ValueError('Password must contain at least one special character')
+        return v
+    
+    @validator('username')
+    def valid_username(cls, v):
+        if len(v) < 3:
+            raise ValueError('Username must be at least 3 characters long')
+        if not re.match(r"^\w+$", v):
+            raise ValueError('Username can only contain alphanumeric characters and underscores')
+        return v
+
 class UserInDB(UserBase):
     id: int
     role: str
     loyalty_points: int
     subscription_plan: Optional[str]
     subscription_expiry: Optional[datetime]
+    monthly_bookings_count: int
+    monthly_limit: int
     assigned_floor: Optional[int]
     is_approved: bool
     gender: Optional[str]
@@ -57,6 +82,8 @@ class BookingBase(BaseModel):
     service_id: int
     floor: int
     stylist_name: str
+    category: str
+    gender: str
     booking_time: datetime
 
 class BookingCreate(BookingBase):
@@ -120,9 +147,13 @@ class AdminStats(BaseModel):
     total_bookings: int
     active_users: int
     avg_rating: float
+    popular_services: List[dict] = []
+    revenue_by_floor: dict = {}
 
 class WorkerStats(BaseModel):
     assigned_floor: Optional[int]
     personal_revenue: float
     completed_bookings: int
     upcoming_queue: int
+    avg_rating: float = 0.0
+    efficiency_score: float = 0.0

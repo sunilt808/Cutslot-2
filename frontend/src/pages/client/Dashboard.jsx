@@ -45,7 +45,7 @@ const ClientDashboard = () => {
       <header className="glass-card" style={{ padding: '3rem', marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid var(--gold)' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-             <span style={{ padding: '0.4rem 1rem', background: 'var(--gold)', color: 'var(--bg-dark)', borderRadius: '40px', fontSize: '0.7rem', fontWeight: 'bold', letterSpacing: '2px' }}>{user?.customer_category?.toUpperCase() || 'NORMAL'}</span>
+             <span style={{ display: 'inline-block', padding: '0.5rem 1.5rem', background: 'var(--gold)', color: 'var(--bg-dark)', borderRadius: '40px', fontSize: '0.75rem', fontWeight: 'bold', letterSpacing: '2.5px' }}>{user?.customer_category?.toUpperCase() || 'NORMAL'}</span>
              <span style={{ color: 'var(--gold)', letterSpacing: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>ELITE MEMBER</span>
           </div>
           <h1 className="serif gradient-text" style={{ fontSize: '3.5rem', margin: 0 }}>CLIENT <span style={{ color: 'var(--text-cream)' }}>PREFERENCE</span></h1>
@@ -136,9 +136,12 @@ const ClientDashboard = () => {
 
            {activeTab === 'notifications' && (
              <div className="fade-in">
-                <h3 className="serif" style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>NOTARY FEED</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                   <h3 className="serif" style={{ fontSize: '1.8rem' }}>NOTARY FEED</h3>
+                   <button onClick={async () => { if(confirm("Clear notifications?")) { await api.delete('/notifications/clear'); fetchData(); } }} style={{ background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', padding: '0.5rem 1rem', borderRadius: '10px', fontSize: '0.7rem' }}>CLEAR ALL</button>
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                   {notifications.map(n => (
+                   {notifications.length === 0 ? <p style={{ color: 'var(--text-dim)' }}>No notifications found.</p> : notifications.map(n => (
                      <div key={n.id} style={{ padding: '1.5rem', borderBottom: '1px solid var(--glass-border)', background: n.is_read ? 'transparent' : 'rgba(255,255,255,0.02)', borderRadius: '15px' }}>
                         <div style={{ fontSize: '1rem', marginBottom: '0.3rem' }}>{n.message}</div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{new Date(n.created_at).toLocaleString()}</div>

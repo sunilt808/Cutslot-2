@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Calendar, Check, X, Bell, User as UserIcon, Scissors, Clock, Wallet, BarChart3, History, Shield, TrendingUp, Sparkles } from 'lucide-react';
+import { Calendar, Check, X, Bell, User as UserIcon, Scissors, Clock, Wallet, BarChart3, History, Shield, TrendingUp, Sparkles, Star } from 'lucide-react';
 
 const WorkerDashboard = () => {
   const { user, api } = useAuth();
@@ -27,8 +27,14 @@ const WorkerDashboard = () => {
   };
 
   const updateStatus = async (id, status) => {
+    let newTime = null;
+    if (status === 'rescheduled') {
+      const resp = prompt("Enter new timing (YYYY-MM-DDTHH:MM:SS):", new Date().toISOString().slice(0, 19));
+      if (!resp) return;
+      newTime = resp;
+    }
     try {
-      await api.put(`/bookings/${id}/status`, { status });
+      await api.put(`/bookings/${id}/status`, { status, new_time: newTime });
       fetchData(); // Refresh both queue and stats
     } catch (err) { alert("Action failed."); }
   };
@@ -51,8 +57,11 @@ const WorkerDashboard = () => {
               <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>PARTICULAR REVENUE</div>
            </div>
            <div className="stat-sm">
-              <div style={{ color: 'var(--gold)', fontSize: '2.4rem', fontWeight: 'bold' }}>{stats.completed_bookings}</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>SESSIONS COMPLETED</div>
+              <div style={{ color: 'var(--gold)', fontSize: '2.4rem', fontWeight: 'bold' }}>{stats.avg_rating} <Star size={20} style={{ display: 'inline', marginBottom: '5px' }} /></div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>AVG RATING</div>
+           </div>
+           <div className="stat-sm">
+              <button onClick={async () => { if(confirm("Clear notifications?")) { await api.delete('/notifications/clear'); } }} style={{ background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', padding: '0.5rem 1rem', borderRadius: '10px', fontSize: '0.7rem' }}>CLEAR NOTIFICATIONS</button>
            </div>
         </div>
       </header>
@@ -60,7 +69,7 @@ const WorkerDashboard = () => {
       <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
          <div className="glass-card">
             <h2 className="serif" style={{ fontSize: '2rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Clock size={24} color="var(--gold)" /> LIVE ATELIER QUEUE
+              <Clock size={24} color="var(--gold)" /> LIVE CUTSLOT QUEUE
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                {bookings.filter(b => b.status === 'pending' || b.status === 'confirmed').length === 0 ? (
@@ -75,10 +84,12 @@ const WorkerDashboard = () => {
                             <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Client Protocol #{b.user_id} | Priority Processing</div>
                          </div>
                       </div>
-                      <div style={{ display: 'flex', gap: '12px' }}>
-                         {b.status === 'pending' && <button onClick={() => updateStatus(b.id, 'confirmed')} className="btn-gold" style={{ background: '#4caf50', border: 'none', color: 'white', padding: '0.7rem 1.2rem' }}><Check size={18} /> CONFIRM</button>}
-                         {b.status === 'confirmed' && <button onClick={() => updateStatus(b.id, 'completed')} className="btn-gold" style={{ padding: '0.7rem 1.2rem' }}><Sparkles size={18} /> COMPLETE</button>}
-                         <button onClick={() => updateStatus(b.id, 'cancelled')} style={{ background: 'transparent', border: '1px solid #f44336', color: '#f44336', padding: '0.7rem 1.2rem', borderRadius: '10px' }}><X size={18} /></button>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                         {b.status === 'pending' && <button onClick={() => updateStatus(b.id, 'confirmed')} className="btn-gold" style={{ background: '#4caf50', border: 'none', color: 'white', padding: '0.6rem 1rem' }}><Check size={16} /> CONFIRM</button>}
+                         {b.status === 'confirmed' && <button onClick={() => updateStatus(b.id, 'completed')} className="btn-gold" style={{ padding: '0.6rem 1rem' }}><Sparkles size={16} /> DONE</button>}
+                         <button onClick={() => updateStatus(b.id, 'absent')} style={{ background: 'transparent', border: '1px solid var(--text-dim)', color: 'var(--text-dim)', padding: '0.6rem 1rem', borderRadius: '10px' }}>ABSENT</button>
+                         <button onClick={() => updateStatus(b.id, 'rescheduled')} style={{ background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', padding: '0.6rem 1rem', borderRadius: '10px' }}>FIX TIME</button>
+                         <button onClick={() => updateStatus(b.id, 'cancelled')} style={{ background: 'transparent', border: '1px solid #f44336', color: '#f44336', padding: '0.6rem 1rem', borderRadius: '10px' }}><X size={16} /></button>
                       </div>
                    </div>
                  ))
@@ -102,7 +113,7 @@ const WorkerDashboard = () => {
                <h3 className="serif" style={{ fontSize: '1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}><Shield size={20} color="var(--gold)" /> FLOOR AUDIT</h3>
                <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div>Ensure all stations on Floor {user.assigned_floor} are sanitized between elite sessions.</div>
-                  <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>Last login tracked: {new Date().toLocaleTimeString()} from Atelier IP.</div>
+                  <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>Last login tracked: {new Date().toLocaleTimeString()} from CUTSLOT IP.</div>
                </div>
             </div>
          </div>

@@ -22,8 +22,14 @@ const WorkerQueue = () => {
     };
 
     const updateStatus = async (id, status) => {
+        let newTime = null;
+        if (status === 'rescheduled') {
+            const resp = prompt("Enter new timing (YYYY-MM-DDTHH:MM:SS):", new Date().toISOString().slice(0, 19));
+            if (!resp) return;
+            newTime = resp;
+        }
         try {
-            await api.put(`/bookings/${id}/status`, { status });
+            await api.put(`/bookings/${id}/status`, { status, new_time: newTime });
             fetchQueue();
         } catch (err) { alert("Action failed."); }
     };
@@ -52,7 +58,7 @@ const WorkerQueue = () => {
                 {Object.keys(groupedQueue).length === 0 ? (
                     <div className="glass-card" style={{ padding: '5rem', textAlign: 'center' }}>
                         <Briefcase size={60} color="var(--gold)" style={{ opacity: 0.2, marginBottom: '2rem' }} />
-                        <h2 className="serif" style={{ color: 'var(--text-dim)' }}>THE ATELIER IS QUIET</h2>
+                        <h2 className="serif" style={{ color: 'var(--text-dim)' }}>THE CUTSLOT IS QUIET</h2>
                         <p style={{ color: 'var(--text-dim)' }}>No upcoming elite sessions scheduled for the next 72 hours.</p>
                     </div>
                 ) : (
@@ -80,14 +86,16 @@ const WorkerQueue = () => {
                                             <span>Elite Client ID: {b.user_id}</span>
                                         </div>
 
-                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                             {b.status === 'pending' && (
-                                                <button onClick={() => updateStatus(b.id, 'confirmed')} className="btn-gold" style={{ background: '#4caf50', border: 'none', color: 'white', flex: 1 }}><Check size={18} /> CONFIRM</button>
+                                                <button onClick={() => updateStatus(b.id, 'confirmed')} className="btn-gold" style={{ background: '#4caf50', border: 'none', color: 'white', flex: 1, padding: '0.6rem' }}><Check size={16} /> CONFIRM</button>
                                             )}
                                             {b.status === 'confirmed' && (
-                                                <button onClick={() => updateStatus(b.id, 'completed')} className="btn-gold" style={{ flex: 1 }}><Scissors size={18} /> COMPLETE</button>
+                                                <button onClick={() => updateStatus(b.id, 'completed')} className="btn-gold" style={{ flex: 1, padding: '0.6rem' }}><Scissors size={16} /> DONE</button>
                                             )}
-                                            <button onClick={() => updateStatus(b.id, 'cancelled')} style={{ padding: '0.8rem', background: 'transparent', border: '1px solid #f44336', color: '#f44336', borderRadius: '10px' }}><X size={18} /></button>
+                                            <button onClick={() => updateStatus(b.id, 'absent')} style={{ flex: 1, padding: '0.6rem', background: 'transparent', border: '1px solid var(--text-dim)', color: 'var(--text-dim)', borderRadius: '10px', fontSize: '0.8rem' }}>ABSENT</button>
+                                            <button onClick={() => updateStatus(b.id, 'rescheduled')} style={{ flex: 1, padding: '0.6rem', background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: '10px', fontSize: '0.8rem' }}>NEW TIME</button>
+                                            <button onClick={() => updateStatus(b.id, 'cancelled')} style={{ padding: '0.6rem', background: 'transparent', border: '1px solid #f44336', color: '#f44336', borderRadius: '10px' }}><X size={16} /></button>
                                         </div>
                                     </div>
                                 ))}
