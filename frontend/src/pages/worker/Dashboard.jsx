@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Calendar, Check, X, Bell, User as UserIcon, Scissors, Clock, Wallet, BarChart3, History, Shield, TrendingUp, Sparkles } from 'lucide-react';
 
@@ -91,6 +92,9 @@ const WorkerDashboard = () => {
                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Queue Depth</span><span style={{ color: 'var(--gold)' }}>{stats.upcoming_queue} Clients</span></div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Floor Efficiency</span><span style={{ color: '#4caf50' }}>EXCELLENT</span></div>
+                  <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)', margin: '1rem 0' }} />
+                  <Link to="/staff/queue" className="btn-gold" style={{ fontSize: '0.8rem', padding: '1rem' }}><Clock size={16} /> MANAGE FULL QUEUE</Link>
+                  <Link to="/staff/performance" className="btn-gold" style={{ fontSize: '0.8rem', padding: '1rem' }}><BarChart3 size={16} /> VIEW REVENUE LOGS</Link>
                </div>
             </div>
 

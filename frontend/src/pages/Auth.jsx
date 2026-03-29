@@ -12,6 +12,7 @@ const Auth = () => {
   const [floor, setFloor] = useState(1);
   const [gender, setGender] = useState("Male");
   const [phone, setPhone] = useState("");
+  const [customerCategory, setCustomerCategory] = useState("normal");
   const [terms, setTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -56,7 +57,7 @@ const Auth = () => {
         // We log in normally, role will be determined by the backend token response
         await login(username, password);
       } else {
-        await signup(username, email, password, role, floor, gender, phone);
+        await signup(username, email, password, role, floor, gender, phone, customerCategory);
       }
       navigate('/');
     } catch (err) {
@@ -99,6 +100,13 @@ const Auth = () => {
                <div className="floor-selector-rich slide-in" style={{ marginTop: '2rem', background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '20px' }}>
                   <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>WHICH FLOOR DO YOU WORK ON?</label>
                   <input type="number" min="1" max="4" value={floor} onChange={(e) => setFloor(parseInt(e.target.value))} required style={{ width: '100%', marginTop: '1rem', padding: '1rem', background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: '10px', fontSize: '1.5rem', textAlign: 'center' }} />
+               </div>
+             )}
+             {!isLogin && role === 'customer' && (
+               <div className="category-selector slide-in" style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                  <div onClick={() => setCustomerCategory('normal')} className={`role-card ${customerCategory === 'normal' ? 'active' : ''}`} style={{ padding: '1rem', textAlign: 'center', borderRadius: '15px', cursor: 'pointer', background: customerCategory === 'normal' ? 'rgba(212,175,55,0.1)' : 'transparent', border: customerCategory === 'normal' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', fontSize: '0.75rem', fontWeight: 'bold' }}>NORMAL</div>
+                  <div onClick={() => setCustomerCategory('vip')} className={`role-card ${customerCategory === 'vip' ? 'active' : ''}`} style={{ padding: '1rem', textAlign: 'center', borderRadius: '15px', cursor: 'pointer', background: customerCategory === 'vip' ? 'rgba(212,175,55,0.1)' : 'transparent', border: customerCategory === 'vip' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', fontSize: '0.75rem', fontWeight: 'bold' }}>VIP MEMBER</div>
+                  <div onClick={() => setCustomerCategory('beauty_under_4')} className={`role-card ${customerCategory === 'beauty_under_4' ? 'active' : ''}`} style={{ padding: '1rem', textAlign: 'center', borderRadius: '15px', cursor: 'pointer', background: customerCategory === 'beauty_under_4' ? 'rgba(212,175,55,0.1)' : 'transparent', border: customerCategory === 'beauty_under_4' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', fontSize: '0.75rem', fontWeight: 'bold' }}>BEAUTY &lt; 4</div>
                </div>
              )}
           </div>

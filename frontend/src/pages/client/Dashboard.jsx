@@ -44,6 +44,10 @@ const ClientDashboard = () => {
     <div className="client-dashboard-page fade-in-up">
       <header className="glass-card" style={{ padding: '3rem', marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid var(--gold)' }}>
         <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+             <span style={{ padding: '0.4rem 1rem', background: 'var(--gold)', color: 'var(--bg-dark)', borderRadius: '40px', fontSize: '0.7rem', fontWeight: 'bold', letterSpacing: '2px' }}>{user?.customer_category?.toUpperCase() || 'NORMAL'}</span>
+             <span style={{ color: 'var(--gold)', letterSpacing: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>ELITE MEMBER</span>
+          </div>
           <h1 className="serif gradient-text" style={{ fontSize: '3.5rem', margin: 0 }}>CLIENT <span style={{ color: 'var(--text-cream)' }}>PREFERENCE</span></h1>
           <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', marginTop: '0.5rem' }}>Your customized elite profile and spending statistics.</p>
         </div>

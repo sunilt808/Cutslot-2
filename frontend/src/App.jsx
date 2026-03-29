@@ -23,6 +23,7 @@ import AdminProfile from './pages/admin/Profile';
 // WORKER
 import WorkerDashboard from './pages/worker/Dashboard';
 import WorkerPerformance from './pages/worker/Performance';
+import WorkerQueue from './pages/worker/Queue';
 
 // CLIENT
 import ClientDashboard from './pages/client/Dashboard';
@@ -61,6 +62,7 @@ function AppRoutes() {
       {/* WORKER ROUTES */}
       <Route path="/staff" element={<ProtectedRoute roles={['staff']}><WorkerDashboard /></ProtectedRoute>} />
       <Route path="/staff/performance" element={<ProtectedRoute roles={['staff']}><WorkerPerformance /></ProtectedRoute>} />
+      <Route path="/staff/queue" element={<ProtectedRoute roles={['staff']}><WorkerQueue /></ProtectedRoute>} />
 
       {/* CLIENT ROUTES */}
       <Route path="/profile" element={<ProtectedRoute roles={['customer']}><ClientDashboard /></ProtectedRoute>} />

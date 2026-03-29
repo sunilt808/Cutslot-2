@@ -89,12 +89,13 @@ async def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
         is_approved=is_approved,
         assigned_floor=user.role == models.UserRole.STAFF and user.assigned_floor or None,
         gender=user.gender,
-        phone=user.phone
+        phone=user.phone,
+        customer_category=user.customer_category or "normal"
     )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    create_audit_log(db, db_user.id, "SIGNUP", f"Registered as {user.role}")
+    create_audit_log(db, db_user.id, "SIGNUP", f"Registered as {user.role} ({user.customer_category})")
     push_notification(db, db_user.id, f"Welcome to LUMIÈRE, {user.username}. Experience excellence.")
     return db_user
 
@@ -107,6 +108,27 @@ async def get_admin_stats(current_user: models.User = Depends(get_admin_user), d
     active_users = db.query(models.User).count()
     avg_rating = db.query(func.avg(models.Review.rating)).scalar() or 0.0
     return {"total_revenue": total_rev, "total_bookings": total_bookings, "active_users": active_users, "avg_rating": round(avg_rating, 1)}
+
+@app.get("/worker/sessions/history", response_model=List[schemas.BookingInDB])
+async def get_worker_history(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.role != models.UserRole.STAFF: raise HTTPException(status_code=403)
+    return db.query(models.Booking).filter(
+        models.Booking.floor == current_user.assigned_floor,
+        models.Booking.status == models.BookingStatus.COMPLETED
+    ).order_by(models.Booking.booking_time.desc()).all()
+
+@app.get("/worker/queue", response_model=List[schemas.BookingInDB])
+async def get_worker_queue(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.role != models.UserRole.STAFF: raise HTTPException(status_code=403)
+    # Today + 3 days
+    start_time = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    end_time = start_time + datetime.timedelta(days=4)
+    return db.query(models.Booking).filter(
+        models.Booking.floor == current_user.assigned_floor,
+        models.Booking.booking_time >= start_time,
+        models.Booking.booking_time < end_time,
+        models.Booking.status.in_([models.BookingStatus.PENDING, models.BookingStatus.CONFIRMED])
+    ).order_by(models.Booking.booking_time.asc()).all()
 
 @app.get("/worker/stats", response_model=schemas.WorkerStats)
 async def get_worker_stats(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):

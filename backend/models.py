@@ -30,6 +30,7 @@ class User(Base):
     is_approved = Column(Boolean, default=True) # Workers set to False in signup
     gender = Column(String, nullable=True) # Male/Female/Other
     phone = Column(String, nullable=True) # Contact Details
+    customer_category = Column(String, default="normal") # normal, vip, beauty_under_4
     joined_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     bookings = relationship("Booking", back_populates="user")

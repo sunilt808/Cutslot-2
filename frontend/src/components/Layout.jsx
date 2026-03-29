@@ -81,6 +81,32 @@ const Layout = ({ children }) => {
                   </Link>
                 </>
               )}
+              {user.role === 'staff' && (
+                <>
+                  <Link to="/staff" className={`nav-button ${isActive('/staff') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/staff') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/staff') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    <Briefcase size={14} /> DASHBOARD
+                  </Link>
+                  <Link to="/staff/queue" className={`nav-button ${isActive('/staff/queue') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/staff/queue') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/staff/queue') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    <Clock size={14} /> QUEUE
+                  </Link>
+                  <Link to="/staff/performance" className={`nav-button ${isActive('/staff/performance') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/staff/performance') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/staff/performance') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    <TrendingUp size={14} /> PERFORMANCE
+                  </Link>
+                </>
+              )}
+              {user.role === 'customer' && (
+                <>
+                  <Link to="/profile" className={`nav-button ${isActive('/profile') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/profile') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/profile') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    <UserIcon size={14} /> PROFILE
+                  </Link>
+                  <Link to="/booking" className={`nav-button ${isActive('/booking') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/booking') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/booking') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    <Calendar size={14} /> BOOKING
+                  </Link>
+                  <Link to="/profile/wallet" className={`nav-button ${isActive('/profile/wallet') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/profile/wallet') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/profile/wallet') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    <Wallet size={14} /> REVENUE
+                  </Link>
+                </>
+              )}
             </>
           )}
         </div>

@@ -13,6 +13,7 @@ class UserCreate(UserBase):
     assigned_floor: Optional[int] = None
     gender: Optional[str] = None
     phone: Optional[str] = None
+    customer_category: Optional[str] = "normal"
 
 class UserInDB(UserBase):
     id: int
@@ -24,6 +25,7 @@ class UserInDB(UserBase):
     is_approved: bool
     gender: Optional[str]
     phone: Optional[str]
+    customer_category: str
     joined_at: datetime
 
     class Config:

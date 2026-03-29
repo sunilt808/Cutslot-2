@@ -8,6 +8,7 @@ const Booking = () => {
   const location = useLocation();
   const initialService = location.state?.service;
   const [selectedFloor, setSelectedFloor] = useState(initialService?.floor || 1);
+  const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bookingService, setBookingService] = useState(null);
   const [stylist, setStylist] = useState("");
