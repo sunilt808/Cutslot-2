@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Layers, Scissors, Heart, Spa, Crown, Clock, CreditCard, ChevronRight } from 'lucide-react';
+import { Layers, Scissors, Heart, Flower, Crown, Clock, CreditCard, ChevronRight, Check } from 'lucide-react';
 
 const Floors = () => {
-  const { api, user } = useAuth();
+  const { api, user, refreshUser } = useAuth();
   const [services, setServices] = useState([]);
   const [selectedFloor, setSelectedFloor] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -16,7 +16,7 @@ const Floors = () => {
   const floors = [
     { id: 1, name: "Common", icon: <Scissors size={20} />, desc: "Haircuts & Basic Wellness" },
     { id: 2, name: "General", icon: <Heart size={20} />, desc: "Massage & Skin Care" },
-    { id: 3, name: "Female-only", icon: <Spa size={20} />, desc: "Exclusive Women's Spa" },
+    { id: 3, name: "Female-only", icon: <Flower size={20} />, desc: "Exclusive Women's Spa" },
     { id: 4, name: "Premium", icon: <Crown size={20} />, desc: "VIP & Subscriptions" }
   ];
 
