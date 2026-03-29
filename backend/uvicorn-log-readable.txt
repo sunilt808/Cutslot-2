@@ -1,0 +1,19 @@
+uvicorn : INFO:     Will watch for changes in these 
+directories: ['D:\\Cutslot\\backend']
+At line:1 char:1
++ uvicorn main:app --reload --host 0.0.0.0 --port 
+8000 2>&1 | Out-File  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~
+    + CategoryInfo          : NotSpecified: (INFO:  
+       Will ...slot\\backend']:String) [], RemoteE  
+  xception
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO:     Uvicorn running on http://0.0.0.0:8000 
+(Press CTRL+C to quit)
+INFO:     Started reloader process [31548] using 
+WatchFiles
+INFO:     Started server process [25296]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
