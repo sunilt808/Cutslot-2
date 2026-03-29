@@ -6,6 +6,7 @@ import Particles from './components/Particles';
 import Home from './pages/Home';
 import Floors from './pages/Floors';
 import Auth from './pages/Auth';
+import Admin from './pages/Admin';
 import './index.css';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/floors" element={<Floors />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/admin" element={<Admin />} />
             {/* Admin and Staff dashboards to be added here */}
           </Routes>
         </Layout>

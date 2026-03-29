@@ -133,13 +133,31 @@ async def create_booking(booking: schemas.BookingCreate, current_user: models.Us
 
 @app.get("/bookings/", response_model=List[schemas.BookingInDB])
 async def read_bookings(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if current_user.role == models.UserRole.ADMIN:
-        return db.query(models.Booking).all()
-    elif current_user.role == models.UserRole.STAFF:
-        # For simplicity, staff sees all for now, or maybe they can see floor specific if needed
+    if current_user.role == models.UserRole.ADMIN or current_user.role == models.UserRole.STAFF:
         return db.query(models.Booking).all()
     else:
         return db.query(models.Booking).filter(models.Booking.user_id == current_user.id).all()
+
+@app.put("/bookings/{booking_id}/status", response_model=schemas.BookingInDB)
+async def update_booking_status(booking_id: int, status: str = Body(..., embed=True), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.role not in [models.UserRole.ADMIN, models.UserRole.STAFF]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
+    
+    db_booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
+    if not db_booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    
+    db_booking.status = status
+    db.commit()
+    db.refresh(db_booking)
+    create_audit_log(db, current_user.id, "BOOKING_UPDATE", f"Booking ID {booking_id} status changed to {status}")
+    return db_booking
+
+# --- Audit Logs ---
+
+@app.get("/audit-logs/", response_model=List[schemas.AuditLogInDB])
+async def read_audit_logs(current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    return db.query(models.AuditLog).all()
 
 # --- Subscription Routes ---
 
