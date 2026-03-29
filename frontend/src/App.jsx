@@ -8,6 +8,7 @@ import Floors from './pages/Floors';
 import Auth from './pages/Auth';
 import Admin from './pages/Admin';
 import Profile from './pages/Profile';
+import Staff from './pages/Staff';
 import './index.css';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/staff" element={<Staff />} />
             {/* Admin and Staff dashboards to be added here */}
           </Routes>
         </Layout>

@@ -17,7 +17,8 @@ const Navbar = () => {
       <div className="nav-links" style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
         <Link to="/" style={{ textDecoration: 'none', color: 'var(--text-cream)', fontWeight: '500', transition: 'var(--transition)' }}>HOME</Link>
         <Link to="/floors" style={{ textDecoration: 'none', color: 'var(--text-cream)', fontWeight: '500' }}>FLOORS</Link>
-        {user?.role === 'admin' && <Link to="/admin" style={{ textDecoration: 'none', color: 'var(--gold)' }}>ADMIN</Link>}
+        {user?.role === 'admin' && <Link to="/admin" style={{ textDecoration: 'none', color: 'var(--gold)', fontWeight: '600' }}>ADMIN</Link>}
+        {user?.role === 'staff' && <Link to="/staff" style={{ textDecoration: 'none', color: 'var(--gold)', fontWeight: '600' }}>WORKER</Link>}
         
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', borderLeft: '1px solid var(--glass-border)', paddingLeft: '1.5rem' }}>
           {user ? (

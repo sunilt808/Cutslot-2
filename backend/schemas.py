@@ -16,6 +16,7 @@ class UserInDB(UserBase):
     loyalty_points: int
     subscription_plan: Optional[str]
     subscription_expiry: Optional[datetime]
+    assigned_floor: Optional[int]
 
     class Config:
         from_attributes = True

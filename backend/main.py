@@ -136,7 +136,11 @@ async def create_booking(booking: schemas.BookingCreate, current_user: models.Us
 
 @app.get("/bookings/", response_model=List[schemas.BookingInDB])
 async def read_bookings(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if current_user.role == models.UserRole.ADMIN or current_user.role == models.UserRole.STAFF:
+    if current_user.role == models.UserRole.ADMIN:
+        return db.query(models.Booking).all()
+    elif current_user.role == models.UserRole.STAFF:
+        if current_user.assigned_floor:
+            return db.query(models.Booking).filter(models.Booking.floor == current_user.assigned_floor).all()
         return db.query(models.Booking).all()
     else:
         return db.query(models.Booking).filter(models.Booking.user_id == current_user.id).all()
@@ -219,7 +223,23 @@ async def seed_data(db: Session = Depends(get_db)):
             role=models.UserRole.ADMIN,
             loyalty_points=5000
         )
+        staff_user = models.User(
+            username="worker1",
+            email="worker@lumiere.com",
+            hashed_password=auth.get_password_hash("worker123"),
+            role=models.UserRole.STAFF,
+            assigned_floor=2
+        )
+        customer_user = models.User(
+            username="client1",
+            email="client@lumiere.com",
+            hashed_password=auth.get_password_hash("client123"),
+            role=models.UserRole.CUSTOMER,
+            loyalty_points=120
+        )
         db.add(admin_user)
+        db.add(staff_user)
+        db.add(customer_user)
 
     db.add_all(f1_services + f2_services + f3_services + f4_services + subs)
     db.commit()

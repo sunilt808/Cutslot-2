@@ -26,6 +26,7 @@ class User(Base):
     loyalty_points = Column(Integer, default=0)
     subscription_plan = Column(String, nullable=True)
     subscription_expiry = Column(DateTime, nullable=True)
+    assigned_floor = Column(Integer, nullable=True) # for staff/workers
 
     bookings = relationship("Booking", back_populates="user")
     audit_logs = relationship("AuditLog", back_populates="user")
