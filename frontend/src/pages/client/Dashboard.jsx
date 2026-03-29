@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { User, Bell, Star, Wallet, Calendar, Settings, History, MessageSquare, Heart } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { User, Bell, Star, Wallet, Calendar, Settings, History, MessageSquare, Heart, Clock, Crown } from 'lucide-react';
 
 const ClientDashboard = () => {
   const { user, api } = useAuth();
@@ -8,61 +8,63 @@ const ClientDashboard = () => {
   const [wallet, setWallet] = useState({ total_spent: 0, loyalty_points: 0 });
   const [notifications, setNotifications] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [walletRes, notifRes, bookingRes] = await Promise.all([
-          api.get('/client/wallet'),
-          api.get('/notifications/'),
-          api.get('/bookings/')
-        ]);
-        setWallet(walletRes.data);
-        setNotifications(notifRes.data);
-        setBookings(bookingRes.data);
-      } catch (err) {
-        console.error("Error fetching client data:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, [api]);
 
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [walletRes, notifRes, bookingRes] = await Promise.all([
+        api.get('/client/wallet'),
+        api.get('/notifications/'),
+        api.get('/bookings/')
+      ]);
+      setWallet(walletRes.data);
+      setNotifications(notifRes.data);
+      setBookings(bookingRes.data);
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
+  };
+
   const addReview = async (bookingId, serviceId) => {
-    const comment = prompt("Please share your boutique experience:");
+    const comment = prompt("Share your boutique experience:");
     const rating = parseInt(prompt("Elite Rating (1-5):"));
     if (!comment || isNaN(rating)) return;
     try {
       await api.post('/reviews/', { booking_id: bookingId, service_id: serviceId, rating, comment });
-      alert("Professional review recorded.");
-    } catch (err) {
-      alert("Failed to record review.");
-    }
+      alert("Review recorded.");
+      fetchData();
+    } catch (err) { alert("Failed."); }
   };
 
   return (
-    <div className="client-dashboard fade-in-up">
+    <div className="client-dashboard-page fade-in-up">
       <header className="glass-card" style={{ padding: '3rem', marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: '4px solid var(--gold)' }}>
         <div>
           <h1 className="serif gradient-text" style={{ fontSize: '3.5rem', margin: 0 }}>CLIENT <span style={{ color: 'var(--text-cream)' }}>PREFERENCE</span></h1>
-          <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem', marginTop: '0.5rem' }}>Your customized elite profile and spending statistics.</p>
+          <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', marginTop: '0.5rem' }}>Your customized elite profile and spending statistics.</p>
         </div>
-        <div style={{ textAlign: 'right' }}>
-           <div style={{ color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 'bold' }}>ACCOUNT STATUS</div>
-           <div className="serif" style={{ fontSize: '1.8rem' }}>{user.loyalty_points > 1000 ? "PLATINUM" : "GOLD"}</div>
+        <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '2rem' }}>
+           <div className="stat-sm">
+              <div style={{ color: 'var(--gold)', fontSize: '2.4rem', fontWeight: 'bold' }}>₹{wallet.total_spent}</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>REVENUE TRACKING</div>
+           </div>
+           <div className="stat-sm">
+              <div style={{ color: 'var(--gold)', fontSize: '2.4rem', fontWeight: 'bold' }}>{wallet.loyalty_points}</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>LOYALTY POINTS</div>
+           </div>
         </div>
       </header>
 
-      <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '2rem' }}>
-        <aside className="glass-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(250px, 1fr) 3fr', gap: '2rem' }}>
+        <aside className="glass-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', height: 'fit-content' }}>
            <button onClick={() => setActiveTab("overview")} className={`btn-gold ${activeTab === 'overview' ? 'active' : ''}`} style={{ width: '100%', background: activeTab === 'overview' ? 'var(--gold)' : 'transparent', color: activeTab === 'overview' ? 'var(--bg-dark)' : 'var(--text-cream)' }}><User size={18} /> OVERVIEW</button>
            <button onClick={() => setActiveTab("history")} className={`btn-gold ${activeTab === 'history' ? 'active' : ''}`} style={{ width: '100%', background: activeTab === 'history' ? 'var(--gold)' : 'transparent', color: activeTab === 'history' ? 'var(--bg-dark)' : 'var(--text-cream)' }}><History size={18} /> SESSIONS</button>
            <button onClick={() => setActiveTab("notifications")} className={`btn-gold ${activeTab === 'notifications' ? 'active' : ''}`} style={{ width: '100%', background: activeTab === 'notifications' ? 'var(--gold)' : 'transparent', color: activeTab === 'notifications' ? 'var(--bg-dark)' : 'var(--text-cream)' }}><Bell size={18} /> NOTARY</button>
-           <button onClick={() => setActiveTab("settings")} className={`btn-gold ${activeTab === 'settings' ? 'active' : ''}`} style={{ width: '100%', background: activeTab === 'settings' ? 'var(--gold)' : 'transparent', color: activeTab === 'settings' ? 'var(--bg-dark)' : 'var(--text-cream)' }}><Settings size={18} /> THEMES</button>
+           <button onClick={() => setActiveTab("subscriptions")} className={`btn-gold ${activeTab === 'subscriptions' ? 'active' : ''}`} style={{ width: '100%', background: activeTab === 'subscriptions' ? 'var(--gold)' : 'transparent', color: activeTab === 'subscriptions' ? 'var(--bg-dark)' : 'var(--text-cream)' }}><Crown size={18} /> ELITE SUBS</button>
         </aside>
 
         <main className="glass-card" style={{ padding: '3rem' }}>
@@ -76,7 +78,7 @@ const ClientDashboard = () => {
                    </div>
                    <div className="stat-box" style={{ padding: '1.5rem', border: '1px solid var(--glass-border)', borderRadius: '15px', textAlign: 'center' }}>
                       <Heart color="var(--gold)" size={24} />
-                      <div className="serif" style={{ fontSize: '1.8rem', margin: '0.5rem 0' }}>{user.loyalty_points}</div>
+                      <div className="serif" style={{ fontSize: '1.8rem', margin: '0.5rem 0' }}>{user?.loyalty_points || 0}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>POINTS EARNED</div>
                    </div>
                    <div className="stat-box" style={{ padding: '1.5rem', border: '1px solid var(--glass-border)', borderRadius: '15px', textAlign: 'center' }}>
@@ -104,20 +106,25 @@ const ClientDashboard = () => {
            )}
 
            {activeTab === 'history' && (
-             <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+             <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <h3 className="serif" style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>SESSION LOGS</h3>
                 {bookings.map(b => (
                   <div key={b.id} className="glass-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                    <div>
-                       <div style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{b.stylist_name}</div>
-                       <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{new Date(b.booking_time).toLocaleDateString()} | Spent: ₹{b.price_paid}</div>
+                    <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                       <div style={{ background: 'var(--gold-glow)', padding: '10px', borderRadius: '50%' }}><Clock size={20} color="var(--gold)" /></div>
+                       <div>
+                         <div style={{ fontSize: '1.3rem', fontWeight: 'bold' }} className="serif">{b.stylist_name}</div>
+                         <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{new Date(b.booking_time).toLocaleDateString()} | Spent: ₹{b.price_paid}</div>
+                       </div>
                     </div>
-                    {b.status === 'completed' && (
-                       <button onClick={() => addReview(b.id, b.service_id)} style={{ background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer' }}>
-                          <MessageSquare size={16} /> REVIEW
-                       </button>
-                    )}
-                    <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: b.status === 'completed' ? 'var(--gold)' : 'var(--text-dim)' }}>{b.status.toUpperCase()}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                      {b.status === 'completed' && (
+                        <button onClick={() => addReview(b.id, b.service_id)} style={{ background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer' }}>
+                            <MessageSquare size={16} /> REVIEW
+                        </button>
+                      )}
+                      <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: b.status === 'completed' ? '#4caf50' : 'var(--gold)', border: '1px solid', padding: '0.5rem 1rem', borderRadius: '5px' }}>{b.status.toUpperCase()}</span>
+                    </div>
                   </div>
                 ))}
              </div>
@@ -126,28 +133,31 @@ const ClientDashboard = () => {
            {activeTab === 'notifications' && (
              <div className="fade-in">
                 <h3 className="serif" style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>NOTARY FEED</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                    {notifications.map(n => (
-                     <div key={n.id} style={{ padding: '1.5rem', borderBottom: '1px solid var(--glass-border)', background: n.is_read ? 'transparent' : 'rgba(212,175,55,0.03)' }}>
-                        <div style={{ fontSize: '0.95rem', marginBottom: '0.3rem' }}>{n.message}</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{new Date(n.created_at).toLocaleString()}</div>
+                     <div key={n.id} style={{ padding: '1.5rem', borderBottom: '1px solid var(--glass-border)', background: n.is_read ? 'transparent' : 'rgba(255,255,255,0.02)', borderRadius: '15px' }}>
+                        <div style={{ fontSize: '1rem', marginBottom: '0.3rem' }}>{n.message}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{new Date(n.created_at).toLocaleString()}</div>
                      </div>
                    ))}
                 </div>
              </div>
            )}
 
-           {activeTab === 'settings' && (
+           {activeTab === 'subscriptions' && (
              <div className="fade-in">
-                <h3 className="serif" style={{ fontSize: '1.8rem', marginBottom: '1rem' }}>ATELIER THEMES</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
-                   <div style={{ padding: '2rem', border: '2px solid var(--gold)', borderRadius: '15px', textAlign: 'center' }}>
-                      <div className="serif" style={{ fontSize: '1.3rem' }}>ANTIGRAVITY LUXE</div>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--gold)' }}>Current Selection</p>
+                <h3 className="serif" style={{ fontSize: '1.8rem', marginBottom: '2rem' }}>ELITE ACCESS RITUALS</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem' }}>
+                   <div className="glass-card" style={{ padding: '2.5rem', border: '1px solid var(--glass-border)' }}>
+                      <div className="serif" style={{ fontSize: '1.6rem', color: 'var(--gold)' }}>Gold Monthly</div>
+                      <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', lineHeight: '1.6' }}>Quarterly luxury styling starting at ₹5500. Includes Floor 1 & 2 priority access.</p>
+                      <button className="btn-gold" style={{ width: '100%', marginTop: '1.5rem' }}>RENEW ACCESS</button>
                    </div>
-                   <div style={{ padding: '2rem', border: '1px solid var(--glass-border)', borderRadius: '15px', textAlign: 'center', opacity: 0.4 }}>
-                      <div className="serif" style={{ fontSize: '1.3rem' }}>PLATINUM MINIMAL</div>
-                      <p style={{ fontSize: '0.75rem' }}>Requires Platinum Tier</p>
+                   <div className="glass-card" style={{ padding: '2.5rem', border: '2px solid var(--gold)', boxShadow: '0 0 30px var(--gold-glow)' }}>
+                      <Crown color="var(--gold)" size={24} />
+                      <div className="serif" style={{ fontSize: '1.8rem', marginTop: '0.5rem' }}>Platinum Yearly</div>
+                      <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', lineHeight: '1.6' }}>Unrestricted atelier access. Private Artisans and VIP Parking Protocols for ₹20,000/yr.</p>
+                      <button className="btn-gold" style={{ width: '100%', marginTop: '1.5rem' }}>ENROLLED</button>
                    </div>
                 </div>
              </div>

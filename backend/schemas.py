@@ -11,6 +11,8 @@ class UserCreate(UserBase):
     password: str
     role: Optional[str] = "customer" # Client can choose
     assigned_floor: Optional[int] = None
+    gender: Optional[str] = None
+    phone: Optional[str] = None
 
 class UserInDB(UserBase):
     id: int
@@ -19,6 +21,9 @@ class UserInDB(UserBase):
     subscription_plan: Optional[str]
     subscription_expiry: Optional[datetime]
     assigned_floor: Optional[int]
+    is_approved: bool
+    gender: Optional[str]
+    phone: Optional[str]
     joined_at: datetime
 
     class Config:

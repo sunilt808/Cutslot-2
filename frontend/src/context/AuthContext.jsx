@@ -33,9 +33,19 @@ export const AuthProvider = ({ children }) => {
     return true;
   };
 
-  const signup = async (username, email, password, role = 'customer', assigned_floor = null) => {
-    await api.post('/users/', { username, email, password, role, assigned_floor });
-    await login(username, password);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
+  const signup = async (username, email, password, role = 'customer', assigned_floor = null, gender = null, phone = null) => {
+    await api.post('/users/', { username, email, password, role, assigned_floor, gender, phone });
   };
 
   const logout = () => {
@@ -44,11 +54,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const checkUser = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     try {
       const response = await api.get('/users/me');
       setUser(response.data);
     } catch (err) {
       setUser(null);
+      localStorage.removeItem('token');
     } finally {
       setLoading(false);
     }
@@ -59,8 +75,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, loading, api, refreshUser: checkUser }}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, login, signup, logout, loading, api, refreshUser: checkUser, theme, toggleTheme }}>
+      {children}
     </AuthContext.Provider>
   );
 };

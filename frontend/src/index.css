@@ -12,6 +12,16 @@
   --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+[data-theme='light'] {
+  --bg-dark: #f8f9fa;
+  --bg-gradient: linear-gradient(135deg, #ffffff 0%, #f1f3f5 100%);
+  --glass: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(212, 175, 55, 0.3);
+  --text-cream: #1a1b1e;
+  --text-dim: rgba(0, 0, 0, 0.6);
+  --gold-glow: rgba(212, 175, 55, 0.2);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -82,8 +92,9 @@ h1, h2, h3, h4, .serif {
 
 /* Typography styles */
 .gradient-text {
-  background: linear-gradient(135deg, #f2efe9 0%, #d4af37 100%);
+  background: linear-gradient(135deg, var(--gold), var(--text-cream), var(--gold));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -140,4 +151,42 @@ h1, h2, h3, h4, .serif {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--gold);
+}
+
+/* Marquee Scroll Animations */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-reverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+  position: relative;
+  padding: 2rem 0;
+}
+
+.marquee-content {
+  display: flex;
+  gap: 3rem;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+
+.marquee-content-reverse {
+  display: flex;
+  gap: 3rem;
+  width: max-content;
+  animation: marquee-reverse 40s linear infinite;
+}
+
+.marquee-content:hover,
+.marquee-content-reverse:hover {
+  animation-play-state: paused;
 }

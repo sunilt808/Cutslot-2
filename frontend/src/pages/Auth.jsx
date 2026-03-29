@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, User as UserIcon, Shield, Users, Briefcase } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, Shield, Users, Briefcase, Zap, BadgeCheck, Smartphone, Phone, Heart, Eye, EyeOff, Layout } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -9,89 +9,155 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("customer");
-  const [floor, setFloor] = useState(null);
+  const [floor, setFloor] = useState(1);
+  const [gender, setGender] = useState("Male");
+  const [phone, setPhone] = useState("");
+  const [terms, setTerms] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login, signup } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validation
+    const nameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+    if (!nameRegex.test(username)) {
+      alert("ERROR: Username must be 3-20 characters long and can only have letters, numbers, and underscores.");
+      return;
+    }
+
+    if (!isLogin) {
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      const phoneRegex = /^[0-9]{10}$/; 
+      
+      if (!emailRegex.test(email)) {
+        alert("ERROR: Please enter a correct email address.");
+        return;
+      }
+      if (!phoneRegex.test(phone)) {
+        alert("ERROR: Phone number must be exactly 10 digits.");
+        return;
+      }
+      if (password.length < 6) {
+        alert("ERROR: Password must be at least 6 characters long.");
+        return;
+      }
+      if (!terms) {
+        alert("ERROR: You must agree to the Terms & Conditions.");
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       if (isLogin) {
+        // We log in normally, role will be determined by the backend token response
         await login(username, password);
       } else {
-        await signup(username, email, password, role, floor);
+        await signup(username, email, password, role, floor, gender, phone);
       }
       navigate('/');
     } catch (err) {
-      alert("Authentication failed. Ensure your choice matches the elite standards.");
+      alert(err.response?.data?.detail || "Login failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-container fade-in-up" style={{ display: 'flex', justifyContent: 'center', padding: '5rem 0' }}>
-      <div className="glass-card" style={{ maxWidth: '500px', width: '100%', padding: '4rem 3rem' }}>
-        <h1 className="serif gradient-text" style={{ fontSize: '3rem', margin: '0 0 1rem 0', textAlign: 'center' }}>
-          {isLogin ? "LUXURY ACCESS" : "JOIN THE ATELIER"}
+    <div className="auth-elite fade-in" style={{ display: 'flex', justifyContent: 'center', minHeight: '80vh', padding: '5rem 2rem' }}>
+      <div className="glass-card" style={{ maxWidth: '750px', width: '100%', padding: '5rem 4rem', boxSizing: 'border-box', borderTop: '4px solid var(--gold)' }}>
+        <h1 className="serif gradient-text" style={{ fontSize: '4rem', textAlign: 'center', margin: '0 0 1rem 0' }}>
+          {isLogin ? "LOGIN" : "SIGN UP"}
         </h1>
-        <p style={{ color: 'var(--text-dim)', textAlign: 'center', marginBottom: '2.5rem' }}>
-          {isLogin ? "Authenticate to resume your excellence." : "Select your role and begin your journey."}
+        <p style={{ color: 'var(--text-dim)', textAlign: 'center', marginBottom: '4rem', fontSize: '1.1rem' }}>
+          {isLogin ? "Welcome back! Enter your login details." : "Create a new account and choose your role."}
         </p>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <div className="input-group">
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>USERNAME</label>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <UserIcon size={18} style={{ position: 'absolute', left: '1rem', color: 'var(--gold)' }} />
-              <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required placeholder="Username" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem 3rem', color: 'var(--text-cream)', borderRadius: '15px', width: '100%' }} />
-            </div>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+          
+          {/* ROLE SELECTOR: Now visible for both Login and Signup as per user request */}
+          <div className="role-selector-detailed">
+             <label style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '2px', display: 'block', marginBottom: '1.5rem', textAlign: 'center' }}>CHOOSE YOUR ROLE</label>
+             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                <div onClick={() => setRole('customer')} className={`role-card ${role === 'customer' ? 'active' : ''}`} style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '20px', cursor: 'pointer', background: role === 'customer' ? 'rgba(212,175,55,0.1)' : 'transparent', border: role === 'customer' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', transition: '0.3s' }}>
+                   <Users size={24} color="var(--gold)" />
+                   <div style={{ fontWeight: 'bold', fontSize: '0.8rem', marginTop: '0.8rem' }}>CUSTOMER</div>
+                </div>
+                <div onClick={() => setRole('staff')} className={`role-card ${role === 'staff' ? 'active' : ''}`} style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '20px', cursor: 'pointer', background: role === 'staff' ? 'rgba(212,175,55,0.1)' : 'transparent', border: role === 'staff' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', transition: '0.3s' }}>
+                   <Briefcase size={24} color="var(--gold)" />
+                   <div style={{ fontWeight: 'bold', fontSize: '0.8rem', marginTop: '0.8rem' }}>STAFF</div>
+                </div>
+                <div onClick={() => setRole('admin')} className={`role-card ${role === 'admin' ? 'active' : ''}`} style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '20px', cursor: 'pointer', background: role === 'admin' ? 'rgba(212,175,55,0.1)' : 'transparent', border: role === 'admin' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', transition: '0.3s' }}>
+                   <Shield size={24} color="var(--gold)" />
+                   <div style={{ fontWeight: 'bold', fontSize: '0.8rem', marginTop: '0.8rem' }}>ADMIN</div>
+                </div>
+             </div>
+             {!isLogin && role === 'staff' && (
+               <div className="floor-selector-rich slide-in" style={{ marginTop: '2rem', background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '20px' }}>
+                  <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>WHICH FLOOR DO YOU WORK ON?</label>
+                  <input type="number" min="1" max="4" value={floor} onChange={(e) => setFloor(parseInt(e.target.value))} required style={{ width: '100%', marginTop: '1rem', padding: '1rem', background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: '10px', fontSize: '1.5rem', textAlign: 'center' }} />
+               </div>
+             )}
+          </div>
+
+          <div className="input-field" style={{ position: 'relative' }}>
+             <UserIcon size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
+             <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required placeholder="USERNAME" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
           </div>
 
           {!isLogin && (
             <>
-              <div className="input-group">
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>EMAIL</label>
-                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                  <Mail size={18} style={{ position: 'absolute', left: '1rem', color: 'var(--gold)' }} />
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="Email" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem 3rem', color: 'var(--text-cream)', borderRadius: '15px', width: '100%' }} />
-                </div>
+              <div className="input-field" style={{ position: 'relative' }}>
+                <Mail size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="EMAIL ADDRESS" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
               </div>
 
-              <div className="role-selector" style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                <button type="button" onClick={() => setRole('customer')} className="btn-gold" style={{ flex: 1, padding: '0.8rem', opacity: role === 'customer' ? 1 : 0.4 }}><Users size={16} /> CLIENT</button>
-                <button type="button" onClick={() => setRole('staff')} className="btn-gold" style={{ flex: 1, padding: '0.8rem', opacity: role === 'staff' ? 1 : 0.4 }}><Briefcase size={16} /> WORKER</button>
-                <button type="button" onClick={() => setRole('admin')} className="btn-gold" style={{ flex: 1, padding: '0.8rem', opacity: role === 'admin' ? 1 : 0.4 }}><Shield size={16} /> ADMIN</button>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                  <div className="input-field" style={{ position: 'relative' }}>
+                    <Phone size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
+                    <input type="text" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0,10))} required maxLength={10} placeholder="PHONE (10 DIGITS)" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
+                  </div>
+                  <div className="input-field" style={{ position: 'relative' }}>
+                    <Heart size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
+                    <select value={gender} onChange={(e) => setGender(e.target.value)} style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.03)', color: 'var(--text-cream)', borderRadius: '15px', appearance: 'none' }}>
+                       <option value="Male" style={{ background: 'var(--bg-dark)' }}>MALE</option>
+                       <option value="Female" style={{ background: 'var(--bg-dark)' }}>FEMALE</option>
+                       <option value="Other" style={{ background: 'var(--bg-dark)' }}>OTHER</option>
+                    </select>
+                  </div>
               </div>
-
-              {role === 'staff' && (
-                <div className="input-group slide-in" style={{ marginTop: '1rem' }}>
-                   <label style={{ fontSize: '0.8rem', color: 'var(--gold)' }}>ASSIGNED FLOOR (1-4)</label>
-                   <input type="number" min="1" max="4" value={floor} onChange={(e) => setFloor(parseInt(e.target.value))} required style={{ background: 'rgba(212,175,55,0.1)', border: '1px solid var(--gold)', padding: '1rem', color: 'var(--text-cream)', borderRadius: '15px', width: '100%' }} />
-                </div>
-              )}
             </>
           )}
 
-          <div className="input-group">
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>PASSWORD</label>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Lock size={18} style={{ position: 'absolute', left: '1rem', color: 'var(--gold)' }} />
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', padding: '1rem 3rem', color: 'var(--text-cream)', borderRadius: '15px', width: '100%' }} />
+          <div className="input-field" style={{ position: 'relative' }}>
+            <Lock size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
+            <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="PASSWORD" style={{ width: '100%', padding: '1.2rem 4rem 1.2rem 3.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
+            <div onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '1.2rem', top: '1.2rem', cursor: 'pointer', color: 'var(--text-dim)' }}>
+               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </div>
           </div>
 
-          <button type="submit" className="btn-gold" style={{ padding: '1.2rem', marginTop: '1rem' }} disabled={loading}>
-            {loading ? "AUTHENTICATING..." : isLogin ? "LOG IN" : "ESTABLISH ACCOUNT"}
+          {!isLogin && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '15px', border: '1px solid var(--glass-border)' }}>
+               <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} style={{ width: '20px', height: '20px', accentColor: 'var(--gold)', cursor: 'pointer' }} />
+               <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-dim)' }}>
+                 I AGREE TO THE <span style={{ color: 'var(--gold)', fontWeight: 'bold', cursor: 'pointer', borderBottom: '1px solid var(--gold)' }}>TERMS & CONDITIONS</span>.
+               </p>
+            </div>
+          )}
+
+          <button type="submit" className="btn-gold" style={{ padding: '1.5rem', fontSize: '1.2rem', marginTop: '1rem', borderRadius: '50px', boxShadow: '0 10px 30px rgba(212,175,55,0.2)' }} disabled={loading}>
+            {loading ? "PLEASE WAIT..." : isLogin ? "LOG IN" : "CREATE ACCOUNT"}
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-          <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>
-            {isLogin ? "New to the atelier?" : "Already established?"} 
-            <button onClick={() => setIsLogin(!isLogin)} style={{ background: 'transparent', border: 'none', color: 'var(--gold)', fontWeight: 'bold', cursor: 'pointer', marginLeft: '0.5rem' }}>{isLogin ? "Join Now" : "Log In"}</button>
+        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>
+            {isLogin ? "New here?" : "Already have an account?"} 
+            <button onClick={() => { setIsLogin(!isLogin); setRole('customer'); }} style={{ background: 'transparent', border: 'none', color: 'var(--gold)', fontWeight: 'bold', cursor: 'pointer', marginLeft: '1rem', borderBottom: '1px solid var(--gold)' }}>{isLogin ? "Sign Up" : "Log In"}</button>
           </p>
         </div>
       </div>

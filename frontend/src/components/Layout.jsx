@@ -1,61 +1,135 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Search, User, LogOut, Scissors, Menu } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
-const Navbar = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  return (
-    <nav className="navbar glass-card" style={{ borderRadius: '0 0 20px 20px', padding: '1rem 3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'fixed', top: 0, width: '100%', zindex: 1000 }}>
-      <div className="logo serif" style={{ fontSize: '1.8rem', fontWeight: 'bold', letterSpacing: '2px', color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <Scissors size={28} />
-        LUMIÈRE <span style={{ color: 'var(--text-cream)' }}>ATELIER</span>
-      </div>
-
-      <div className="nav-links" style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
-        <Link to="/" style={{ textDecoration: 'none', color: 'var(--text-cream)', fontWeight: '500', transition: 'var(--transition)' }}>HOME</Link>
-        <Link to="/floors" style={{ textDecoration: 'none', color: 'var(--text-cream)', fontWeight: '500' }}>FLOORS</Link>
-        {user?.role === 'admin' && <Link to="/admin" style={{ textDecoration: 'none', color: 'var(--gold)', fontWeight: '600' }}>ADMIN</Link>}
-        {user?.role === 'staff' && <Link to="/staff" style={{ textDecoration: 'none', color: 'var(--gold)', fontWeight: '600' }}>WORKER</Link>}
-        
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', borderLeft: '1px solid var(--glass-border)', paddingLeft: '1.5rem' }}>
-          {user ? (
-            <>
-              <Link to="/profile" className="user-profile" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: 'inherit', transition: 'var(--transition)' }}>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.85rem', fontWeight: '600' }}>{user.username}</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--gold)' }}>{user.loyalty_points} PTS</div>
-                </div>
-                <div style={{ background: 'var(--gold-glow)', padding: '5px', borderRadius: '50%' }}>
-                  <User size={20} color="var(--gold)" />
-                </div>
-              </Link>
-              <button onClick={logout} className="btn-gold" style={{ padding: '0.5rem', borderRadius: '50%', background: 'transparent', border: 'none' }}>
-                <LogOut size={16} />
-              </button>
-            </>
-          ) : (
-            <Link to="/auth" className="btn-gold">ENROLL</Link>
-          )}
-        </div>
-      </div>
-    </nav>
-  );
-};
+import { Scissors, User as UserIcon, LogOut, Shield, Briefcase, Calendar, Home, Crown, Armchair, Sparkles, Wallet, History, TrendingUp, Settings, Sun, Moon, Database } from 'lucide-react';
 
 const Layout = ({ children }) => {
+  const { user, logout, theme, toggleTheme } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  const isActive = (path) => location.pathname === path;
+
   return (
-    <div style={{ paddingTop: '100px', minHeight: '100vh', position: 'relative' }}>
-      <Navbar />
-      <main style={{ padding: '2rem 5%' }}>
+    <div className={`layout-root ${theme}`} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', transition: 'var(--transition)' }}>
+      
+      {/* 🚀 NAVBAR */}
+      <nav className="navbar glass-card" style={{ 
+        margin: '1.5rem 2rem', 
+        padding: '0.8rem 2.5rem', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        position: 'sticky', 
+        top: '1rem', 
+        zIndex: 1000,
+        borderRadius: '50px',
+        border: '1px solid var(--glass-border)',
+        background: theme === 'dark' ? 'rgba(5, 4, 8, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(15px)'
+      }}>
+        
+        {/* ✂️ BRAND */}
+        <div className="logo-group">
+          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div className="logo-icon pulse-gold" style={{ background: 'var(--gold)', borderRadius: '12px', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Scissors color="black" size={22} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+               <span className="serif" style={{ fontSize: '1.8rem', fontWeight: 'bold', letterSpacing: '4px', color: 'var(--text-cream)', lineHeight: 1 }}>CutSlot</span>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.65rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '2px' }}>
+                  <Armchair size={10} /> LUXURY SALON <Sparkles size={10} />
+               </div>
+            </div>
+          </Link>
+        </div>
+
+        {/* 🎖️ NAVIGATION */}
+        <div className="nav-links" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '0.4rem', borderRadius: '40px', border: '1px solid var(--glass-border)' }}>
+          <Link to="/" className={`nav-button ${isActive('/') ? 'active' : ''}`} style={{ 
+            textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold'
+          }}>
+            <Home size={14} /> HOME
+          </Link>
+          
+          <Link to="/services" className={`nav-button ${isActive('/services') ? 'active' : ''}`} style={{ 
+            textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/services') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/services') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold'
+          }}>
+            <Scissors size={14} /> SERVICES
+          </Link>
+
+          {user && (
+            <>
+              {user.role === 'admin' && (
+                <>
+                  <Link to="/admin" className={`nav-button ${isActive('/admin') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    <Shield size={14} /> DASHBOARD
+                  </Link>
+                  <Link to="/admin/workers" className={`nav-button ${isActive('/admin/workers') || isActive('/admin/credentials') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin/workers') || isActive('/admin/credentials') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin/workers') || isActive('/admin/credentials') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    <Briefcase size={14} /> STAFF
+                  </Link>
+                  <Link to="/admin/services" className={`nav-button ${isActive('/admin/services') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin/services') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin/services') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    <Database size={14} /> INVENTORY
+                  </Link>
+                  <Link to="/admin/revenue" className={`nav-button ${isActive('/admin/revenue') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin/revenue') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin/revenue') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                    <TrendingUp size={14} /> REVENUE
+                  </Link>
+                </>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* 💍 ACTIONS */}
+        <div className="nav-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          
+          <button onClick={toggleTheme} style={{
+              background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--gold)'
+          }}>
+             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+
+          {user && user.role === 'admin' && (
+            <Link to="/admin/profile" className={`nav-button ${isActive('/admin/profile') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', background: isActive('/admin/profile') ? 'var(--gold)' : 'rgba(255,255,255,0.03)', color: isActive('/admin/profile') ? 'var(--bg-dark)' : 'var(--text-cream)' }}>
+               <UserIcon size={18} />
+            </Link>
+          )}
+
+          {user ? (
+            <>
+              <div style={{ display: 'flex', gap: '1.2rem', alignItems: 'center', background: 'rgba(212,175,55,0.05)', padding: '5px 20px', borderRadius: '40px', border: '1px solid var(--gold-glow)' }}>
+                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
+                   <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--gold)', letterSpacing: '1px' }}>{user.username.toUpperCase()}</span>
+                   <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>{user.role.toUpperCase()}</span>
+                </div>
+                <button onClick={handleLogout} className="btn-logout" style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }} title="Logout">
+                  <LogOut size={16} />
+                </button>
+              </div>
+            </>
+          ) : (
+            <Link to="/auth" className="btn-gold" style={{ padding: '0.8rem 2rem', borderRadius: '30px', fontWeight: 'bold', fontSize: '0.8rem' }}>
+              LOGIN
+            </Link>
+          )}
+        </div>
+      </nav>
+
+      <main className="content-container" style={{ flex: 1 }}>
         {children}
       </main>
-      
-      <footer style={{ marginTop: '5rem', padding: '3rem 5%', borderTop: '1px solid var(--glass-border)', textAlign: 'center' }}>
-        <div className="serif" style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--gold)' }}>✨ LUMIÈRE Atelier – CutSlot ✨</div>
-        <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>&copy; 2024 Luxury Salon Ecosystem. All Rights Reserved.</p>
+
+      <footer className="glass-card" style={{ margin: '4rem 2rem 1.5rem 2rem', padding: '5rem', textAlign: 'center', borderRadius: '40px', borderTop: '1px solid var(--gold-glow)' }}>
+        <div className="serif" style={{ fontSize: '2rem', color: 'var(--gold)', letterSpacing: '6px', marginBottom: '1rem' }}>CUTSLOT</div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '3rem', opacity: 0.5 }}>
+           <Scissors size={20} /> <Armchair size={20} /> <Crown size={20} />
+        </div>
+        <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', letterSpacing: '2px' }}>EXCELLENCE IN HAIR & BEAUTY &copy; 2026</p>
       </footer>
     </div>
   );

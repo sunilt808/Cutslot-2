@@ -27,6 +27,9 @@ class User(Base):
     subscription_plan = Column(String, nullable=True)
     subscription_expiry = Column(DateTime, nullable=True)
     assigned_floor = Column(Integer, nullable=True)
+    is_approved = Column(Boolean, default=True) # Workers set to False in signup
+    gender = Column(String, nullable=True) # Male/Female/Other
+    phone = Column(String, nullable=True) # Contact Details
     joined_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     bookings = relationship("Booking", back_populates="user")
