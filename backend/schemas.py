@@ -1,0 +1,81 @@
+from pydantic import BaseModel, EmailStr
+from typing import List, Optional
+from datetime import datetime
+import enum
+
+class UserBase(BaseModel):
+    username: str
+    email: EmailStr
+
+class UserCreate(UserBase):
+    password: str
+
+class UserInDB(UserBase):
+    id: int
+    role: str
+    loyalty_points: int
+    subscription_plan: Optional[str]
+    subscription_expiry: Optional[datetime]
+
+    class Config:
+        from_attributes = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+    role: Optional[str] = None
+
+class ServiceBase(BaseModel):
+    name: str
+    description: str
+    price: float
+    duration: int
+    floor: int
+    category: str
+
+class ServiceInDB(ServiceBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+class BookingBase(BaseModel):
+    service_id: int
+    floor: int
+    stylist_name: str
+    booking_time: datetime
+
+class BookingCreate(BookingBase):
+    pass
+
+class BookingInDB(BookingBase):
+    id: int
+    user_id: int
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AuditLogInDB(BaseModel):
+    id: int
+    user_id: int
+    action: str
+    timestamp: datetime
+    details: str
+
+    class Config:
+        from_attributes = True
+
+class SubscriptionInDB(BaseModel):
+    id: int
+    name: str
+    price: float
+    duration_days: int
+    perks: str
+
+    class Config:
+        from_attributes = True
