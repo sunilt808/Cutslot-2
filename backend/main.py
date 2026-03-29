@@ -2,9 +2,9 @@ from fastapi import FastAPI, Depends, HTTPException, status, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from . import models, schemas, auth, database
+import models, schemas, auth, database
 from jose import JWTError, jwt
-from .database import engine, get_db
+from database import engine, get_db
 import datetime
 from typing import List
 
