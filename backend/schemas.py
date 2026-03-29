@@ -9,6 +9,8 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    role: Optional[str] = "customer" # Client can choose
+    assigned_floor: Optional[int] = None
 
 class UserInDB(UserBase):
     id: int
@@ -17,6 +19,7 @@ class UserInDB(UserBase):
     subscription_plan: Optional[str]
     subscription_expiry: Optional[datetime]
     assigned_floor: Optional[int]
+    joined_at: datetime
 
     class Config:
         from_attributes = True
@@ -56,6 +59,30 @@ class BookingInDB(BookingBase):
     id: int
     user_id: int
     status: str
+    price_paid: float
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ReviewBase(BaseModel):
+    booking_id: int
+    service_id: int
+    rating: int
+    comment: str
+
+class ReviewInDB(ReviewBase):
+    id: int
+    user_id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class NotificationInDB(BaseModel):
+    id: int
+    message: str
+    is_read: bool
     created_at: datetime
 
     class Config:
@@ -80,3 +107,15 @@ class SubscriptionInDB(BaseModel):
 
     class Config:
         from_attributes = True
+
+class AdminStats(BaseModel):
+    total_revenue: float
+    total_bookings: int
+    active_users: int
+    avg_rating: float
+
+class WorkerStats(BaseModel):
+    assigned_floor: Optional[int]
+    personal_revenue: float
+    completed_bookings: int
+    upcoming_queue: int

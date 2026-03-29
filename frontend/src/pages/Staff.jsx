@@ -1,126 +1,139 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, Check, X, Bell, User as UserIcon, Scissors, Clock } from 'lucide-react';
+import { Calendar, Check, X, Bell, User as UserIcon, Scissors, Clock, Wallet, BarChart3, History, Shield } from 'lucide-react';
 
 const Staff = () => {
   const { user, api } = useAuth();
+  const [activeTab, setActiveTab] = useState("queue");
   const [bookings, setBookings] = useState([]);
+  const [stats, setStats] = useState({ assigned_floor: 0, personal_revenue: 0, completed_bookings: 0, upcoming_queue: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchBookings = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await api.get('/bookings/');
-        setBookings(response.data);
+        const [statsRes, bookingRes] = await Promise.all([
+          api.get('/worker/stats'),
+          api.get('/bookings/')
+        ]);
+        setStats(statsRes.data);
+        setBookings(bookingRes.data);
       } catch (err) {
-        console.error("Error fetching staff bookings:", err);
+        console.error("Error fetching staff data:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchBookings();
+    fetchData();
   }, [api]);
 
   const updateStatus = async (id, status) => {
     try {
       await api.put(`/bookings/${id}/status`, { status });
       setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
+      // Refresh stats if status is completed
+      if (status === 'completed') {
+        const statsRes = await api.get('/worker/stats');
+        setStats(statsRes.data);
+      }
     } catch (err) {
       alert("Status update failed.");
     }
   };
 
-  if (user?.role !== 'staff') {
-    return (
-      <div style={{ textAlign: 'center', padding: '5rem' }}>
-        <h1 className="serif">STAFF ACCESS ONLY</h1>
-        <p style={{ color: 'var(--text-dim)' }}>Please log in as a worker to manage floor sessions.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="staff-container fade-in-up">
-      <header style={{ marginBottom: '3rem', borderLeft: '4px solid var(--gold)', paddingLeft: '1.5rem' }}>
-        <h1 className="serif gradient-text" style={{ fontSize: '3rem', margin: 0 }}>WORKER <span style={{ color: 'var(--text-cream)' }}>DASHBOARD</span></h1>
-        <p style={{ color: 'var(--text-dim)', marginTop: '0.5rem' }}>Managing <span style={{ color: 'var(--gold)', fontWeight: 'bold' }}>FLOOR {user.assigned_floor || "ALL"}</span> | Welcome back, {user.username}.</p>
+      <header className="glass-card" style={{ padding: '3rem', marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRight: '4px solid var(--gold)' }}>
+        <div style={{ textAlign: 'right', display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+           <div style={{ background: 'var(--gold-glow)', padding: '10px', borderRadius: '50%' }}>
+             <UserIcon size={30} color="var(--gold)" />
+           </div>
+           <div>
+              <h1 className="serif" style={{ fontSize: '3rem', margin: 0 }}>WORKER <span style={{ color: 'var(--gold)' }}>0{user?.assigned_floor || "X"}</span></h1>
+              <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>Welcome back, Master Stylist {user?.username}.</p>
+           </div>
+        </div>
+        <div style={{ display: 'flex', gap: '3rem', textAlign: 'center' }}>
+           <div className="stat-sm">
+              <div style={{ color: 'var(--gold)', fontSize: '1.5rem', fontWeight: 'bold' }}>₹{stats.personal_revenue}</div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>YOUR REVENUE</div>
+           </div>
+           <div className="stat-sm">
+              <div style={{ color: 'var(--gold)', fontSize: '1.5rem', fontWeight: 'bold' }}>{stats.completed_bookings}</div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>SESSIONS COMPLETED</div>
+           </div>
+        </div>
       </header>
 
-      <div className="staff-actions" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-        <div className="glass-card" style={{ gridColumn: 'span 2' }}>
-          <h2 className="serif" style={{ fontSize: '1.8rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Calendar size={24} color="var(--gold)" /> UPCOMING DUTIES
-          </h2>
-          
-          {loading ? (
-            <div style={{ color: 'var(--gold)' }}>LOADING TASKS...</div>
-          ) : bookings.length === 0 ? (
-            <div style={{ color: 'var(--text-dim)', padding: '2rem', textAlign: 'center' }}>No assigned tasks on your floor today.</div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {bookings.map(booking => (
-                <div key={booking.id} className="glass-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '1.5rem' }}>
-                  <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                    <div style={{ color: 'var(--gold)', textAlign: 'center', borderRight: '1px solid var(--glass-border)', paddingRight: '1.5rem' }}>
-                      <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{new Date(booking.booking_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase' }}>TODAY</div>
-                    </div>
-                    <div>
-                      <div className="serif" style={{ fontSize: '1.3rem' }}>{booking.stylist_name} <span style={{ fontSize: '0.8rem', color: 'var(--gold)', fontStyle: 'italic' }}> - Client ID: {booking.user_id}</span></div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <Scissors size={14} /> Service #{booking.service_id} | Floor {booking.floor}
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    {booking.status === 'pending' ? (
-                      <>
-                        <button onClick={() => updateStatus(booking.id, 'confirmed')} className="btn-gold" style={{ padding: '0.6rem 1rem', background: '#4caf50', border: 'none', color: 'white' }}>
-                          <Check size={18} /> CONFIRM
-                        </button>
-                        <button onClick={() => updateStatus(booking.id, 'cancelled')} className="btn-gold" style={{ padding: '0.6rem 1rem', background: 'transparent', borderColor: '#f44336', color: '#f44336' }}>
-                          <X size={18} /> REJECT
-                        </button>
-                      </>
-                    ) : (
-                       <div style={{ color: booking.status === 'confirmed' ? '#4caf50' : '#f44336', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '0.8rem', border: '1px solid', padding: '0.5rem 1rem', borderRadius: '5px' }}>
-                         {booking.status}
+      <div className="staff-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(250px, 1fr) 3fr', gap: '2rem' }}>
+        <aside className="glass-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', height: 'fit-content' }}>
+           <button onClick={() => setActiveTab("queue")} className={`btn-gold ${activeTab === 'queue' ? 'active' : ''}`} style={{ width: '100%', background: activeTab === 'queue' ? 'var(--gold)' : 'transparent', color: activeTab === 'queue' ? 'var(--bg-dark)' : 'var(--text-cream)' }}><Clock size={18} /> SERVICE QUEUE</button>
+           <button onClick={() => setActiveTab("history")} className={`btn-gold ${activeTab === 'history' ? 'active' : ''}`} style={{ width: '100%', background: activeTab === 'history' ? 'var(--gold)' : 'transparent', color: activeTab === 'history' ? 'var(--bg-dark)' : 'var(--text-cream)' }}><History size={18} /> PERFORMANCE LOG</button>
+           <button onClick={() => setActiveTab("notary")} className={`btn-gold ${activeTab === 'notary' ? 'active' : ''}`} style={{ width: '100%', background: activeTab === 'notary' ? 'var(--gold)' : 'transparent', color: activeTab === 'notary' ? 'var(--bg-dark)' : 'var(--text-cream)' }}><Shield size={18} /> SECURITY FEED</button>
+        </aside>
+
+        <main>
+           {activeTab === 'queue' && (
+             <div className="fade-in">
+                <h2 className="serif" style={{ fontSize: '2rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Calendar size={24} color="var(--gold)" /> LIVE ATELIER QUEUE
+                </h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                   {bookings.filter(b => b.status === 'pending' || b.status === 'confirmed').length === 0 ? (
+                     <p style={{ color: 'var(--text-dim)', padding: '3rem', textAlign: 'center' }}>No active clients in the queue for Floor {user.assigned_floor}.</p>
+                   ) : (
+                     bookings.filter(b => b.status === 'pending' || b.status === 'confirmed').map(b => (
+                       <div className="glass-card" key={b.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: b.status === 'confirmed' ? '1px solid var(--gold)' : '1px solid var(--glass-border)' }}>
+                          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                             <div style={{ fontSize: '1.5rem', color: 'var(--gold)', fontWeight: 'bold' }}>{new Date(b.booking_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                             <div>
+                                <div className="serif" style={{ fontSize: '1.4rem' }}>Stylist: {b.stylist_name}</div>
+                                <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Client: ID#{b.user_id} | Floor {b.floor}</div>
+                             </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '10px' }}>
+                             {b.status === 'pending' && <button onClick={() => updateStatus(b.id, 'confirmed')} className="btn-gold" style={{ background: '#4caf50', border: 'none', color: 'white', padding: '0.6rem 1rem' }}><Check size={16} /> ACCEPT</button>}
+                             {b.status === 'confirmed' && <button onClick={() => updateStatus(b.id, 'completed')} className="btn-gold" style={{ background: 'var(--gold)', color: 'var(--bg-dark)', padding: '0.6rem 1rem' }}><BarChart3 size={16} /> COMPLETE</button>}
+                             <button onClick={() => updateStatus(b.id, 'cancelled')} style={{ background: 'transparent', border: '1px solid #f44336', color: '#f44336', padding: '0.6rem 1rem', borderRadius: '10px' }}><X size={16} /></button>
+                          </div>
                        </div>
-                    )}
-                  </div>
+                     ))
+                   )}
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+             </div>
+           )}
 
-        <div className="sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div className="glass-card">
-            <h3 className="serif" style={{ fontSize: '1.4rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Bell size={20} color="var(--gold)" /> NOTICES
-            </h3>
-            <div style={{ fontSize: '0.9rem', color: 'var(--text-dim)' }}>
-              Maintain floor hygiene. <br /><br />
-              Ensure premium experience for VIP clients. <br /><br />
-              Report any equipment issues immediately.
-            </div>
-          </div>
+           {activeTab === 'history' && (
+             <div className="fade-in">
+                <h2 className="serif" style={{ fontSize: '2.4rem', marginBottom: '1rem', color: 'var(--gold)' }}>SESSION PERFORMANCE</h2>
+                <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                   {bookings.filter(b => b.status === 'completed' || b.status === 'cancelled').slice(0, 10).map(b => (
+                      <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', borderBottom: '1px solid var(--glass-border)' }}>
+                         <div>
+                            <span style={{ color: 'var(--text-dim)' }}>{new Date(b.booking_time).toLocaleDateString()}</span>
+                            <span style={{ marginLeft: '1rem' }}>{b.stylist_name}</span>
+                         </div>
+                         <div style={{ fontWeight: 'bold', color: b.status === 'completed' ? '#4caf50' : '#f44336' }}>{b.status.toUpperCase()}</div>
+                      </div>
+                   ))}
+                </div>
+             </div>
+           )}
 
-          <div className="glass-card" style={{ background: 'linear-gradient(rgba(212,175,55,0.05), transparent)' }}>
-            <h3 className="serif" style={{ fontSize: '1.4rem', marginBottom: '1.2rem' }}>YOUR STATUS</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                <span>Shift</span>
-                <span style={{ color: 'var(--gold)' }}>8:00 AM - 4:00 PM</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                <span>Floor Performance</span>
-                <span style={{ color: '#4caf50' }}>EXCELLENT</span>
-              </div>
-            </div>
-          </div>
-        </div>
+           {activeTab === 'notary' && (
+             <div className="fade-in">
+                <h2 className="serif" style={{ fontSize: '2.4rem' }}>SECURITY & AUDITS</h2>
+                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '15px' }}>
+                   <p style={{ color: 'var(--text-dim)' }}>Access to professional logs is restricted to floor-authorized personnel. Logging each action ensures atelier precision.</p>
+                   <div style={{ borderLeft: '2px solid var(--gold)', paddingLeft: '2rem', marginTop: '2rem' }}>
+                      <div style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>Worker signed in successfully from Floor {user.assigned_floor} IP.</div>
+                      <div style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>Booking #44 status changed to COMPLETED by {user.username}.</div>
+                   </div>
+                </div>
+             </div>
+           )}
+        </main>
       </div>
     </div>
   );

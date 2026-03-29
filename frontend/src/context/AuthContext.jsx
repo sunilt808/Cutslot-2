@@ -33,8 +33,8 @@ export const AuthProvider = ({ children }) => {
     return true;
   };
 
-  const signup = async (username, email, password) => {
-    await api.post('/users/', { username, email, password });
+  const signup = async (username, email, password, role = 'customer', assigned_floor = null) => {
+    await api.post('/users/', { username, email, password, role, assigned_floor });
     await login(username, password);
   };
 

@@ -2,18 +2,19 @@ from fastapi import FastAPI, Depends, HTTPException, status, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 import models, schemas, auth, database
 from jose import JWTError, jwt
 from database import engine, get_db
 import datetime
-from typing import List
+from typing import List, Optional
 
 # Create Tables
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="LUMIÈRE Atelier - CutSlot API", version="1.0.0")
+app = FastAPI(title="LUMIÈRE Atelier - Luxury Elite API", version="2.0.0")
 
-# CORS middleware for React
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,223 +25,179 @@ app.add_middleware(
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-# --- Dependency ---
+# --- Dependencies ---
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail="Session expired. Please re-enter the luxury atelier.",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
         payload = jwt.decode(token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
         username: str = payload.get("sub")
-        role: str = payload.get("role")
-        if username is None:
-            raise credentials_exception
-        token_data = schemas.TokenData(username=username, role=role)
-    except JWTError:
-        raise credentials_exception
+        if username is None: raise credentials_exception
+        token_data = schemas.TokenData(username=username, role=payload.get("role"))
+    except JWTError: raise credentials_exception
     user = db.query(models.User).filter(models.User.username == token_data.username).first()
-    if user is None:
-        raise credentials_exception
+    if user is None: raise credentials_exception
     return user
 
 def get_admin_user(current_user: models.User = Depends(get_current_user)):
     if current_user.role != models.UserRole.ADMIN:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
-        )
+        raise HTTPException(status_code=403, detail="Admin authorization required.")
     return current_user
 
-# --- Logging Helper ---
+# --- Logging & Notification Helpers ---
 def create_audit_log(db: Session, user_id: int, action: str, details: str = ""):
-    log_entry = models.AuditLog(user_id=user_id, action=action, details=details)
-    db.add(log_entry)
+    db.add(models.AuditLog(user_id=user_id, action=action, details=details))
     db.commit()
 
-# --- Auth Routes ---
+def push_notification(db: Session, user_id: int, message: str):
+    db.add(models.Notification(user_id=user_id, message=message))
+    db.commit()
+
+# --- Auth & Roles ---
 
 @app.post("/token", response_model=schemas.Token)
-async def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     user = db.query(models.User).filter(models.User.username == form_data.username).first()
     if not user or not auth.verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = datetime.timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = auth.create_access_token(
-        data={"sub": user.username, "role": user.role}, expires_delta=access_token_expires
-    )
-    create_audit_log(db, user.id, "LOGIN", f"User logged in from {form_data.username}")
+        raise HTTPException(status_code=401, detail="Invalid elite credentials")
+    access_token = auth.create_access_token(data={"sub": user.username, "role": user.role})
+    create_audit_log(db, user.id, "LOGIN", f"Accessed role: {user.role}")
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.post("/users/", response_model=schemas.UserInDB)
-async def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(models.User).filter(models.User.username == user.username).first()
-    if db_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
+async def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    if db.query(models.User).filter(models.User.username == user.username).first():
+        raise HTTPException(status_code=400, detail="Username already claimed")
     
-    # Check if first user, make admin
-    is_first = db.query(models.User).count() == 0
-    role = models.UserRole.ADMIN if is_first else models.UserRole.CUSTOMER
-    
-    hashed_password = auth.get_password_hash(user.password)
     db_user = models.User(
         username=user.username,
         email=user.email,
-        hashed_password=hashed_password,
-        role=role
+        hashed_password=auth.get_password_hash(user.password),
+        role=user.role,
+        assigned_floor=user.assigned_floor if user.role == models.UserRole.STAFF else None
     )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    create_audit_log(db, db_user.id, "SIGNUP", f"User registered as {role}")
+    create_audit_log(db, db_user.id, "SIGNUP", f"Registered as {user.role}")
+    push_notification(db, db_user.id, f"Welcome to LUMIÈRE, {user.username}. Experience excellence.")
     return db_user
 
-@app.get("/users/me", response_model=schemas.UserInDB)
-async def read_users_me(current_user: models.User = Depends(get_current_user)):
-    return current_user
+# --- Statistics & Dashboards ---
 
-# --- Service Routes ---
+@app.get("/admin/stats", response_model=schemas.AdminStats)
+async def get_admin_stats(current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    total_rev = db.query(func.sum(models.Booking.price_paid)).filter(models.Booking.status == models.BookingStatus.COMPLETED).scalar() or 0.0
+    total_bookings = db.query(models.Booking).count()
+    active_users = db.query(models.User).count()
+    avg_rating = db.query(func.avg(models.Review.rating)).scalar() or 0.0
+    return {"total_revenue": total_rev, "total_bookings": total_bookings, "active_users": active_users, "avg_rating": round(avg_rating, 1)}
 
-@app.get("/services/", response_model=List[schemas.ServiceInDB])
-async def read_services(floor: int = None, db: Session = Depends(get_db)):
-    query = db.query(models.Service)
-    if floor:
-        query = query.filter(models.Service.floor == floor)
-    return query.all()
+@app.get("/worker/stats", response_model=schemas.WorkerStats)
+async def get_worker_stats(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.role != models.UserRole.STAFF: raise HTTPException(status_code=403)
+    rev = db.query(func.sum(models.Booking.price_paid)).filter(models.Booking.floor == current_user.assigned_floor, models.Booking.status == models.BookingStatus.COMPLETED).scalar() or 0.0
+    completed = db.query(models.Booking).filter(models.Booking.floor == current_user.assigned_floor, models.Booking.status == models.BookingStatus.COMPLETED).count()
+    queue = db.query(models.Booking).filter(models.Booking.floor == current_user.assigned_floor, models.Booking.status == models.BookingStatus.CONFIRMED).count()
+    return {"assigned_floor": current_user.assigned_floor, "personal_revenue": rev, "completed_bookings": completed, "upcoming_queue": queue}
 
-# --- Booking Routes ---
+@app.get("/client/wallet")
+async def get_client_wallet(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    total_spent = db.query(func.sum(models.Booking.price_paid)).filter(models.Booking.user_id == current_user.id).scalar() or 0.0
+    return {"total_spent": total_spent, "loyalty_points": current_user.loyalty_points}
+
+# --- Bookings & Intelligent Advance Algorithm ---
 
 @app.post("/bookings/", response_model=schemas.BookingInDB)
 async def create_booking(booking: schemas.BookingCreate, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    # Basic Algorithm: Check for slot collisions
+    existing = db.query(models.Booking).filter(
+        models.Booking.floor == booking.floor,
+        models.Booking.booking_time == booking.booking_time,
+        models.Booking.status != models.BookingStatus.CANCELLED
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Requested slot is already reserved by another elite member.")
+    
+    service = db.query(models.Service).filter(models.Service.id == booking.service_id).first()
+    if not service: raise HTTPException(status_code=404)
+    
     db_booking = models.Booking(
-        user_id=current_user.id,
-        service_id=booking.service_id,
-        floor=booking.floor,
-        stylist_name=booking.stylist_name,
-        booking_time=booking.booking_time,
-        status=models.BookingStatus.PENDING
+        user_id=current_user.id, service_id=booking.service_id, floor=booking.floor,
+        stylist_name=booking.stylist_name, booking_time=booking.booking_time,
+        price_paid=service.price, status=models.BookingStatus.PENDING
     )
     db.add(db_booking)
-    # Award loyalty points
-    current_user.loyalty_points += 100
+    current_user.loyalty_points += 100 # Award points
     db.commit()
     db.refresh(db_booking)
-    db.refresh(current_user)
-    create_audit_log(db, current_user.id, "BOOKING_CREATE", f"Booking ID {db_booking.id} created. 100 points awarded.")
+    
+    create_audit_log(db, current_user.id, "BOOKING", f"Created booking #{db_booking.id} on floor {booking.floor}")
+    push_notification(db, current_user.id, f"Your reservation for {service.name} is awaiting confirmation.")
     return db_booking
 
 @app.get("/bookings/", response_model=List[schemas.BookingInDB])
-async def read_bookings(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if current_user.role == models.UserRole.ADMIN:
-        return db.query(models.Booking).all()
-    elif current_user.role == models.UserRole.STAFF:
-        if current_user.assigned_floor:
-            return db.query(models.Booking).filter(models.Booking.floor == current_user.assigned_floor).all()
-        return db.query(models.Booking).all()
-    else:
-        return db.query(models.Booking).filter(models.Booking.user_id == current_user.id).all()
+async def list_bookings(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    query = db.query(models.Booking)
+    if current_user.role == models.UserRole.STAFF:
+        query = query.filter(models.Booking.floor == current_user.assigned_floor)
+    elif current_user.role == models.UserRole.CUSTOMER:
+        query = query.filter(models.Booking.user_id == current_user.id)
+    return query.all()
 
-@app.put("/bookings/{booking_id}/status", response_model=schemas.BookingInDB)
-async def update_booking_status(booking_id: int, status: str = Body(..., embed=True), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if current_user.role not in [models.UserRole.ADMIN, models.UserRole.STAFF]:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
-    
-    db_booking = db.query(models.Booking).filter(models.Booking.id == booking_id).first()
-    if not db_booking:
-        raise HTTPException(status_code=404, detail="Booking not found")
-    
-    db_booking.status = status
+@app.put("/bookings/{id}/status")
+async def update_status(id: int, status: str = Body(..., embed=True), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    booking = db.query(models.Booking).filter(models.Booking.id == id).first()
+    if not booking: raise HTTPException(status_code=404)
+    booking.status = status
     db.commit()
-    db.refresh(db_booking)
-    create_audit_log(db, current_user.id, "BOOKING_UPDATE", f"Booking ID {booking_id} status changed to {status}")
-    return db_booking
+    push_notification(db, booking.user_id, f"Booking status updated: {status.upper()}")
+    return {"msg": "Status updated successfully"}
 
-# --- Audit Logs ---
+# --- Reviews & Notifications ---
 
-@app.get("/audit-logs/", response_model=List[schemas.AuditLogInDB])
-async def read_audit_logs(current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
-    return db.query(models.AuditLog).all()
+@app.post("/reviews/", response_model=schemas.ReviewInDB)
+async def post_review(review: schemas.ReviewBase, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    db_review = models.Review(user_id=current_user.id, **review.dict())
+    db.add(db_review)
+    db.commit()
+    db.refresh(db_review)
+    push_notification(db, current_user.id, "Thank you for sharing your feedback with the atelier.")
+    return db_review
 
-# --- Subscription Routes ---
+@app.get("/notifications/", response_model=List[schemas.NotificationInDB])
+async def get_notifications(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return db.query(models.Notification).filter(models.Notification.user_id == current_user.id).order_by(models.Notification.created_at.desc()).all()
+
+# --- Helpers ---
+
+@app.get("/services/", response_model=List[schemas.ServiceInDB])
+async def list_services(floor: Optional[int] = None, db: Session = Depends(get_db)):
+    q = db.query(models.Service)
+    if floor: q = q.filter(models.Service.floor == floor)
+    return q.all()
 
 @app.get("/subscriptions/", response_model=List[schemas.SubscriptionInDB])
-async def read_subscriptions(db: Session = Depends(get_db)):
+async def list_subs(db: Session = Depends(get_db)):
     return db.query(models.Subscription).all()
 
-# --- Seed Initial Data ---
-
 @app.post("/seed/")
-async def seed_data(db: Session = Depends(get_db)):
-    # Check if data exists
-    if db.query(models.Service).count() > 0:
-        return {"msg": "Data already seeded"}
-    
-    # Floor 1: Common - Haircuts, wellness (Males)
-    f1_services = [
-        models.Service(name="Signature Haircut", description="Classic luxury haircut by senior stylists", price=500, duration=30, floor=1, category="Hair"),
-        models.Service(name="Beard Sculpting", description="Precision beard grooming and styling", price=300, duration=20, floor=1, category="Grooming"),
-        models.Service(name="Scalp Detox", description="Revitalizing scalp treatment with essential oils", price=800, duration=45, floor=1, category="Wellness")
-    ]
-    
-    # Floor 2: General - Massage, facial, nails, grooming (Males)
-    f2_services = [
-        models.Service(name="Deep Tissue Massage", description="Relieve chronic muscle tension and stress", price=1500, duration=60, floor=2, category="Wellness"),
-        models.Service(name="Anti-Aging Facial", description="Luxurious facial with premium skin products", price=2000, duration=60, floor=2, category="Skin Care"),
-        models.Service(name="Elite Manicure", description="Complete hand and nail grooming", price=600, duration=40, floor=2, category="Nails")
-    ]
-    
-    # Floor 3: Female-only - Spa, styling, beauty therapy
-    f3_services = [
-        models.Service(name="Royal Spa Ritual", description="Ultimate relaxation with full body spa", price=2500, duration=90, floor=3, category="Spa"),
-        models.Service(name="Couture Styling", description="Advanced hair styling for events", price=1800, duration=60, floor=3, category="Styling"),
-        models.Service(name="Glow Therapy", description="Comprehensive skin brightening and rejuvenation", price=3000, duration=75, floor=3, category="Beauty")
-    ]
-    
-    # Floor 4: Premium & Advance
-    f4_services = [
-        models.Service(name="Diamond VIP Session", description="Private session with master stylist + perks", price=5000, duration=120, floor=4, category="Premium"),
-        models.Service(name="Subscription Onboarding", description="Exclusive consultation for yearly members", price=0, duration=30, floor=4, category="Membership")
-    ]
-    
-    # Subscriptions
-    subs = [
-        models.Subscription(name="Silver Monthly", price=2000, duration_days=30, perks="2 Haircuts + 1 Facial"),
-        models.Subscription(name="Gold Quarterly", price=5500, duration_days=90, perks="Unlimited Haircuts + 10% Off Services"),
-        models.Subscription(name="Platinum Yearly", price=20000, duration_days=365, perks="VIP Access + Unlimited All Floor Access + Private Stylist")
-    ]
-    
-    # Create Default Admin if no users exist
-    if db.query(models.User).count() == 0:
-        admin_user = models.User(
-            username="admin",
-            email="admin@lumiere.com",
-            hashed_password=auth.get_password_hash("admin123"),
-            role=models.UserRole.ADMIN,
-            loyalty_points=5000
-        )
-        staff_user = models.User(
-            username="worker1",
-            email="worker@lumiere.com",
-            hashed_password=auth.get_password_hash("worker123"),
-            role=models.UserRole.STAFF,
-            assigned_floor=2
-        )
-        customer_user = models.User(
-            username="client1",
-            email="client@lumiere.com",
-            hashed_password=auth.get_password_hash("client123"),
-            role=models.UserRole.CUSTOMER,
-            loyalty_points=120
-        )
-        db.add(admin_user)
-        db.add(staff_user)
-        db.add(customer_user)
-
-    db.add_all(f1_services + f2_services + f3_services + f4_services + subs)
+async def seed_elite_data(db: Session = Depends(get_db)):
+    if db.query(models.Service).count() > 0: return {"msg": "Atelier already initialized"}
+    # Services
+    db.add_all([
+        models.Service(name="Royal Haircut", description="Master level precision", price=800, duration=45, floor=1, category="Hair"),
+        models.Service(name="Elite Spa", description="Full body rejuvenation", price=3000, duration=90, floor=3, category="Spa"),
+        models.Service(name="Diamond Glow", description="Premium facial treatment", price=5000, duration=120, floor=4, category="Premium")
+    ])
+    # Users
+    db.add_all([
+        models.User(username="admin", email="admin@lumiere.com", hashed_password=auth.get_password_hash("admin123"), role="admin"),
+        models.User(username="worker1", email="worker1@lumiere.com", hashed_password=auth.get_password_hash("worker123"), role="staff", assigned_floor=1),
+        models.User(username="client1", email="client1@lumiere.com", hashed_password=auth.get_password_hash("client123"), role="customer")
+    ])
     db.commit()
-    return {"msg": "Data seeded successfully with default Admin (admin/admin123)"}
+    return {"msg": "Elite Atelier initialized successfully."}
