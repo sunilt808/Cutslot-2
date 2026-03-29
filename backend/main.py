@@ -207,6 +207,17 @@ async def seed_data(db: Session = Depends(get_db)):
         models.Subscription(name="Platinum Yearly", price=20000, duration_days=365, perks="VIP Access + Unlimited All Floor Access + Private Stylist")
     ]
     
+    # Create Default Admin if no users exist
+    if db.query(models.User).count() == 0:
+        admin_user = models.User(
+            username="admin",
+            email="admin@lumiere.com",
+            hashed_password=auth.get_password_hash("admin123"),
+            role=models.UserRole.ADMIN,
+            loyalty_points=5000
+        )
+        db.add(admin_user)
+
     db.add_all(f1_services + f2_services + f3_services + f4_services + subs)
     db.commit()
-    return {"msg": "Data seeded successfully"}
+    return {"msg": "Data seeded successfully with default Admin (admin/admin123)"}
