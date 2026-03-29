@@ -126,9 +126,12 @@ async def create_booking(booking: schemas.BookingCreate, current_user: models.Us
         status=models.BookingStatus.PENDING
     )
     db.add(db_booking)
+    # Award loyalty points
+    current_user.loyalty_points += 100
     db.commit()
     db.refresh(db_booking)
-    create_audit_log(db, current_user.id, "BOOKING_CREATE", f"Booking ID {db_booking.id} created")
+    db.refresh(current_user)
+    create_audit_log(db, current_user.id, "BOOKING_CREATE", f"Booking ID {db_booking.id} created. 100 points awarded.")
     return db_booking
 
 @app.get("/bookings/", response_model=List[schemas.BookingInDB])

@@ -11,6 +11,7 @@ const Floors = () => {
   const [stylist, setStylist] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [bookingSuccess, setBookingSuccess] = useState(false);
 
   const floors = [
     { id: 1, name: "Common", icon: <Scissors size={20} />, desc: "Haircuts & Basic Wellness" },
@@ -34,8 +35,6 @@ const Floors = () => {
     fetchServices();
   }, [selectedFloor, api]);
 
-  const [bookingSuccess, setBookingSuccess] = useState(false);
-
   const handleBooking = async (e) => {
     e.preventDefault();
     if (!user) {
@@ -51,6 +50,7 @@ const Floors = () => {
         booking_time: `${date}T${time}:00`
       });
       setBookingSuccess(true);
+      refreshUser(); // Update points
       setTimeout(() => {
         setBookingSuccess(false);
         setBookingService(null);
