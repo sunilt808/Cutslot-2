@@ -8,8 +8,10 @@ import Particles from './components/Particles';
 import Landing from './pages/common/Landing';
 import Services from './pages/common/Services';
 import Booking from './pages/common/Booking';
+import BookingConfirmation from './pages/common/BookingConfirmation';
 import Auth from './pages/Auth';
 import CommonProfile from './pages/common/Profile';
+import Reviews from './pages/common/Reviews';
 
 // ADMIN
 import AdminDashboard from './pages/admin/Dashboard';
@@ -28,6 +30,8 @@ import WorkerQueue from './pages/worker/Queue';
 // CLIENT
 import ClientDashboard from './pages/client/Dashboard';
 import ClientWallet from './pages/client/Wallet';
+import ClientRevenue from './pages/client/Revenue';
+import MyAppointments from './pages/client/MyAppointments';
 
 import './index.css';
 
@@ -40,12 +44,24 @@ const ProtectedRoute = ({ children, roles = [] }) => {
   return children;
 };
 
+// Home Redirect Component
+const HomeRedirect = () => {
+    const { user, loading } = useAuth();
+    if (loading) return null;
+    if (!user) return <Landing />;
+    if (user.role === 'admin') return <Navigate to="/admin" />;
+    if (user.role === 'staff') return <Navigate to="/staff" />;
+    return <Navigate to="/profile" />;
+};
+
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Landing />} />
+      <Route path="/" element={<HomeRedirect />} />
       <Route path="/services" element={<Services />} />
       <Route path="/booking" element={<Booking />} />
+      <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+      <Route path="/reviews" element={<Reviews />} />
       <Route path="/auth" element={<Auth />} />
 
       <Route path="/settings" element={<ProtectedRoute><CommonProfile /></ProtectedRoute>} />
@@ -66,7 +82,9 @@ function AppRoutes() {
 
       {/* CLIENT ROUTES */}
       <Route path="/profile" element={<ProtectedRoute roles={['customer']}><ClientDashboard /></ProtectedRoute>} />
+      <Route path="/profile/appointments" element={<ProtectedRoute roles={['customer']}><MyAppointments /></ProtectedRoute>} />
       <Route path="/profile/wallet" element={<ProtectedRoute roles={['customer']}><ClientWallet /></ProtectedRoute>} />
+      <Route path="/profile/revenue" element={<ProtectedRoute roles={['customer']}><ClientRevenue /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

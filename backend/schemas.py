@@ -6,6 +6,7 @@ import enum
 
 class UserBase(BaseModel):
     username: str
+    full_name: Optional[str] = None
     email: EmailStr
 
 class UserCreate(UserBase):
@@ -40,6 +41,7 @@ class UserCreate(UserBase):
 
 class UserInDB(UserBase):
     id: int
+    full_name: Optional[str]
     role: str
     loyalty_points: int
     subscription_plan: Optional[str]
@@ -71,6 +73,7 @@ class ServiceBase(BaseModel):
     duration: int
     floor: int
     category: str
+    service_type: Optional[str] = "standard"
 
 class ServiceInDB(ServiceBase):
     id: int
@@ -85,6 +88,7 @@ class BookingBase(BaseModel):
     category: str
     gender: str
     booking_time: datetime
+    service_type: Optional[str] = "standard"
 
 class BookingCreate(BookingBase):
     pass
@@ -92,6 +96,7 @@ class BookingCreate(BookingBase):
 class BookingInDB(BookingBase):
     id: int
     user_id: int
+    user_name: Optional[str] = "Anonymous Site Guest"
     status: str
     price_paid: float
     created_at: datetime
@@ -138,6 +143,7 @@ class SubscriptionInDB(BaseModel):
     price: float
     duration_days: int
     perks: str
+    category: str
 
     class Config:
         from_attributes = True

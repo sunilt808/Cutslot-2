@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Scissors, User as UserIcon, LogOut, Shield, Briefcase, Calendar, Home, Crown, Armchair, Sparkles, Wallet, History, TrendingUp, Settings, Sun, Moon, Database } from 'lucide-react';
+import { Scissors, User as UserIcon, LogOut, Shield, Briefcase, Calendar, Home, Crown, Armchair, Sparkles, Wallet, History, TrendingUp, Settings, Sun, Moon, Database, MessageSquare, PieChart, Users, Bookmark } from 'lucide-react';
 
 const Layout = ({ children }) => {
   const { user, logout, theme, toggleTheme } = useAuth();
@@ -49,65 +49,84 @@ const Layout = ({ children }) => {
           </Link>
         </div>
 
-        {/* 🎖️ NAVIGATION */}
+        {/* 🎖️ ROLE-BASED NAVIGATION */}
         <div className="nav-links" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '0.4rem', borderRadius: '40px', border: '1px solid var(--glass-border)' }}>
-          <Link to="/" className={`nav-button ${isActive('/') ? 'active' : ''}`} style={{ 
-            textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold'
-          }}>
-            <Home size={14} /> HOME
-          </Link>
           
-          <Link to="/services" className={`nav-button ${isActive('/services') ? 'active' : ''}`} style={{ 
-            textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/services') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/services') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold'
-          }}>
-            <Scissors size={14} /> SERVICES
-          </Link>
-
-          {user && (
+          {/* 🏠 PUBLIC/HOME */}
+          {!user && (
             <>
-              {user.role === 'admin' && (
-                <>
-                  <Link to="/admin" className={`nav-button ${isActive('/admin') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    <Shield size={14} /> DASHBOARD
-                  </Link>
-                  <Link to="/admin/workers" className={`nav-button ${isActive('/admin/workers') || isActive('/admin/credentials') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin/workers') || isActive('/admin/credentials') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin/workers') || isActive('/admin/credentials') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    <Briefcase size={14} /> STAFF
-                  </Link>
-                  <Link to="/admin/services" className={`nav-button ${isActive('/admin/services') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin/services') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin/services') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    <Database size={14} /> INVENTORY
-                  </Link>
-                  <Link to="/admin/revenue" className={`nav-button ${isActive('/admin/revenue') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin/revenue') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin/revenue') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    <TrendingUp size={14} /> REVENUE
-                  </Link>
-                </>
-              )}
-              {user.role === 'staff' && (
-                <>
-                  <Link to="/staff" className={`nav-button ${isActive('/staff') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/staff') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/staff') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    <Briefcase size={14} /> DASHBOARD
-                  </Link>
-                  <Link to="/staff/queue" className={`nav-button ${isActive('/staff/queue') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/staff/queue') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/staff/queue') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    <Clock size={14} /> QUEUE
-                  </Link>
-                  <Link to="/staff/performance" className={`nav-button ${isActive('/staff/performance') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/staff/performance') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/staff/performance') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    <TrendingUp size={14} /> PERFORMANCE
-                  </Link>
-                </>
-              )}
-              {user.role === 'customer' && (
-                <>
-                  <Link to="/profile" className={`nav-button ${isActive('/profile') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/profile') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/profile') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    <UserIcon size={14} /> PROFILE
-                  </Link>
-                  <Link to="/booking" className={`nav-button ${isActive('/booking') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/booking') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/booking') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    <Calendar size={14} /> BOOKING
-                  </Link>
-                  <Link to="/profile/wallet" className={`nav-button ${isActive('/profile/wallet') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/profile/wallet') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/profile/wallet') ? 'var(--gold)' : 'transparent', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    <Wallet size={14} /> REVENUE
-                  </Link>
-                </>
-              )}
+               <Link to="/" className={`nav-button ${isActive('/') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <Home size={14} /> HOME
+              </Link>
+              <Link to="/services" className={`nav-button ${isActive('/services') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/services') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/services') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <Scissors size={14} /> CATALOG
+              </Link>
             </>
+          )}
+
+          {/* 🔧 ADMIN NAVIGATION */}
+          {user?.role === 'admin' && (
+            <>
+              <Link to="/admin" className={`nav-button ${isActive('/admin') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <PieChart size={14} /> DASHBOARD
+              </Link>
+              <Link to="/admin/workers" className={`nav-button ${isActive('/admin/workers') || isActive('/admin/credentials') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin/workers') || isActive('/admin/credentials') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin/workers') || isActive('/admin/credentials') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <Users size={14} /> WORKERS
+              </Link>
+              <Link to="/admin/services" className={`nav-button ${isActive('/admin/services') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin/services') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin/services') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <Database size={14} /> INVENTORY
+              </Link>
+              <Link to="/admin/revenue" className={`nav-button ${isActive('/admin/revenue') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin/revenue') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin/revenue') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <TrendingUp size={14} /> REVENUE
+              </Link>
+            </>
+          )}
+
+          {/* ✂️ STAFF NAVIGATION */}
+          {user?.role === 'staff' && (
+            <>
+              <Link to="/staff" className={`nav-button ${isActive('/staff') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/staff') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/staff') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <PieChart size={14} /> DASHBOARD
+              </Link>
+              <Link to="/staff/queue" className={`nav-button ${isActive('/staff/queue') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/staff/queue') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/staff/queue') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <History size={14} /> QUEUE
+              </Link>
+              <Link to="/staff/performance" className={`nav-button ${isActive('/staff/performance') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/staff/performance') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/staff/performance') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <TrendingUp size={14} /> PERFORMANCE
+              </Link>
+            </>
+          )}
+
+          {/* 👤 CLIENT NAVIGATION */}
+          {user?.role === 'customer' && (
+            <>
+              <Link to="/profile" className={`nav-button ${isActive('/profile') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/profile') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/profile') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <UserIcon size={14} /> DASHBOARD
+              </Link>
+              <Link to="/profile/appointments" className={`nav-button ${isActive('/profile/appointments') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/profile/appointments') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/profile/appointments') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <Bookmark size={14} /> APPOINTMENTS
+              </Link>
+              <Link to="/booking" className={`nav-button ${isActive('/booking') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/booking') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/booking') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <Calendar size={14} /> BOOKING
+              </Link>
+              <Link to="/profile/revenue" className={`nav-button ${isActive('/profile/revenue') || isActive('/profile/wallet') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/profile/revenue') || isActive('/profile/wallet') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/profile/revenue') || isActive('/profile/wallet') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <TrendingUp size={14} /> REVENUE
+              </Link>
+            </>
+          )}
+
+          {/* 💬 REVIEWS (FOR ALL AUTHENTICATED) */}
+          {user && (
+            <Link to="/reviews" className={`nav-button ${isActive('/reviews') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/reviews') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/reviews') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+              <MessageSquare size={14} /> {user.role === 'customer' ? 'FEEDBACK' : 'REVIEWS'}
+            </Link>
+          )}
+
+          {/* ⚙️ PROFILE/SETTINGS (FOR ALL) */}
+          {user && (
+            <Link to="/settings" className={`nav-button ${isActive('/settings') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/settings') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/settings') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+              <Settings size={14} /> PROFILE
+            </Link>
           )}
         </div>
 
@@ -120,17 +139,11 @@ const Layout = ({ children }) => {
              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </button>
 
-          {user && user.role === 'admin' && (
-            <Link to="/admin/profile" className={`nav-button ${isActive('/admin/profile') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 15px', borderRadius: '30px', background: isActive('/admin/profile') ? 'var(--gold)' : 'rgba(255,255,255,0.03)', color: isActive('/admin/profile') ? 'var(--bg-dark)' : 'var(--text-cream)' }}>
-               <UserIcon size={18} />
-            </Link>
-          )}
-
           {user ? (
             <>
               <div style={{ display: 'flex', gap: '1.2rem', alignItems: 'center', background: 'rgba(212,175,55,0.05)', padding: '5px 20px', borderRadius: '40px', border: '1px solid var(--gold-glow)' }}>
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
-                   <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--gold)', letterSpacing: '1px' }}>{user.username.toUpperCase()}</span>
+                   <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--gold)', letterSpacing: '1px' }}>{user.full_name?.toUpperCase() || user.username.toUpperCase()}</span>
                    <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>{user.role.toUpperCase()}</span>
                 </div>
                 <button onClick={handleLogout} className="btn-logout" style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }} title="Logout">

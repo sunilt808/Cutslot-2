@@ -7,11 +7,11 @@ const AdminProfile = () => {
     const [activeTab, setActiveTab] = useState('profile');
 
     return (
-        <div className="admin-profile-page fade-in">
-            <header className="glass-card" style={{ padding: '4rem', marginBottom: '4rem', display: 'flex', gap: '4rem', alignItems: 'center', borderTop: '4px solid var(--gold)' }}>
+        <div className="admin-profile-page fade-in" style={{ padding: '6rem 2rem', maxWidth: '1400px', margin: '0 auto' }}>
+            <header className="glass-card" style={{ padding: '4rem 6rem', marginBottom: '6rem', display: 'flex', gap: '5rem', alignItems: 'center', borderTop: '4px solid var(--gold)', background: 'linear-gradient(rgba(212,175,55,0.05), transparent)' }}>
                  <div style={{ position: 'relative' }}>
-                    <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                       <UserCircle size={80} color="black" />
+                    <div style={{ width: '150px', height: '150px', borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: '0 0 40px rgba(212,175,55,0.2)' }}>
+                       <UserCircle size={110} color="black" />
                     </div>
                     <div style={{ position: 'absolute', bottom: '0', right: '0', background: 'var(--bg-dark)', borderRadius: '50%', padding: '10px', border: '1px solid var(--gold)' }}>
                        <Shield size={20} color="var(--gold)" />

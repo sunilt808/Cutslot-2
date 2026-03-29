@@ -22,6 +22,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
+    full_name = Column(String, nullable=True)
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     role = Column(String, default=UserRole.CUSTOMER)
@@ -52,6 +53,7 @@ class Service(Base):
     duration = Column(Integer)
     floor = Column(Integer)
     category = Column(String)
+    service_type = Column(String, default="standard") # standard, custom, home, vip
 
 class Booking(Base):
     __tablename__ = "bookings"
@@ -71,6 +73,10 @@ class Booking(Base):
     user = relationship("User", back_populates="bookings")
     service = relationship("Service")
     review = relationship("Review", back_populates="booking", uselist=False)
+
+    @property
+    def user_name(self):
+        return self.user.full_name or self.user.username
 
 class Review(Base):
     __tablename__ = "reviews"
@@ -113,7 +119,8 @@ class Subscription(Base):
     __tablename__ = "subscriptions"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
+    name = Column(String) # Silver, Gold, Elite, Royal
     price = Column(Float)
-    duration_days = Column(Integer)
+    duration_days = Column(Integer, default=30)
     perks = Column(Text)
+    category = Column(String) # standard, bespoke, doorstep, imperial

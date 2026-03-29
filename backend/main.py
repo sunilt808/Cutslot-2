@@ -77,17 +77,17 @@ async def login(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestF
 async def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if db.query(models.User).filter(models.User.username == user.username).first():
         raise HTTPException(status_code=400, detail="Username already claimed")
-    
     # Logic: Customers/Admins auto-approved. Workers need permission.
-    is_approved = True if user.role != models.UserRole.STAFF else False
+    is_approved = True if user.role != "staff" else False
     
     db_user = models.User(
         username=user.username,
+        full_name=user.full_name,
         email=user.email,
         hashed_password=auth.get_password_hash(user.password),
         role=user.role,
         is_approved=is_approved,
-        assigned_floor=user.role == models.UserRole.STAFF and user.assigned_floor or None,
+        assigned_floor=user.role == "staff" and user.assigned_floor or None,
         gender=user.gender,
         phone=user.phone,
         customer_category=user.customer_category or "normal"
@@ -142,7 +142,7 @@ async def get_admin_stats(current_user: models.User = Depends(get_admin_user), d
 async def get_worker_history(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     if current_user.role != models.UserRole.STAFF: raise HTTPException(status_code=403)
     return db.query(models.Booking).filter(
-        models.Booking.floor == current_user.assigned_floor,
+        models.Booking.stylist_name == current_user.username,
         models.Booking.status == models.BookingStatus.COMPLETED
     ).order_by(models.Booking.booking_time.desc()).all()
 
@@ -153,7 +153,7 @@ async def get_worker_queue(current_user: models.User = Depends(get_current_user)
     start_time = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
     end_time = start_time + datetime.timedelta(days=4)
     return db.query(models.Booking).filter(
-        models.Booking.floor == current_user.assigned_floor,
+        models.Booking.stylist_name == current_user.username,
         models.Booking.booking_time >= start_time,
         models.Booking.booking_time < end_time,
         models.Booking.status.in_([models.BookingStatus.PENDING, models.BookingStatus.CONFIRMED])
@@ -162,12 +162,12 @@ async def get_worker_queue(current_user: models.User = Depends(get_current_user)
 @app.get("/worker/stats", response_model=schemas.WorkerStats)
 async def get_worker_stats(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     if current_user.role != models.UserRole.STAFF: raise HTTPException(status_code=403)
-    rev = db.query(func.sum(models.Booking.price_paid)).filter(models.Booking.floor == current_user.assigned_floor, models.Booking.status == models.BookingStatus.COMPLETED).scalar() or 0.0
-    completed = db.query(models.Booking).filter(models.Booking.floor == current_user.assigned_floor, models.Booking.status == models.BookingStatus.COMPLETED).count()
-    queue = db.query(models.Booking).filter(models.Booking.floor == current_user.assigned_floor, models.Booking.status == models.BookingStatus.CONFIRMED).count()
+    rev = db.query(func.sum(models.Booking.price_paid)).filter(models.Booking.stylist_name == current_user.username, models.Booking.status == models.BookingStatus.COMPLETED).scalar() or 0.0
+    completed = db.query(models.Booking).filter(models.Booking.stylist_name == current_user.username, models.Booking.status == models.BookingStatus.COMPLETED).count()
+    queue = db.query(models.Booking).filter(models.Booking.stylist_name == current_user.username, models.Booking.status == models.BookingStatus.CONFIRMED).count()
     
-    # Calculate avg rating for sessions served by this worker floor
-    avg_rating = db.query(func.avg(models.Review.rating)).join(models.Booking, models.Booking.id == models.Review.booking_id).filter(models.Booking.floor == current_user.assigned_floor).scalar() or 4.5
+    # Calculate avg rating for sessions served by this worker specifically
+    avg_rating = db.query(func.avg(models.Review.rating)).join(models.Booking, models.Booking.id == models.Review.booking_id).filter(models.Booking.stylist_name == current_user.username).scalar() or 4.5
 
     return {"assigned_floor": current_user.assigned_floor, "personal_revenue": rev, "completed_bookings": completed, "upcoming_queue": queue, "avg_rating": round(avg_rating, 1), "efficiency_score": 98.4}
 
@@ -196,18 +196,47 @@ async def get_client_wallet(current_user: models.User = Depends(get_current_user
     return {"total_spent": total_spent, "loyalty_points": current_user.loyalty_points}
 
 @app.get("/admin/workers", response_model=List[schemas.UserInDB])
-async def list_workers(current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+async def list_workers_admin(current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     return db.query(models.User).filter(models.User.role == models.UserRole.STAFF).all()
+
+@app.get("/workers/", response_model=List[schemas.UserInDB])
+async def list_workers_public(floor: Optional[int] = None, db: Session = Depends(get_db)):
+    q = db.query(models.User).filter(models.User.role == models.UserRole.STAFF, models.User.is_approved == True)
+    if floor: q = q.filter(models.User.assigned_floor == floor)
+    return q.all()
+
+@app.post("/admin/workers/", response_model=schemas.UserInDB)
+async def create_worker_admin(user: schemas.UserCreate, current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    if db.query(models.User).filter(models.User.username == user.username).first():
+        raise HTTPException(status_code=400, detail="Username already active in directory.")
+    db_user = models.User(
+        username=user.username,
+        full_name=user.full_name,
+        email=user.email,
+        hashed_password=auth.get_password_hash(user.password),
+        role="staff",
+        is_approved=True,
+        assigned_floor=user.assigned_floor,
+        gender=user.gender,
+        phone=user.phone
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    create_audit_log(db, current_user.id, "CREATE_STAFF", f"Onboarded artisan: {user.username}")
+    return db_user
 
 @app.put("/admin/workers/{user_id}")
 async def update_worker_admin(user_id: int, data: dict = Body(...), current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
     worker = db.query(models.User).filter(models.User.id == user_id).first()
-    if not worker: raise HTTPException(status_code=404)
+    if not worker: raise HTTPException(status_code=404, detail="Artisan not found in staff directory.")
+    if "password" in data and data["password"]:
+        worker.hashed_password = auth.get_password_hash(data["password"])
     for key, value in data.items():
-        if hasattr(worker, key) and key != "hashed_password":
+        if hasattr(worker, key) and key not in ["hashed_password", "password"]:
             setattr(worker, key, value)
     db.commit()
-    return {"msg": "Worker updated."}
+    return {"msg": f"Profile protocol updated for {worker.username}."}
 
 @app.get("/admin/audits", response_model=List[schemas.AuditLogInDB])
 async def get_all_audits(current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
@@ -249,9 +278,13 @@ async def get_revenue_report(current_user: models.User = Depends(get_admin_user)
     # Group by category (via join)
     cat_rev = db.query(models.Service.category, func.sum(models.Booking.price_paid)).join(models.Booking).filter(models.Booking.status == models.BookingStatus.COMPLETED).group_by(models.Service.category).all()
     
+    # Breakdown by Member Category (Prime vs Non-Prime)
+    member_rev = db.query(models.User.customer_category, func.sum(models.Booking.price_paid)).join(models.Booking, models.Booking.user_id == models.User.id).filter(models.Booking.status == models.BookingStatus.COMPLETED).group_by(models.User.customer_category).all()
+
     return {
         "by_floor": {f"Floor {f}": rev for f, rev in floor_rev},
         "by_category": {cat: rev for cat, rev in cat_rev},
+        "by_member_type": {cat: rev for cat, rev in member_rev},
         "total": sum(rev for _, rev in floor_rev)
     }
 
@@ -266,24 +299,15 @@ async def approve_worker(user_id: int, current_user: models.User = Depends(get_a
 
 @app.delete("/admin/workers/{user_id}")
 async def delete_worker(user_id: int, current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    worker = db.query(models.User).filter(models.User.id == user_id).first()
+    if not worker: raise HTTPException(status_code=404, detail="Artisans not found in staff directory.")
     db.delete(worker)
+    create_audit_log(db, current_user.id, "DELETE_STAFF", f"Decommissioned worker: {worker.username}")
     db.commit()
-    return {"msg": "Worker profile decommissioned."}
+    return {"msg": f"Artisan {worker.username} decommissioned successfully."}
 
 @app.post("/subscribe/")
 async def subscribe_user(service_id: int = Body(..., embed=True), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    service = db.query(models.Service).filter(models.Service.id == service_id, models.Service.floor == 4).first()
-    if not service: raise HTTPException(status_code=404, detail="Membership plan not found.")
-    
-    # Determine limits based on plan name
-    limit = 0
-    name = service.name.lower()
-    if "gold" in name or "silver" in name or "membership" in name:
-        limit = 10 
-    if "pro" in name and "super" not in name:
-        limit = 15
-    if "super pro" in name or "ultimate" in name or "vip" in name:
-        limit = 9999 
     
     # Determine category based on limits
     category = "membership"
@@ -367,7 +391,7 @@ async def create_booking(booking: schemas.BookingCreate, current_user: models.Us
 async def list_bookings(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     query = db.query(models.Booking)
     if current_user.role == models.UserRole.STAFF:
-        query = query.filter(models.Booking.floor == current_user.assigned_floor)
+        query = query.filter(models.Booking.stylist_name == current_user.username)
     elif current_user.role == models.UserRole.CUSTOMER:
         query = query.filter(models.Booking.user_id == current_user.id)
     return query.all()

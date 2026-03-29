@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, User as UserIcon, Shield, Users, Briefcase, Zap, BadgeCheck, Smartphone, Phone, Heart, Eye, EyeOff, Layout } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, Shield, Users, Briefcase, Zap, BadgeCheck, Smartphone, Phone, Heart, Eye, EyeOff, Layout, Crown, CheckCircle } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("customer");
@@ -13,13 +14,28 @@ const Auth = () => {
   const [gender, setGender] = useState("Male");
   const [phone, setPhone] = useState("");
   const [customerCategory, setCustomerCategory] = useState("normal");
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [plans, setPlans] = useState([]);
   const [terms, setTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login, signup } = useAuth();
+  const { login, signup, subscribe, api } = useAuth();
   const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
+  useEffect(() => {
+    if (!isLogin && role === 'customer') {
+        fetchPlans();
+    }
+  }, [isLogin, role]);
+
+  const fetchPlans = async () => {
+    try {
+        const res = await api.get('/services/?floor=4');
+        setPlans(res.data);
+    } catch(err) { console.error(err); }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validation
@@ -42,18 +58,8 @@ const Auth = () => {
         return;
       }
       
-      // Strong Password Validation
-      const hasUpper = /[A-Z]/.test(password);
-      const hasLower = /[a-z]/.test(password);
-      const hasNumber = /\d/.test(password);
-      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
       if (password.length < 8) {
         alert("ERROR: Password must be at least 8 characters long.");
-        return;
-      }
-      if (!hasUpper || !hasLower || !hasNumber || !hasSpecial) {
-        alert("ERROR: Password must contain uppercase, lowercase, numbers, and special characters.");
         return;
       }
 
@@ -66,14 +72,18 @@ const Auth = () => {
     setLoading(true);
     try {
       if (isLogin) {
-        // We log in normally, role will be determined by the backend token response
         await login(username, password);
       } else {
-        await signup(username, email, password, role, floor, gender, phone, customerCategory);
+        await signup(username, fullName, email, password, role, floor, gender, phone, customerCategory);
+        // If customer chose a plan, subscribe them right after login
+        await login(username, password); 
+        if (role === 'customer' && selectedPlan) {
+            await subscribe(selectedPlan);
+        }
       }
       navigate('/');
     } catch (err) {
-      alert(err.response?.data?.detail || "Login failed. Please check your credentials.");
+      alert(err.response?.data?.detail || "Process failed. Please verify your data.");
     } finally {
       setLoading(false);
     }
@@ -81,19 +91,19 @@ const Auth = () => {
 
   return (
     <div className="auth-elite fade-in" style={{ display: 'flex', justifyContent: 'center', minHeight: '80vh', padding: '5rem 2rem' }}>
-      <div className="glass-card" style={{ maxWidth: '750px', width: '100%', padding: '5rem 4rem', boxSizing: 'border-box', borderTop: '4px solid var(--gold)' }}>
+      <div className="glass-card" style={{ maxWidth: '850px', width: '100%', padding: '5rem 4rem', boxSizing: 'border-box', borderTop: '4px solid var(--gold)' }}>
         <h1 className="serif gradient-text" style={{ fontSize: '4rem', textAlign: 'center', margin: '0 0 1rem 0' }}>
           {isLogin ? "LOGIN" : "SIGN UP"}
         </h1>
         <p style={{ color: 'var(--text-dim)', textAlign: 'center', marginBottom: '4rem', fontSize: '1.1rem' }}>
-          {isLogin ? "Welcome back! Enter your login details." : "Create a new account and choose your role."}
+          {isLogin ? "Welcome back to the excellence." : "Join the elite community of luxury connoisseurs."}
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
           
-          {/* ROLE SELECTOR: Now visible for both Login and Signup as per user request */}
+          {/* ROLE SELECTOR */}
           <div className="role-selector-detailed">
-             <label style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '2px', display: 'block', marginBottom: '1.5rem', textAlign: 'center' }}>CHOOSE YOUR ROLE</label>
+             <label style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '2px', display: 'block', marginBottom: '1.5rem', textAlign: 'center' }}>IDENTIFY YOUR ROLE</label>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
                 <div onClick={() => setRole('customer')} className={`role-card ${role === 'customer' ? 'active' : ''}`} style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '20px', cursor: 'pointer', background: role === 'customer' ? 'rgba(212,175,55,0.1)' : 'transparent', border: role === 'customer' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', transition: '0.3s' }}>
                    <Users size={24} color="var(--gold)" />
@@ -108,24 +118,19 @@ const Auth = () => {
                    <div style={{ fontWeight: 'bold', fontSize: '0.8rem', marginTop: '0.8rem' }}>ADMIN</div>
                 </div>
              </div>
-             {!isLogin && role === 'staff' && (
-               <div className="floor-selector-rich slide-in" style={{ marginTop: '2rem', background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '20px' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>WHICH FLOOR DO YOU WORK ON?</label>
-                  <input type="number" min="1" max="4" value={floor} onChange={(e) => setFloor(parseInt(e.target.value))} required style={{ width: '100%', marginTop: '1rem', padding: '1rem', background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: '10px', fontSize: '1.5rem', textAlign: 'center' }} />
-               </div>
-             )}
-             {!isLogin && role === 'customer' && (
-               <div className="category-selector slide-in" style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-                  <div onClick={() => setCustomerCategory('normal')} className={`role-card ${customerCategory === 'normal' ? 'active' : ''}`} style={{ padding: '1rem', textAlign: 'center', borderRadius: '15px', cursor: 'pointer', background: customerCategory === 'normal' ? 'rgba(212,175,55,0.1)' : 'transparent', border: customerCategory === 'normal' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', fontSize: '0.75rem', fontWeight: 'bold' }}>NORMAL</div>
-                  <div onClick={() => setCustomerCategory('vip')} className={`role-card ${customerCategory === 'vip' ? 'active' : ''}`} style={{ padding: '1rem', textAlign: 'center', borderRadius: '15px', cursor: 'pointer', background: customerCategory === 'vip' ? 'rgba(212,175,55,0.1)' : 'transparent', border: customerCategory === 'vip' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', fontSize: '0.75rem', fontWeight: 'bold' }}>VIP MEMBER</div>
-                  <div onClick={() => setCustomerCategory('beauty_under_4')} className={`role-card ${customerCategory === 'beauty_under_4' ? 'active' : ''}`} style={{ padding: '1rem', textAlign: 'center', borderRadius: '15px', cursor: 'pointer', background: customerCategory === 'beauty_under_4' ? 'rgba(212,175,55,0.1)' : 'transparent', border: customerCategory === 'beauty_under_4' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', fontSize: '0.75rem', fontWeight: 'bold' }}>BEAUTY &lt; 4</div>
-               </div>
-             )}
           </div>
 
-          <div className="input-field" style={{ position: 'relative' }}>
-             <UserIcon size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
-             <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required placeholder="USERNAME" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
+          <div style={{ display: 'grid', gridTemplateColumns: isLogin ? '1fr' : '1fr 1fr', gap: '2rem' }}>
+            <div className="input-field" style={{ position: 'relative' }}>
+                <UserIcon size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
+                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required placeholder="USERNAME" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
+            </div>
+            {!isLogin && (
+                <div className="input-field" style={{ position: 'relative' }}>
+                    <Zap size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
+                    <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required placeholder="FULL NAME" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
+                </div>
+            )}
           </div>
 
           {!isLogin && (
@@ -138,7 +143,7 @@ const Auth = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                   <div className="input-field" style={{ position: 'relative' }}>
                     <Phone size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
-                    <input type="text" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0,10))} required maxLength={10} placeholder="PHONE (10 DIGITS)" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
+                    <input type="text" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0,10))} required maxLength={10} placeholder="PHONE" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
                   </div>
                   <div className="input-field" style={{ position: 'relative' }}>
                     <Heart size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
@@ -149,6 +154,30 @@ const Auth = () => {
                     </select>
                   </div>
               </div>
+
+              {role === 'customer' && (
+                  <div className="subscription-choice slide-in" style={{ background: 'rgba(212,175,55,0.03)', padding: '2rem', borderRadius: '25px', border: '1px solid var(--gold-glow)' }}>
+                      <label style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+                          <Crown size={16} /> SELECT YOUR ELITE MEMBERSHIP (OPTIONAL)
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                          {plans.slice(0, 4).map(p => (
+                              <div key={p.id} onClick={() => setSelectedPlan(selectedPlan === p.id ? null : p.id)} style={{ padding: '1.2rem', borderRadius: '15px', border: selectedPlan === p.id ? '2px solid var(--gold)' : '1px solid var(--glass-border)', background: selectedPlan === p.id ? 'rgba(212,175,55,0.1)' : 'transparent', cursor: 'pointer', position: 'relative', transition: '0.2s' }}>
+                                  <div style={{ fontWeight: 'bold', fontSize: '0.9rem', color: selectedPlan === p.id ? 'var(--gold)' : 'var(--text-cream)' }}>{p.name}</div>
+                                  <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>₹{p.price} / Month</div>
+                                  {selectedPlan === p.id && <CheckCircle size={16} color="var(--gold)" style={{ position: 'absolute', right: '1rem', top: '1.2rem' }} />}
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+              )}
+
+              {role === 'staff' && (
+                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
+                      <label style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold' }}>ASSIGNED OPERATIONAL FLOOR</label>
+                      <input type="number" min="1" max="4" value={floor} onChange={(e) => setFloor(parseInt(e.target.value))} required style={{ width: '100%', marginTop: '1rem', padding: '1rem', background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: '10px', fontSize: '1.5rem', textAlign: 'center' }} />
+                  </div>
+              )}
             </>
           )}
 
@@ -158,31 +187,26 @@ const Auth = () => {
             <div onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '1.2rem', top: '1.2rem', cursor: 'pointer', color: 'var(--text-dim)' }}>
                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </div>
-            {!isLogin && (
-              <div style={{ padding: '1rem', fontSize: '0.7rem', color: 'var(--text-dim)', background: 'rgba(212,175,55,0.03)', borderRadius: '10px', marginTop: '1rem', border: '1px dashed var(--gold)' }}>
-                 MUST BE 8+ CHARS WITH: <b>A-Z</b>, <b>a-z</b>, <b>0-9</b>, and <b>SPECIAL CHARS</b>.
-              </div>
-            )}
           </div>
 
           {!isLogin && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '15px', border: '1px solid var(--glass-border)' }}>
                <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} style={{ width: '20px', height: '20px', accentColor: 'var(--gold)', cursor: 'pointer' }} />
                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-dim)' }}>
-                 I AGREE TO THE <span style={{ color: 'var(--gold)', fontWeight: 'bold', cursor: 'pointer', borderBottom: '1px solid var(--gold)' }}>TERMS & CONDITIONS</span>.
+                 I AGREE TO THE <span style={{ color: 'var(--gold)', fontWeight: 'bold', borderBottom: '1px solid var(--gold)' }}>TERMS & CONDITIONS</span>.
                </p>
             </div>
           )}
 
-          <button type="submit" className="btn-gold" style={{ padding: '1.5rem', fontSize: '1.2rem', marginTop: '1rem', borderRadius: '50px', boxShadow: '0 10px 30px rgba(212,175,55,0.2)' }} disabled={loading}>
-            {loading ? "PLEASE WAIT..." : isLogin ? "LOG IN" : "CREATE ACCOUNT"}
+          <button type="submit" className="btn-gold" style={{ padding: '1.5rem', fontSize: '1.2rem', marginTop: '1rem', borderRadius: '50px', fontWeight: 'bold' }} disabled={loading}>
+            {loading ? "PROCESSING..." : isLogin ? "LOGIN" : "CREATE ACCOUNT"}
           </button>
         </form>
 
         <div style={{ textAlign: 'center', marginTop: '3rem' }}>
           <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>
-            {isLogin ? "New here?" : "Already have an account?"} 
-            <button onClick={() => { setIsLogin(!isLogin); setRole('customer'); }} style={{ background: 'transparent', border: 'none', color: 'var(--gold)', fontWeight: 'bold', cursor: 'pointer', marginLeft: '1rem', borderBottom: '1px solid var(--gold)' }}>{isLogin ? "Sign Up" : "Log In"}</button>
+            {isLogin ? "New to CutSlot?" : "Already an elite member?"} 
+            <button onClick={() => { setIsLogin(!isLogin); }} style={{ background: 'transparent', border: 'none', color: 'var(--gold)', fontWeight: 'bold', cursor: 'pointer', marginLeft: '1rem', borderBottom: '1px solid var(--gold)' }}>{isLogin ? "Sign Up" : "Log In"}</button>
           </p>
         </div>
       </div>
