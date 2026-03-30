@@ -1,8 +1,7 @@
 import datetime
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Text
-from sqlalchemy.orm import relationship, declarative_base
-
-Base = declarative_base()
+from sqlalchemy.orm import relationship
+from database import Base
 
 class UserRole:
     ADMIN = "admin"
@@ -17,12 +16,7 @@ class BookingStatus:
     RESCHEDULED = "rescheduled"
     ABSENT = "absent"
 
-class AuditLog(Base):
-    __tablename__ = "audit_logs"
-    id = Column(Integer, primary_key=True, index=True)
-    action = Column(String)
-    details = Column(String)
-    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+
 
 class User(Base):
     __tablename__ = "users"
