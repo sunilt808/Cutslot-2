@@ -1,83 +1,112 @@
-# CUTSLOT — Elite Atelier & Digital Salon Orchestrator
+# 🏛️ CUTSLOT — Elite Atelier & Digital Salon Orchestrator
 
-Welcome to the **CutSlot Platform**, an exclusive, state-of-the-art web application engineered to manage high-end luxury salon operations. The platform offers a seamless digital ecosystem integrating the needs of **Elite Clients**, **Skilled Artisans**, and the **General Directorate (Administrators)**.
-
----
-
-## 🏗️ System Architecture
-
-### 👑 The Estate Directorate (Admin)
-Full systemic control over the entire CutSlot business platform.
-- **Advanced Revenue Intelligence:** Tracks real-time, mathematically accurate revenue lines. Extracts total booking payouts, calculates exact tax collected, deducts fixed 15% Artisan Commissions, and maps the absolute **net profit** directly to the Directorate.
-- **Artisan Credential Vetting:** New Artisans cannot automatically book clients. The Admin commands a strict approval pipeline where new worker registrations are flagged as "PENDING" and require explicit verification.
-- **Service Inventory System:** Dynamic oversight of over 60+ meticulously seeded luxury rituals ranging across Grooming, VIP Skincare, Wellnes, and Subscriptions.
-- **Central Dispatch Queue:** View, manage, or dynamically re-allocate high-priority bookings happening globally across the estate.
-
-### ✂️ The Skilled Artisans (Staff)
-A dedicated, distraction-free environment for professional cosmetologists and therapists.
-- **Locked Commission Architecture:** Revenue transparency built-in. Every concluded ritual instantly deposits a strict, mathematically absolute **15.0% commission payout** securely into the Artisan's performance trackers.
-- **Personal Dispatch Queue:** Utilizing an assigned-floor logic structure (Floors 1-4). Artisans only see clients bound to their precise domain.
-- **Dynamic Ritual Flags:** Workers manage states through `Pending` -> `En-Route` -> `Confirmed` -> `Completed`. 
-- **Enhanced Accountability:** Detailed performance metrics and guest evaluations directly linked to their profile.
-
-### 👤 The Elite Guest Experience (Client)
-A premium front-end delivering unparalleled booking luxury.
-- **Enhanced Guest Testimonials:** A fully transparent review system where guests evaluate specific **Rituals** (e.g., Hair Cut, Skincare) performed by specific **Artisans**. Reviews are now available to all registered clients, ensuring a comprehensive community voice.
-- **Smart Booking Flow:** Service limits, premium doorstep fees, timeline overlaps, and penalty-math (based on <6 hour cancellation bounds).
-- **Client Wallet & Activity:** Direct portal highlighting Loyalty Points mapping, Subscription Renewals (Elite vs Gold packages), total Estate expenditure, and advance slot scheduling.
-- **Membership Subscriptions:** Active memberships (like the 30-Day Elite Tier) bypass certain service fees or apply 20% discounts dynamically at checkout.
+**CutSlot** is a premium, full-stack digital ecosystem engineered for high-end luxury salon management. It seamlessly bridges the gap between **Elite Clients**, **Skilled Artisans**, and the **General Directorate (Administrators)** through a glassmorphic, high-performance interface.
 
 ---
 
-## ✨ Core Modernizations (New)
+## 🖼️ Estate Visual Gallery
 
-### 🌓 Dynamic Theme Versatility
-The CutSlot UI now supports a **seamless Light/Dark Mode** switch. 
-- **Premium Aesthetics:** Both themes utilize custom glassmorphism and theme-aware variables (`--glass-tint`, `--glass-tint-gold`) to ensure visual depth and legibility across all backgrounds.
-- **Consistent Luxury:** Whether in High-Contrast Dark or Sophisticated Light, the "Estate" aesthetic remains premium, utilizing Playfair Display typography and animated gold glows.
+### 👑 The Directorate Command
+![Admin Dashboard](./screenshots/10_admin_dashboard_1774892987237.png)
+*Real-time business intelligence and financial oversight.*
 
-### 📝 Verified Review Protocols
-We have stabilized the review submission architecture:
-- **Verified Linkage:** Reviews now bridge the **Guest Name**, the **Artisan Name**, and the specific **Ritual Category**.
-- **Public Transparency:** Reviews on the Landing page and dedicated feed provide granular insights into service quality.
-- **Inclusive Vetting:** All registered users with completed sessions can now "Vette an Artisan" directly from their **Experience History** on the Profile page.
+### 👤 Guest Experience
+![Client Dashboard](./screenshots/04_client_dashboard_1774892742516.png)
+*A personalized vista for ritual history, wallet tracking, and bookings.*
 
----
-
-## 🛠️ Technology Stack & Environment
-
-**Frontend Protocol:**
-- **Core:** `React.js` powered by `Vite`.
-- **Aesthetic DNA:** Completely custom responsive CSS with theme-aware tokens.
-- **Iconography:** `lucide-react`.
-- **Routing:** Deep `react-router-dom` role-based protection.
-
-**Backend Services:**
-- **Engine:** `FastAPI` (Python).
-- **Database:** `SQLAlchemy` mapping into `SQLite` (Write-Ahead-Log architecture).
-- **Security:** CSRF-protected `JWT-Bearer` tokens with `Passlib Bcrypt`.
+### ✂️ Artisan Dispatch
+![Staff Dashboard](./screenshots/08_worker_dashboard_1774892875449.png)
+*The professional queue for managing floor operations and client rituals.*
 
 ---
 
-## 🚀 Execution Guide
+## 🏗️ System Architecture & Logic
 
-### Database Seeding & Resetting
-To initialize the estate with 60+ new luxury services and pre-vetted Artisans:
+The CutSlot platform follows a strict **Decoupled MVC (Model-View-Controller)** architecture to ensure scalability and role-based security.
+
+### **📐 Architectural Flow**
+
+```mermaid
+graph TD
+    subgraph "Frontend (React + Vite)"
+        UI["Glassmorphic UI (Pages)"]
+        Context["AuthContext & State"]
+        API_Call["Axios Instance"]
+    end
+
+    subgraph "Backend (FastAPI)"
+        Router["Request Router (main.py)"]
+        Logic["Business Logic & Service Layer"]
+        Auth["JWT & Bcrypt Security"]
+    end
+
+    subgraph "Persistence (SQLAlchemy + SQLite)"
+        Models["Database Models"]
+        DB[("cutslot.db (WAL Mode)")]
+    end
+
+    UI --> Context
+    Context --> API_Call
+    API_Call --> Router
+    Router --> Logic
+    Logic --> Auth
+    Auth --> Models
+    Models --> DB
+```
+
+### **MVC Mapping**
+*   **MODEL (Data Layer):** Defined in `backend/models.py` using SQLAlchemy. Managed via Pydantic schemas in `backend/schemas.py`.
+*   **VIEW (Interaction Layer):** A React-based ecosystem in `frontend/src/pages`. Divided by roles: `admin/`, `worker/`, `client/`, and `common/`.
+*   **CONTROLLER (Logic Layer):** Orchestrated by FastAPI endpoints in `backend/main.py`. Handles routing, session validation, and state transitions.
+
+---
+
+## 🌓 Elite Feature Set
+
+### **1. Dynamic Theme Versatility**
+The Estate UI supports a global **Light/Dark Mode** switch. 
+- **Glassmorphic Depth:** Custom variables like `--glass-tint` ensure that card readability and aesthetic luxury are preserved in every environment.
+- **Premium Symbols:** Integration of `lucide-react` for a sharp, modern iconography feel.
+
+### **2. Verified Ritual Feedback**
+Our stabilized review system bridges the "Trust Gap":
+- **Contextual Transparency:** Guests evaluate specific **Rituals** (e.g., Hair Cut, Skincare) performed by specific **Artisans**.
+- **Inclusive Vetting:** Reviews are now open to all registered clients. A guest can only "Vette" an artisan after a ritual is officially "Completed" in the Dispatch queue.
+
+### **3. Dispatch Intelligence**
+A multi-floor operational model (Floors 01-04) that prevents artisan overlap and ensures guests are routed to their designated station efficiently.
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | React 19, Vite, React-Router-Dom 7, Lucide Icons |
+| **Styling** | Custom Responsive CSS (Vibrance, Glassmorphism, Theme-Aware) |
+| **Backend** | FastAPI, Python 3.10+ |
+| **Database** | SQLite + SQLAlchemy (Write-Ahead-Logging Architecture) |
+| **Security** | JWT-Bearer Tokens, Bcrypt Hashing, Role-Based Access Control |
+
+---
+
+## 🚀 Estate Initiation Guide
+
+### 1. Database Prime
+Synchronize the estate with 60+ seeded rituals and pre-vetted worker registries:
 ```bash
 python main.py --reset-db --seed-all
 ```
 
-### Backend Initiation
+### 2. Backend Ignition
 ```powershell
-cd backend
-pip install -r requirements.txt
 uvicorn main:app --port 8000 --reload
 ```
 
-### Frontend Initiation
+### 3. Frontend Ignition
 ```powershell
-cd frontend
-npm install
 npm run dev
 ```
 
+---
+*Developed & Stabilized by Antigravity*
