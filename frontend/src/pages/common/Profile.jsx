@@ -178,6 +178,7 @@ const ProfileSettings = () => {
                 </div>
 
                 {/* 🎖️ MEMBERSHIP STATUS (CLOCK + CALENDAR) */}
+                {user.role === 'customer' && (
                 <aside style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                     <div className="glass-card" style={{ padding: '5rem', border: '2px solid var(--gold)', background: 'radial-gradient(circle at top right, rgba(212,175,55,0.1), transparent)', borderRadius: '40px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem' }}>
@@ -225,6 +226,7 @@ const ProfileSettings = () => {
                         </ul>
                     </div>
                 </aside>
+                )}
             </div>
 
             {/* 📝 REVIEW MODAL */}

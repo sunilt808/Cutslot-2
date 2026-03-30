@@ -9,11 +9,20 @@ const Reviews = () => {
     const [newComment, setNewComment] = useState("");
     const [newRating, setNewRating] = useState(5);
     const [newWorkerName, setNewWorkerName] = useState("");
+    const [pastWorkers, setPastWorkers] = useState([]);
     const [stats, setStats] = useState({ average: 0, total: 0 });
 
     useEffect(() => {
         fetchReviews();
-    }, []);
+        if (user && user.role === 'customer') {
+            api.get('/bookings/').then(res => {
+                const completed = res.data.filter(b => b.status === 'completed' && b.stylist_name);
+                const uniqueWorkers = [...new Set(completed.map(b => b.stylist_name))];
+                setPastWorkers(uniqueWorkers);
+                if (uniqueWorkers.length > 0) setNewWorkerName(uniqueWorkers[0]);
+            }).catch(err => console.error("Could not fetch past bookings", err));
+        }
+    }, [user]);
 
     const fetchReviews = async () => {
         try {
@@ -75,15 +84,22 @@ const Reviews = () => {
                             <h3 className="serif" style={{ fontSize: '2rem', marginBottom: '2.5rem' }}>SHARE YOUR <span style={{ color: 'var(--gold)' }}>EXPERIENCE</span></h3>
                             <form onSubmit={handleSubmitReview} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold', marginBottom: '1rem' }}>ARTISAN NAME</label>
-                                    <input
-                                        type="text"
-                                        value={newWorkerName}
-                                        onChange={(e) => setNewWorkerName(e.target.value)}
-                                        placeholder="Artisan who served you..."
-                                        required
-                                        style={{ width: '100%', padding: '1.2rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }}
-                                    />
+                                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold', marginBottom: '1rem' }}>SELECT ARTISAN</label>
+                                    {pastWorkers.length > 0 ? (
+                                        <select
+                                            value={newWorkerName}
+                                            onChange={(e) => setNewWorkerName(e.target.value)}
+                                            required
+                                            style={{ width: '100%', padding: '1.2rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }}
+                                        >
+                                            <option value="" disabled>Choose an artisan...</option>
+                                            {pastWorkers.map(w => <option key={w} value={w}>{w}</option>)}
+                                        </select>
+                                    ) : (
+                                        <div style={{ color: 'var(--text-dim)', fontSize: '0.9rem', padding: '1.2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '15px' }}>
+                                            You must complete a ritual before archiving elite feedback.
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold', marginBottom: '1rem' }}>RATING</label>
@@ -110,7 +126,7 @@ const Reviews = () => {
                                         style={{ width: '100%', padding: '1.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px', height: '150px', resize: 'none' }}
                                     />
                                 </div>
-                                <button type="submit" className="btn-gold" style={{ padding: '1.2rem', borderRadius: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', fontWeight: 'bold' }}>
+                                <button type="submit" disabled={pastWorkers.length === 0} className="btn-gold" style={{ padding: '1.2rem', borderRadius: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', fontWeight: 'bold', opacity: pastWorkers.length === 0 ? 0.5 : 1 }}>
                                     <Send size={18} /> SUBMIT TESTIMONIAL
                                 </button>
                             </form>

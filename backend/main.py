@@ -551,9 +551,73 @@ async def get_worker_stats(current_user: models.User = Depends(get_current_user)
 def seed_database(db: Session):
     # ✂️ CORE SERVICES
     rituals = [
+        # GROOMING (Floor 1)
         models.Service(name="Bespoke Hair Sculpting", description="Tailored architectural grooming for the elite guest.", price=2500, duration=45, floor=1, category="Grooming"),
+        models.Service(name="Classic Scissor Cut", description="Traditional precision scissor cut and styling.", price=1500, duration=30, floor=1, category="Grooming"),
+        models.Service(name="Fade & Taper Blend", description="Modern fade with master level gradient blending.", price=1800, duration=45, floor=1, category="Grooming"),
+        models.Service(name="Executive Buzz Cut", description="Ultra clean geometric low maintenance cut.", price=1200, duration=20, floor=1, category="Grooming"),
+        models.Service(name="Signature Restyle", description="Complete transformation and shape shifting.", price=3500, duration=60, floor=1, category="Grooming"),
+        models.Service(name="Youth Cut (Under 16)", description="Gentle, precise styling for young gentlemen.", price=1000, duration=30, floor=1, category="Grooming"),
+        models.Service(name="The Lumiere Trim", description="Maintenance trim mapping your natural waves.", price=1500, duration=30, floor=1, category="Grooming"),
+        models.Service(name="Scalp Camouflage", description="Temporary hair density optical enhancement.", price=4000, duration=60, floor=1, category="Grooming"),
+        models.Service(name="Anti-Dandruff Protocol", description="Deep clinical cleansing for scalp health.", price=2200, duration=45, floor=1, category="Grooming"),
+        models.Service(name="Hair Fall Defense", description="Stimulating scalp massage with redensyl.", price=2800, duration=45, floor=1, category="Grooming"),
+        models.Service(name="Keratin Smoothing", description="Frizz reduction absolute silk keratin therapy.", price=8000, duration=120, floor=1, category="Grooming"),
+        models.Service(name="Creative Coloring", description="Artisan blended modern hair hues.", price=5500, duration=90, floor=1, category="Grooming"),
+        models.Service(name="Grey Blending", description="Subtle, natural salt & pepper camouflage.", price=3000, duration=45, floor=1, category="Grooming"),
+        models.Service(name="Highlights/Lowlights", description="Dimensional coloring for volume illusion.", price=4500, duration=90, floor=1, category="Grooming"),
+        models.Service(name="Global Color", description="Rich monotone permanent coloring.", price=5000, duration=90, floor=1, category="Grooming"),
+        models.Service(name="Olaplex Bond Repair", description="Internal hair bond restructuring treatment.", price=6000, duration=60, floor=1, category="Grooming"),
+        models.Service(name="Volumizing Blowout", description="Red-carpet ready volume and setting.", price=1200, duration=30, floor=1, category="Grooming"),
+        models.Service(name="Hair Tattoo/Art", description="Custom geometric designs shaved into nape.", price=2000, duration=45, floor=1, category="Grooming"),
+        models.Service(name="Beard Outline", description="Sharp geometric cheek and neck outlining.", price=800, duration=15, floor=1, category="Grooming"),
+        models.Service(name="Eyebrow Architecture", description="Mapping and threading for men.", price=600, duration=15, floor=1, category="Grooming"),
+        
+        # VIP GROOMING (Floor 2)
         models.Service(name="VIP Beard Ritual", description="Hot towel, straight razor finish with luxury oils.", price=1200, duration=30, floor=2, category="VIP Grooming"),
+        models.Service(name="Royal Shave", description="7-step signature shave for absolute smooth skin.", price=2000, duration=45, floor=2, category="VIP Grooming"),
+        models.Service(name="Platinum Beard Sculpt", description="Volumizing blow-dry, precise trim and sculpt.", price=1800, duration=45, floor=2, category="VIP Grooming"),
+        models.Service(name="Gold Leaf Facial", description="24K gold infused anti-aging facial protocol.", price=9500, duration=90, floor=2, category="VIP Grooming"),
+        models.Service(name="Diamond Dermabrasion", description="Deep exfoliation revealing youthful skin.", price=6500, duration=60, floor=2, category="VIP Grooming"),
+        models.Service(name="Charcoal Detox Mask", description="Deep pore cleansing utilizing activated carbon.", price=3000, duration=45, floor=2, category="VIP Grooming"),
+        models.Service(name="Oxygen Infusion", description="Pressurized oxygen delivering hyaluronic acid.", price=7500, duration=60, floor=2, category="VIP Grooming"),
+        models.Service(name="Cryotherapy Facial", description="Ice-cold sculpting targeting inflammation.", price=8500, duration=60, floor=2, category="VIP Grooming"),
+        models.Service(name="Eye Bag Rescue", description="Lymphatic drainage for the lower orbit.", price=2500, duration=30, floor=2, category="VIP Grooming"),
+        models.Service(name="LED Light Matrix", description="Red/Blue light therapy for acne and aging.", price=4000, duration=45, floor=2, category="VIP Grooming"),
+        models.Service(name="Hydrafacial Elite", description="Vortex extraction and peptide infusion.", price=12000, duration=90, floor=2, category="VIP Grooming"),
+        models.Service(name="Micro-Needling", description="Collagen induction deep healing therapy.", price=15000, duration=90, floor=2, category="VIP Grooming"),
+        models.Service(name="Chemical Peel", description="Resurfacing using AHA/BHA luxury blend.", price=8000, duration=45, floor=2, category="VIP Grooming"),
+        models.Service(name="Manicure Royal", description="Gold-infused hydration and nail buffing.", price=2500, duration=45, floor=2, category="VIP Grooming"),
+        models.Service(name="Pedicure Imperial", description="Callus elimination and reflexology polish.", price=3500, duration=60, floor=2, category="VIP Grooming"),
+        models.Service(name="Paraffin Wax Dip", description="Thermal deep hydration for hands/feet.", price=2000, duration=30, floor=2, category="VIP Grooming"),
+        models.Service(name="Laser Hair Edging", description="Permanent clean lines on cheeks and nape.", price=4500, duration=30, floor=2, category="VIP Grooming"),
+        models.Service(name="Threaded Contour", description="Facial hair removal via ancient threading.", price=1500, duration=30, floor=2, category="VIP Grooming"),
+        models.Service(name="Nose & Ear Waxing", description="Painless hard-wax structural clearing.", price=1000, duration=15, floor=2, category="VIP Grooming"),
+        models.Service(name="Lip Hyperpigmentation", description="Laser correction for dark lips.", price=5000, duration=30, floor=2, category="VIP Grooming"),
+
+        # WELLNESS (Floor 3)
         models.Service(name="Deep Tissue Stress Relief", description="Floor 3 wellness signature therapy.", price=4500, duration=90, floor=3, category="Wellness"),
+        models.Service(name="Swedish Relaxation", description="Gentle, long sweeping strokes for calmness.", price=3500, duration=60, floor=3, category="Wellness"),
+        models.Service(name="Aromatherapy Journey", description="Essential oil synchronized sensory healing.", price=4000, duration=60, floor=3, category="Wellness"),
+        models.Service(name="Hot Stone Melting", description="Volcanic stones radiating deep heat.", price=5500, duration=90, floor=3, category="Wellness"),
+        models.Service(name="Thai Stretching", description="Yoga-like assisted flexibility unblocking.", price=5000, duration=90, floor=3, category="Wellness"),
+        models.Service(name="Sports Recovery", description="Trigger point therapy targeting lactic acid.", price=4800, duration=60, floor=3, category="Wellness"),
+        models.Service(name="Shiatsu Acupressure", description="Japanese meridian healing technique.", price=5200, duration=90, floor=3, category="Wellness"),
+        models.Service(name="Reflexology", description="Foot mapping targeting organ pathways.", price=2800, duration=45, floor=3, category="Wellness"),
+        models.Service(name="Four Hands Synchronization", description="Two artisans massaging in absolute harmony.", price=9500, duration=60, floor=3, category="Wellness"),
+        models.Service(name="Lomi Lomi Nui", description="Hawaiian wave-like full body flow.", price=6000, duration=90, floor=3, category="Wellness"),
+        models.Service(name="Bamboo Sculpting", description="Using heated bamboo shoots to roll tissue.", price=5800, duration=90, floor=3, category="Wellness"),
+        models.Service(name="Cupping Therapy", description="Ancient vacuum therapy drawing toxins out.", price=3500, duration=45, floor=3, category="Wellness"),
+        models.Service(name="Back & Shoulders Release", description="Focussed 30-min upper body unknotting.", price=2000, duration=30, floor=3, category="Wellness"),
+        models.Service(name="Head & Neck Float", description="Targeting cranial tension and migraines.", price=2200, duration=30, floor=3, category="Wellness"),
+        models.Service(name="Maternity Oasis", description="Prenatal safety-certified gentle relief.", price=6000, duration=60, floor=3, category="Wellness"),
+        models.Service(name="Jetlag Reboot", description="Circadian rhythm recovery massage.", price=7500, duration=90, floor=3, category="Wellness"),
+        models.Service(name="Hammam Scrub", description="Turkish hot steam and vigorous exfoliation.", price=8500, duration=90, floor=3, category="Wellness"),
+        models.Service(name="Detox Body Wrap", description="Seaweed infused fat burning body cocoon.", price=7000, duration=60, floor=3, category="Wellness"),
+        models.Service(name="Sound Bowl Meditation", description="Tibetan singing bowls acoustic healing.", price=3000, duration=45, floor=3, category="Wellness"),
+        models.Service(name="Reiki Energy Protocol", description="Non-touch energetic field rebalancing.", price=4000, duration=60, floor=3, category="Wellness"),
+
+        # SUBSCRIPTIONS (Floor 4)
         models.Service(name="Elite Membership", description="50% off on rituals + priority booking.", price=25000, duration=0, floor=4, category="subscription", sac_code="9983", hsn_code="3304"),
         models.Service(name="Gold Membership", description="30% off on all rituals + VIP access.", price=15000, duration=0, floor=4, category="subscription", sac_code="9983", hsn_code="3304")
     ]
@@ -568,14 +632,14 @@ def seed_database(db: Session):
         models.User(username="Anil", full_name="Anil Kumar", email="anil@cutslot.com", password_hash=auth.get_password_hash("Anil@123"), role="staff", assigned_floor=1, is_approved=True, commission_rate=15.0),
         models.User(username="Eshwar", full_name="Eshwar Rao", email="eshwar@cutslot.com", password_hash=auth.get_password_hash("Eshwar@123"), role="staff", assigned_floor=1, is_approved=True, commission_rate=15.0),
         models.User(username="Rahul", full_name="Rahul Sharma", email="rahul@cutslot.com", password_hash=auth.get_password_hash("Rahul@123"), role="staff", assigned_floor=2, is_approved=True, commission_rate=15.0),
-        models.User(username="Nithin", full_name="Nithin Gowda", email="nithin@cutslot.com", password_hash=auth.get_password_hash("Nithin@123"), role="staff", assigned_floor=2, is_approved=True, commission_rate=20.0),
-        models.User(username="Kusuma", full_name="Kusuma Devi", email="kusuma@cutslot.com", password_hash=auth.get_password_hash("Kusuma@123"), role="staff", assigned_floor=3, is_approved=True, commission_rate=25.0),
+        models.User(username="Nithin", full_name="Nithin Gowda", email="nithin@cutslot.com", password_hash=auth.get_password_hash("Nithin@123"), role="staff", assigned_floor=2, is_approved=True, commission_rate=15.0),
+        models.User(username="Kusuma", full_name="Kusuma Devi", email="kusuma@cutslot.com", password_hash=auth.get_password_hash("Kusuma@123"), role="staff", assigned_floor=3, is_approved=True, commission_rate=15.0),
         models.User(username="Manju", full_name="Manju Prasad", email="manju@cutslot.com", password_hash=auth.get_password_hash("Manju@123"), role="staff", assigned_floor=1, is_approved=True, commission_rate=15.0),
-        models.User(username="Prithvi", full_name="Prithvi Raj", email="prithvi@cutslot.com", password_hash=auth.get_password_hash("Prithvi@123"), role="staff", assigned_floor=2, is_approved=True, commission_rate=20.0),
+        models.User(username="Prithvi", full_name="Prithvi Raj", email="prithvi@cutslot.com", password_hash=auth.get_password_hash("Prithvi@123"), role="staff", assigned_floor=2, is_approved=True, commission_rate=15.0),
         models.User(username="Divya", full_name="Divya S.", email="divya@cutslot.com", password_hash=auth.get_password_hash("Divya@123"), role="staff", assigned_floor=3, is_approved=True, commission_rate=15.0),
         # 🛡️ PENDING VETTING
-        models.User(username="Sanjay", full_name="Sanjay Rao", email="sanjay@cutslot.com", password_hash=auth.get_password_hash("Sanjay@123"), role="staff", assigned_floor=1, is_approved=False, commission_rate=10.0),
-        models.User(username="Meeta", full_name="Meeta S.", email="meeta@cutslot.com", password_hash=auth.get_password_hash("Meeta@123"), role="staff", assigned_floor=2, is_approved=False, commission_rate=10.0)
+        models.User(username="Sanjay", full_name="Sanjay Rao", email="sanjay@cutslot.com", password_hash=auth.get_password_hash("Sanjay@123"), role="staff", assigned_floor=1, is_approved=False, commission_rate=15.0),
+        models.User(username="Meeta", full_name="Meeta S.", email="meeta@cutslot.com", password_hash=auth.get_password_hash("Meeta@123"), role="staff", assigned_floor=2, is_approved=False, commission_rate=15.0)
     ]
 
     # 👥 ELITE GUESTS (10 Clients)
