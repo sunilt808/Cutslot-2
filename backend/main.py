@@ -11,11 +11,15 @@ import asyncio
 import json
 from typing import List, Optional
 import typing
+# from api.v1.endpoints import revenue, reviews
 
 # Create Tables
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="LUMIÈRE Atelier - Luxury Elite API", version="3.0.0")
+
+# app.include_router(revenue.router, prefix="/api/v1/revenue", tags=["Revenue"])
+# app.include_router(reviews.router, prefix="/api/v1/reviews", tags=["Reviews"])
 
 # CORS middleware
 app.add_middleware(
@@ -208,6 +212,16 @@ async def signup(user: schemas.UserCreate, background_tasks: BackgroundTasks, db
     background_tasks.add_task(async_push_notification, database.SessionLocal, db_user.id, "Welcome to the Estate. Excellence awaits.")
     return db_user
 
+@app.put("/users/me")
+async def update_user(user_update: dict = Body(...), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if "full_name" in user_update: current_user.full_name = user_update["full_name"]
+    if "email" in user_update: current_user.email = user_update["email"]
+    if "phone" in user_update: current_user.phone = user_update["phone"]
+    if "gender" in user_update: current_user.gender = user_update["gender"]
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
 # --- Luxury CRM & Preferences ---
 @app.put("/users/me/preferences")
 async def update_preferences(prefs: dict = Body(...), current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -216,6 +230,19 @@ async def update_preferences(prefs: dict = Body(...), current_user: models.User 
     if "allergies" in prefs: current_user.preferences_allergies = prefs["allergies"]
     db.commit()
     return {"msg": "Ritual preferences documented."}
+
+@app.post("/wallet/deposit", response_model=schemas.UserInDB)
+async def deposit_funds(deposit: schemas.WalletDeposit, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    current_user.balance += deposit.amount
+    db.add(models.WalletTransaction(
+        user_id=current_user.id,
+        amount=deposit.amount,
+        type="deposit",
+        description="Elite wallet top-up"
+    ))
+    db.commit()
+    db.refresh(current_user)
+    return current_user
 
 # --- Intelligent Booking (Conflict Resolve + Revenue Protection) ---
 @app.post("/bookings/", response_model=schemas.BookingInDB)
@@ -240,15 +267,24 @@ async def create_booking(booking_in: schemas.BookingCreate, current_user: models
     
     # Membership Discount Logic
     if current_user.subscription_plan and current_user.subscription_expiry > datetime.datetime.utcnow():
-        if current_user.monthly_bookings_count < current_user.monthly_limit:
-            base_price = 0.0 # Covered by membership
-            current_user.monthly_bookings_count += 1
-        else:
-            base_price *= 0.8 # 20% discount on over-limit sessions for elites
-
+        base_price *= 0.8 # 20% discount on all rituals for elite members
+    
     total_price = base_price + travel_fee
     tax_amount = total_price * tax_rate
     final_price = total_price + tax_amount
+
+    # 🛑 PAYMENT PROCESSING: Check and deduct balance
+    if final_price > 0:
+        if current_user.balance < final_price:
+            raise HTTPException(status_code=400, detail=f"Insufficient estate balance. Required: ₹{final_price}, Available: ₹{current_user.balance}")
+        current_user.balance -= final_price
+        # Log Transaction
+        db.add(models.WalletTransaction(
+            user_id=current_user.id,
+            amount=-final_price,
+            type="payment",
+            description=f"Ritual payment: {service.name}"
+        ))
     
     # Compute end_time from service duration
     end_dt = booking_in.booking_time + datetime.timedelta(minutes=service.duration) if service.duration else None
@@ -276,15 +312,19 @@ async def create_booking(booking_in: schemas.BookingCreate, current_user: models
         service_type=booking_in.service_type,
         destination_lat=booking_in.destination_lat,
         destination_lng=booking_in.destination_lng,
-        status="pending"
+        status="pending", # Restore to pending for Artisan Queue
+        payment_idempotency_key=booking_in.payment_idempotency_key if hasattr(booking_in, 'payment_idempotency_key') else None,
+        payment_status="success" if final_price > 0 else "pending"
     )
-    
     # 3. Loyalty Protocol
     current_user.loyalty_points += (20 if final_price > 5000 else 10)
     
     db.add(new_booking)
     db.commit()
     db.refresh(new_booking)
+    
+    # Inject user_name for the response model
+    new_booking.__dict__['user_name'] = current_user.full_name or current_user.username
     
     await manager.broadcast(json.dumps({"type": "NEW_BOOKING", "booking_id": new_booking.id}))
     
@@ -443,10 +483,18 @@ async def list_workers_public(floor: Optional[int] = None, db: Session = Depends
 async def list_reviews(db: Session = Depends(get_db)):
     try:
         reviews = db.query(models.Review).order_by(models.Review.created_at.desc()).all()
-        # Add user_name mock field for UI
         for r in reviews:
+            # Guest name
             user = db.query(models.User).filter(models.User.id == r.user_id).first()
             r.__dict__['user_name'] = user.full_name or user.username if user else "Elite Guest"
+            # Service info
+            if r.service_id:
+                srv = db.query(models.Service).filter(models.Service.id == r.service_id).first()
+                r.__dict__['service_name'] = srv.name if srv else "Bespoke Ritual"
+                r.__dict__['service_category'] = srv.category if srv else "Artisan"
+            else:
+                r.__dict__['service_name'] = "CutSlot Ritual"
+                r.__dict__['service_category'] = "Experience"
         return reviews
     except Exception:
         return []
@@ -457,9 +505,9 @@ async def create_review(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    if current_user.role != "customer":
-        raise HTTPException(status_code=403, detail="Only elite members can submit rituals.")
-    
+    if current_user.role not in ["customer", "admin"]:
+        raise HTTPException(status_code=403, detail=f"Protocol violation: Only registered clients and administrators can submit ritual archives. Current role: {current_user.role}")
+
     # Must have completed a booking with this worker
     past_booking = db.query(models.Booking).filter(
         models.Booking.user_id == current_user.id,
@@ -468,7 +516,7 @@ async def create_review(
     ).first()
     
     if not past_booking:
-        raise HTTPException(status_code=403, detail="Aesthetic protocol violation: You can only review artisans you have completed a ritual with.")
+        raise HTTPException(status_code=403, detail=f"Aesthetic protocol violation: No completed ritual found with {review.get('worker_name')} for your estate account.")
         
     db_review = models.Review(
         user_id=current_user.id,
@@ -500,22 +548,24 @@ async def list_bookings(current_user: models.User = Depends(get_current_user), d
 # --- Admin & Stats ---
 @app.get("/admin/stats")
 async def get_admin_stats(current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
-    total_rev = db.query(func.sum(models.Booking.price_paid)).filter(models.Booking.status == "completed").scalar() or 0
-    total_tax = db.query(func.sum(models.Booking.tax_amount)).filter(models.Booking.status == "completed").scalar() or 0
-    total_comm = db.query(func.sum(models.Booking.artisan_commission)).filter(models.Booking.status == "completed").scalar() or 0
+    # Total revenue includes completed and confirmed (paid)
+    revenue_filter = models.Booking.status.in_(["completed", "confirmed", "pending"])
+    total_rev = db.query(func.sum(models.Booking.price_paid)).filter(revenue_filter).scalar() or 0
+    total_tax = db.query(func.sum(models.Booking.tax_amount)).filter(revenue_filter).scalar() or 0
+    total_comm = db.query(func.sum(models.Booking.artisan_commission)).filter(revenue_filter).scalar() or 0
 
     artisan_profits = db.query(
         models.User.username,
         func.sum(models.Booking.price_paid - models.Booking.tax_amount - models.Booking.artisan_commission).label("net_profit")
     ).join(models.Booking, models.User.username == models.Booking.stylist_name)\
-     .filter(models.Booking.status == "completed")\
+     .filter(revenue_filter)\
      .group_by(models.User.username).all()
 
     service_profits = db.query(
         models.Service.name,
         func.sum(models.Booking.price_paid - models.Booking.tax_amount - models.Booking.artisan_commission).label("net_profit")
     ).join(models.Booking, models.Service.id == models.Booking.service_id)\
-     .filter(models.Booking.status == "completed")\
+     .filter(revenue_filter)\
      .group_by(models.Service.name).all()
 
     clients = db.query(models.User).filter(models.User.role == "customer").all()
@@ -586,9 +636,11 @@ async def get_worker_stats(current_user: models.User = Depends(get_current_user)
     my_bookings = db.query(models.Booking).filter(
         models.Booking.stylist_name == current_user.username
     ).all()
+    # Revenue is earned even if pending (payment deducted from client already)
+    revenue_filter = models.Booking.status.in_(["completed", "confirmed", "pending"])
     completed = [b for b in my_bookings if b.status == "completed"]
     upcoming = [b for b in my_bookings if b.status in ["pending", "confirmed"]]
-    personal_revenue = sum(b.artisan_commission for b in completed)
+    personal_revenue = sum(b.artisan_commission for b in my_bookings if b.status in ["completed", "confirmed", "pending"])
     # Rating from reviews
     reviews = db.query(models.Review).filter(models.Review.worker_name == current_user.username).all()
     avg_rating = round(sum(r.rating for r in reviews) / len(reviews), 1) if reviews else 5.0
@@ -685,7 +737,8 @@ async def delete_worker(id: int, current_user: models.User = Depends(get_admin_u
 
 @app.get("/admin/revenue/report")
 async def get_revenue_report(current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
-    bookings = db.query(models.Booking).filter(models.Booking.status == "completed").all()
+    revenue_filter = models.Booking.status.in_(["completed", "confirmed", "pending"])
+    bookings = db.query(models.Booking).filter(revenue_filter).all()
     total = sum(b.price_paid for b in bookings) if bookings else 0
     by_floor = {}
     by_category = {}

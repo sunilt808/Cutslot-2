@@ -5,14 +5,14 @@ import { User as UserIcon, Mail, Phone, Heart, Save, History, Clock, Crown, Spar
 const ProfileSettings = () => {
     const { user, api, refreshUser } = useAuth();
     const [loading, setLoading] = useState(false);
-    
+
     // Form States
     const [username, setUsername] = useState("");
     const [fullName, setFullName] = useState("");
     const [phone, setPhone] = useState("");
     const [gender, setGender] = useState("Male");
     const [email, setEmail] = useState("");
-    
+
     const [history, setHistory] = useState([]);
     const [plans, setPlans] = useState([]);
 
@@ -45,24 +45,24 @@ const ProfileSettings = () => {
         try {
             const res = await api.get('/services/?floor=4');
             setPlans(res.data);
-        } catch(err) { console.error("Plans fetch error:", err); }
+        } catch (err) { console.error("Plans fetch error:", err); }
     };
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await api.put('/users/me', { 
-                username, 
-                full_name: fullName, 
-                phone, 
+            await api.put('/users/me', {
+                username,
+                full_name: fullName,
+                phone,
                 gender,
                 email
             });
             await refreshUser();
             alert("PROFILE SYNCHRONIZED WITH THE ESTATE REGISTRY.");
-        } catch (err) { 
-            alert(err.response?.data?.detail || "Profile update failed."); 
+        } catch (err) {
+            alert(err.response?.data?.detail || "Profile update failed.");
         } finally { setLoading(false); }
     };
 
@@ -76,11 +76,12 @@ const ProfileSettings = () => {
         if (!comment.trim()) return alert("Please share some ritual feedback.");
         setLoading(true);
         try {
-            await api.post('/reviews/', { 
-                booking_id: selectedBooking.id, 
+            await api.post('/reviews/', {
+                booking_id: selectedBooking.id,
                 service_id: selectedBooking.service_id,
-                rating, 
-                comment 
+                worker_name: selectedBooking.stylist_name,
+                rating,
+                comment
             });
             setShowReviewModal(false);
             setComment("");
@@ -126,12 +127,12 @@ const ProfileSettings = () => {
             </header>
 
             <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', width: '100%', alignItems: 'start' }}>
-                
+
                 {/* 📝 IDENTITY MANAGEMENT */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
                     <form className="glass-card" onSubmit={handleUpdateProfile} style={{ padding: '5rem', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.01)', borderRadius: '40px' }}>
                         <h3 className="serif" style={{ fontSize: '3rem', marginBottom: '4rem' }}>IDENTITY <span style={{ color: 'var(--gold)' }}>PROTOCOLS</span></h3>
-                        
+
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', marginBottom: '4rem' }}>
                             <div className="input-field">
                                 <label style={{ fontSize: '0.75rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '2px', display: 'block', marginBottom: '1rem' }}>USERNAME</label>
@@ -147,12 +148,12 @@ const ProfileSettings = () => {
                             </div>
                             <div className="input-field">
                                 <label style={{ fontSize: '0.75rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '2px', display: 'block', marginBottom: '1rem' }}>CONTACT PHONE</label>
-                                <input type="text" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0,10))} required maxLength={10} style={{ width: '100%', padding: '1.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '20px' }} />
+                                <input type="text" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} required maxLength={10} style={{ width: '100%', padding: '1.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '20px' }} />
                             </div>
                         </div>
 
                         <button type="submit" disabled={loading} className="btn-gold" style={{ width: '100%', padding: '1.8rem', borderRadius: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', fontWeight: 'bold', fontSize: '1.1rem' }}>
-                            {loading ? <Clock className="spin" size={24} /> : <Save size={24} />} 
+                            {loading ? <Clock className="spin" size={24} /> : <Save size={24} />}
                             {loading ? "SYNCHRONIZING..." : "SYNCHRONIZE CREDENTIALS"}
                         </button>
                     </form>
@@ -169,7 +170,15 @@ const ProfileSettings = () => {
                                     </div>
                                     <div style={{ textAlign: 'right' }}>
                                         <div style={{ fontWeight: 'bold', color: 'var(--gold)', fontSize: '1.4rem' }}>₹{h.price_paid}</div>
-                                        <div style={{ fontSize: '0.9rem', color: h.status === 'completed' ? '#4caf50' : '#ff9800', marginTop: '5px' }}>{h.status.toUpperCase()}</div>
+                                        <div style={{ fontSize: '0.9rem', color: h.status === 'completed' ? '#4caf50' : '#ff9800', marginTop: '5px', marginBottom: '10px' }}>{h.status.toUpperCase()}</div>
+                                        {h.status === 'completed' && (
+                                            <button 
+                                                onClick={() => { setSelectedBooking(h); setShowReviewModal(true); }}
+                                                style={{ background: 'var(--gold-glow)', color: 'var(--gold)', border: '1px solid var(--gold)', padding: '0.5rem 1rem', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 'bold', cursor: 'pointer' }}
+                                            >
+                                                VETTE ARTISAN
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             )) : <p style={{ color: 'var(--text-dim)', textAlign: 'center', padding: '3rem' }}>No past rituals archived.</p>}
@@ -179,53 +188,53 @@ const ProfileSettings = () => {
 
                 {/* 🎖️ MEMBERSHIP STATUS (CLOCK + CALENDAR) */}
                 {user.role === 'customer' && (
-                <aside style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
-                    <div className="glass-card" style={{ padding: '5rem', border: '2px solid var(--gold)', background: 'radial-gradient(circle at top right, rgba(212,175,55,0.1), transparent)', borderRadius: '40px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem' }}>
-                            <Crown size={50} color="var(--gold)" />
-                            <div style={{ textAlign: 'right' }}>
-                                <div style={{ color: 'var(--gold)', letterSpacing: '4px', fontWeight: 'bold', fontSize: '0.9rem' }}>TIER STATUS</div>
-                                <h4 className="serif" style={{ fontSize: '3rem', margin: 0 }}>{user.subscription_plan || "GUEST"}</h4>
+                    <aside style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
+                        <div className="glass-card" style={{ padding: '5rem', border: '2px solid var(--gold)', background: 'radial-gradient(circle at top right, rgba(212,175,55,0.1), transparent)', borderRadius: '40px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem' }}>
+                                <Crown size={50} color="var(--gold)" />
+                                <div style={{ textAlign: 'right' }}>
+                                    <div style={{ color: 'var(--gold)', letterSpacing: '4px', fontWeight: 'bold', fontSize: '0.9rem' }}>TIER STATUS</div>
+                                    <h4 className="serif" style={{ fontSize: '3rem', margin: 0 }}>{user.subscription_plan || "GUEST"}</h4>
+                                </div>
+                            </div>
+
+                            {/* ⏱️ EXPIRY CLOCK */}
+                            <div style={{ display: 'flex', gap: '2rem', marginBottom: '4rem' }}>
+                                <div style={{ flex: 1, background: 'rgba(0,0,0,0.3)', padding: '3rem', borderRadius: '30px', textAlign: 'center', border: '1px solid var(--gold-glow)' }}>
+                                    <div style={{ fontSize: '4.5rem', fontWeight: 'bold', color: 'var(--gold)' }}>{daysLeft}</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>DAYS REMAINING</div>
+                                </div>
+                                <div style={{ flex: 1, background: 'rgba(0,0,0,0.3)', padding: '3rem', borderRadius: '30px', textAlign: 'center', border: '1px solid var(--glass-border)' }}>
+                                    <Clock size={30} color="var(--gold)" style={{ margin: '0 auto 1.5rem' }} />
+                                    <div style={{ fontSize: '1rem', color: 'white' }}>{user.subscription_expiry ? new Date(user.subscription_expiry).toLocaleDateString() : "N/A"}</div>
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>EXPIRY CALENDAR</div>
+                                </div>
+                            </div>
+
+                            {/* RENEWAL / BUY OPTIONS */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                {plans.slice(0, 3).map(p => (
+                                    <button key={p.id} onClick={() => handleUpgrade(p.id)} className="glass-card" style={{ padding: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.02)', textAlign: 'left', width: '100%' }}>
+                                        <div>
+                                            <div style={{ fontWeight: 'bold', color: 'white' }}>{p.name.toUpperCase()}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Renew Ritual Access</div>
+                                        </div>
+                                        <div style={{ color: 'var(--gold)', fontWeight: 'bold' }}>₹{p.price}</div>
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
-                        {/* ⏱️ EXPIRY CLOCK */}
-                        <div style={{ display: 'flex', gap: '2rem', marginBottom: '4rem' }}>
-                            <div style={{ flex: 1, background: 'rgba(0,0,0,0.3)', padding: '3rem', borderRadius: '30px', textAlign: 'center', border: '1px solid var(--gold-glow)' }}>
-                                <div style={{ fontSize: '4.5rem', fontWeight: 'bold', color: 'var(--gold)' }}>{daysLeft}</div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>DAYS REMAINING</div>
-                            </div>
-                            <div style={{ flex: 1, background: 'rgba(0,0,0,0.3)', padding: '3rem', borderRadius: '30px', textAlign: 'center', border: '1px solid var(--glass-border)' }}>
-                                <Clock size={30} color="var(--gold)" style={{ margin: '0 auto 1.5rem' }} />
-                                <div style={{ fontSize: '1rem', color: 'white' }}>{user.subscription_expiry ? new Date(user.subscription_expiry).toLocaleDateString() : "N/A"}</div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>EXPIRY CALENDAR</div>
-                            </div>
+                        <div className="glass-card" style={{ padding: '4rem', background: 'rgba(255,255,255,0.01)', borderRadius: '40px', border: '1px solid var(--glass-border)' }}>
+                            <Calendar size={35} color="var(--gold)" style={{ marginBottom: '2rem' }} />
+                            <h4 className="serif" style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>ELITE <span style={{ color: 'var(--gold)' }}>PRIVILEGES</span></h4>
+                            <ul style={{ padding: 0, listStyle: 'none', color: 'var(--text-dim)', fontSize: '1.1rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <li style={{ display: 'flex', alignItems: 'center', gap: '15px' }}><CheckCircle size={18} color="var(--gold)" /> Priority floor scheduling</li>
+                                <li style={{ display: 'flex', alignItems: 'center', gap: '15px' }}><CheckCircle size={18} color="var(--gold)" /> Complimentary ritual beverages</li>
+                                <li style={{ display: 'flex', alignItems: 'center', gap: '15px' }}><CheckCircle size={18} color="var(--gold)" /> Doorstep service eligibility</li>
+                            </ul>
                         </div>
-
-                        {/* RENEWAL / BUY OPTIONS */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                             {plans.slice(0,3).map(p => (
-                                 <button key={p.id} onClick={() => handleUpgrade(p.id)} className="glass-card" style={{ padding: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.02)', textAlign: 'left', width: '100%' }}>
-                                    <div>
-                                        <div style={{ fontWeight: 'bold', color: 'white' }}>{p.name.toUpperCase()}</div>
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Renew Ritual Access</div>
-                                    </div>
-                                    <div style={{ color: 'var(--gold)', fontWeight: 'bold' }}>₹{p.price}</div>
-                                 </button>
-                             ))}
-                        </div>
-                    </div>
-
-                    <div className="glass-card" style={{ padding: '4rem', background: 'rgba(255,255,255,0.01)', borderRadius: '40px', border: '1px solid var(--glass-border)' }}>
-                        <Calendar size={35} color="var(--gold)" style={{ marginBottom: '2rem' }} />
-                        <h4 className="serif" style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>ELITE <span style={{ color: 'var(--gold)' }}>PRIVILEGES</span></h4>
-                        <ul style={{ padding: 0, listStyle: 'none', color: 'var(--text-dim)', fontSize: '1.1rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <li style={{ display: 'flex', alignItems: 'center', gap: '15px' }}><CheckCircle size={18} color="var(--gold)" /> Priority floor scheduling</li>
-                            <li style={{ display: 'flex', alignItems: 'center', gap: '15px' }}><CheckCircle size={18} color="var(--gold)" /> Complimentary ritual beverages</li>
-                            <li style={{ display: 'flex', alignItems: 'center', gap: '15px' }}><CheckCircle size={18} color="var(--gold)" /> Doorstep service eligibility</li>
-                        </ul>
-                    </div>
-                </aside>
+                    </aside>
                 )}
             </div>
 

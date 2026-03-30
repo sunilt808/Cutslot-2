@@ -17,23 +17,23 @@ const Layout = ({ children }) => {
 
   return (
     <div className={`layout-root ${theme}`} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', transition: 'var(--transition)' }}>
-      
+
       {/* 🚀 NAVBAR */}
-      <nav className="navbar glass-card" style={{ 
-        margin: '1.5rem 2rem', 
-        padding: '0.8rem 2.5rem', 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        position: 'sticky', 
-        top: '1rem', 
+      <nav className="navbar glass-card" style={{
+        margin: '1.5rem 2rem',
+        padding: '0.8rem 2.5rem',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        position: 'sticky',
+        top: '1rem',
         zIndex: 1000,
         borderRadius: '50px',
         border: '1px solid var(--glass-border)',
         background: theme === 'dark' ? 'rgba(5, 4, 8, 0.8)' : 'rgba(255, 255, 255, 0.8)',
         backdropFilter: 'blur(15px)'
       }}>
-        
+
         {/* ✂️ BRAND */}
         <div className="logo-group">
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -41,21 +41,21 @@ const Layout = ({ children }) => {
               <Scissors color="black" size={22} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-               <span className="serif" style={{ fontSize: '1.8rem', fontWeight: 'bold', letterSpacing: '4px', color: 'var(--text-cream)', lineHeight: 1 }}>CUTSLOT</span>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.65rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '2px' }}>
-                  <Armchair size={10} /> LUXURY SALON <Sparkles size={10} />
-               </div>
+              <span className="serif" style={{ fontSize: '1.8rem', fontWeight: 'bold', letterSpacing: '4px', color: 'var(--text-cream)', lineHeight: 1 }}>CUTSLOT</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.65rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '2px' }}>
+                <Armchair size={10} /> LUXURY SALON <Sparkles size={10} />
+              </div>
             </div>
           </Link>
         </div>
 
         {/* 🎖️ ROLE-BASED NAVIGATION */}
         <div className="nav-links" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '0.4rem', borderRadius: '40px', border: '1px solid var(--glass-border)' }}>
-          
+
           {/* 🏠 PUBLIC/HOME */}
           {!user && (
             <>
-               <Link to="/" className={`nav-button ${isActive('/') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+              <Link to="/" className={`nav-button ${isActive('/') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
                 <Home size={14} /> HOME
               </Link>
               <Link to="/services" className={`nav-button ${isActive('/services') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/services') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/services') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
@@ -141,19 +141,19 @@ const Layout = ({ children }) => {
 
         {/* 💍 ACTIONS */}
         <div className="nav-actions" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          
+
           <button onClick={toggleTheme} style={{
-              background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--gold)'
+            background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '50%', width: '45px', height: '45px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--gold)'
           }}>
-             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </button>
 
           {user ? (
             <>
               <div style={{ display: 'flex', gap: '1.2rem', alignItems: 'center', background: 'rgba(212,175,55,0.05)', padding: '5px 20px', borderRadius: '40px', border: '1px solid var(--gold-glow)' }}>
                 <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
-                   <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--gold)', letterSpacing: '1px' }}>{user.full_name?.toUpperCase() || user.username.toUpperCase()}</span>
-                   <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>{user.role.toUpperCase()}</span>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--gold)', letterSpacing: '1px' }}>{user.full_name?.toUpperCase() || user.username.toUpperCase()}</span>
+                  <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>{user.role.toUpperCase()}</span>
                 </div>
                 <button onClick={handleLogout} className="btn-logout" style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }} title="Logout">
                   <LogOut size={16} />
@@ -175,7 +175,7 @@ const Layout = ({ children }) => {
       <footer className="glass-card" style={{ margin: '4rem 2rem 1.5rem 2rem', padding: '5rem', textAlign: 'center', borderRadius: '40px', borderTop: '1px solid var(--gold-glow)' }}>
         <div className="serif" style={{ fontSize: '2rem', color: 'var(--gold)', letterSpacing: '6px', marginBottom: '1rem' }}>CUTSLOT</div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '3rem', opacity: 0.5 }}>
-           <Scissors size={20} /> <Armchair size={20} /> <Crown size={20} />
+          <Scissors size={20} /> <Armchair size={20} /> <Crown size={20} />
         </div>
         <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', letterSpacing: '2px' }}>EXCELLENCE IN HAIR & BEAUTY &copy; 2026</p>
       </footer>

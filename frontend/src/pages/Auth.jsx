@@ -109,15 +109,15 @@ const Auth = () => {
           <div className="role-selector-detailed">
              <label style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '2px', display: 'block', marginBottom: '1.5rem', textAlign: 'center' }}>IDENTIFY YOUR ROLE</label>
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-                <div onClick={() => setRole('customer')} className={`role-card ${role === 'customer' ? 'active' : ''}`} style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '20px', cursor: 'pointer', background: role === 'customer' ? 'rgba(212,175,55,0.1)' : 'transparent', border: role === 'customer' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', transition: '0.3s' }}>
+                <div onClick={() => setRole('customer')} className={`role-card ${role === 'customer' ? 'active' : ''}`} style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '20px', cursor: 'pointer', background: role === 'customer' ? 'var(--glass-tint-gold)' : 'transparent', border: role === 'customer' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', transition: '0.3s' }}>
                    <Users size={24} color="var(--gold)" />
                    <div style={{ fontWeight: 'bold', fontSize: '0.8rem', marginTop: '0.8rem' }}>CUSTOMER</div>
                 </div>
-                <div onClick={() => setRole('staff')} className={`role-card ${role === 'staff' ? 'active' : ''}`} style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '20px', cursor: 'pointer', background: role === 'staff' ? 'rgba(212,175,55,0.1)' : 'transparent', border: role === 'staff' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', transition: '0.3s' }}>
+                <div onClick={() => setRole('staff')} className={`role-card ${role === 'staff' ? 'active' : ''}`} style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '20px', cursor: 'pointer', background: role === 'staff' ? 'var(--glass-tint-gold)' : 'transparent', border: role === 'staff' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', transition: '0.3s' }}>
                    <Briefcase size={24} color="var(--gold)" />
                    <div style={{ fontWeight: 'bold', fontSize: '0.8rem', marginTop: '0.8rem' }}>STAFF</div>
                 </div>
-                <div onClick={() => setRole('admin')} className={`role-card ${role === 'admin' ? 'active' : ''}`} style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '20px', cursor: 'pointer', background: role === 'admin' ? 'rgba(212,175,55,0.1)' : 'transparent', border: role === 'admin' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', transition: '0.3s' }}>
+                <div onClick={() => setRole('admin')} className={`role-card ${role === 'admin' ? 'active' : ''}`} style={{ padding: '1.5rem', textAlign: 'center', borderRadius: '20px', cursor: 'pointer', background: role === 'admin' ? 'var(--glass-tint-gold)' : 'transparent', border: role === 'admin' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', transition: '0.3s' }}>
                    <Shield size={24} color="var(--gold)" />
                    <div style={{ fontWeight: 'bold', fontSize: '0.8rem', marginTop: '0.8rem' }}>ADMIN</div>
                 </div>
@@ -127,12 +127,12 @@ const Auth = () => {
           <div style={{ display: 'grid', gridTemplateColumns: isLogin ? '1fr' : '1fr 1fr', gap: '2rem' }}>
             <div className="input-field" style={{ position: 'relative' }}>
                 <UserIcon size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
-                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required placeholder="USERNAME" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
+                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required placeholder="USERNAME" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'var(--glass-tint)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
             </div>
             {!isLogin && (
                 <div className="input-field" style={{ position: 'relative' }}>
                     <Zap size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
-                    <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required placeholder="FULL NAME" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
+                    <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required placeholder="FULL NAME" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'var(--glass-tint)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
                 </div>
             )}
           </div>
@@ -141,32 +141,32 @@ const Auth = () => {
             <>
               <div className="input-field" style={{ position: 'relative' }}>
                 <Mail size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="EMAIL ADDRESS" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="EMAIL ADDRESS" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'var(--glass-tint)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
                   <div className="input-field" style={{ position: 'relative' }}>
                     <Phone size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
-                    <input type="text" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0,10))} required maxLength={10} placeholder="PHONE" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
+                    <input type="text" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0,10))} required maxLength={10} placeholder="PHONE" style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', background: 'var(--glass-tint)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }} />
                   </div>
                   <div className="input-field" style={{ position: 'relative' }}>
                     <Heart size={20} color="var(--gold)" style={{ position: 'absolute', left: '1.2rem', top: '1.2rem' }} />
-                    <select value={gender} onChange={(e) => setGender(e.target.value)} style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.03)', color: 'var(--text-cream)', borderRadius: '15px', appearance: 'none' }}>
-                       <option value="Male" style={{ background: 'var(--bg-dark)' }}>MALE</option>
-                       <option value="Female" style={{ background: 'var(--bg-dark)' }}>FEMALE</option>
-                       <option value="Other" style={{ background: 'var(--bg-dark)' }}>OTHER</option>
+                    <select value={gender} onChange={(e) => setGender(e.target.value)} style={{ width: '100%', padding: '1.2rem 1.2rem 1.2rem 3.5rem', border: '1px solid var(--glass-border)', background: 'var(--glass-tint)', color: 'var(--text-cream)', borderRadius: '15px', appearance: 'none' }}>
+                       <option value="Male" style={{ background: 'var(--bg-dark)', color: 'var(--text-cream)' }}>MALE</option>
+                       <option value="Female" style={{ background: 'var(--bg-dark)', color: 'var(--text-cream)' }}>FEMALE</option>
+                       <option value="Other" style={{ background: 'var(--bg-dark)', color: 'var(--text-cream)' }}>OTHER</option>
                     </select>
                   </div>
               </div>
 
               {role === 'customer' && (
-                  <div className="subscription-choice slide-in" style={{ background: 'rgba(212,175,55,0.03)', padding: '2.5rem', borderRadius: '25px', border: '1px solid var(--gold-glow)' }}>
+                  <div className="subscription-choice slide-in" style={{ background: 'var(--glass-tint-gold)', padding: '2.5rem', borderRadius: '25px', border: '1px solid var(--gold-glow)' }}>
                       <label style={{ fontSize: '0.9rem', color: 'var(--gold)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2rem' }}>
                           <Crown size={20} /> SELECT YOUR ELITE MEMBERSHIP (OPTIONAL)
                       </label>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem' }}>
                           {plans.length > 0 ? plans.map(p => (
-                              <div key={p.id} onClick={() => setSelectedPlan(selectedPlan === p.id ? null : p.id)} style={{ padding: '1.5rem', borderRadius: '18px', border: selectedPlan === p.id ? '2px solid var(--gold)' : '1px solid var(--glass-border)', background: selectedPlan === p.id ? 'rgba(212,175,55,0.12)' : 'rgba(255,255,255,0.02)', cursor: 'pointer', position: 'relative', transition: 'all 0.3s ease', transform: selectedPlan === p.id ? 'scale(1.02)' : 'scale(1)' }}>
+                              <div key={p.id} onClick={() => setSelectedPlan(selectedPlan === p.id ? null : p.id)} style={{ padding: '1.5rem', borderRadius: '18px', border: selectedPlan === p.id ? '2px solid var(--gold)' : '1px solid var(--glass-border)', background: selectedPlan === p.id ? 'var(--gold-glow)' : 'var(--glass-tint)', cursor: 'pointer', position: 'relative', transition: 'all 0.3s ease', transform: selectedPlan === p.id ? 'scale(1.02)' : 'scale(1)' }}>
                                   <div style={{ fontWeight: 'bold', fontSize: '1rem', color: selectedPlan === p.id ? 'var(--gold)' : 'var(--text-cream)', marginBottom: '5px' }}>{p.name.split(' ')[0]}</div>
                                   <div style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold' }}>₹{p.price}</div>
                                   <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '8px' }}>{(p.description || '').slice(0, 30)}...</div>
@@ -182,7 +182,7 @@ const Auth = () => {
               )}
 
               {role === 'staff' && (
-                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
+                  <div style={{ background: 'var(--glass-tint)', padding: '2rem', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
                       <label style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold' }}>ASSIGNED OPERATIONAL FLOOR</label>
                       <input type="number" min="1" max="4" value={floor} onChange={(e) => setFloor(parseInt(e.target.value))} required style={{ width: '100%', marginTop: '1rem', padding: '1rem', background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: '10px', fontSize: '1.5rem', textAlign: 'center' }} />
                   </div>
@@ -199,7 +199,7 @@ const Auth = () => {
           </div>
 
           {!isLogin && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '15px', border: '1px solid var(--glass-border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem', background: 'var(--glass-tint)', borderRadius: '15px', border: '1px solid var(--glass-border)' }}>
                <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} style={{ width: '20px', height: '20px', accentColor: 'var(--gold)', cursor: 'pointer' }} />
                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-dim)' }}>
                  I AGREE TO THE <span style={{ color: 'var(--gold)', fontWeight: 'bold', borderBottom: '1px solid var(--gold)' }}>TERMS & CONDITIONS</span>.

@@ -82,6 +82,7 @@ class BookingBase(BaseModel):
     service_type: Optional[str] = "standard"
     destination_lat: Optional[float] = None
     destination_lng: Optional[float] = None
+    payment_idempotency_key: Optional[str] = None
 
 class BookingCreate(BookingBase):
     pass
@@ -96,6 +97,7 @@ class BookingInDB(BookingBase):
     artisan_commission: float
     created_at: datetime.datetime
     user_name: Optional[str] = None
+    payment_idempotency_key: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -116,6 +118,8 @@ class ReviewInDB(ReviewBase):
     user_id: int
     created_at: datetime.datetime
     user_name: Optional[str] = None
+    service_name: Optional[str] = None
+    service_category: Optional[str] = None
 
     class Config:
         from_attributes = True

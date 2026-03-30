@@ -147,8 +147,10 @@ const Reviews = () => {
                                             <User size={24} color="var(--gold)" />
                                         </div>
                                         <div>
-                                            <div style={{ fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--text-cream)' }}>ELITE MEMBER #{r.user_id}</div>
-                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Verified Session • {new Date(r.created_at).toLocaleDateString()}</div>
+                                            <div style={{ fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--text-cream)' }}>{r.user_name || `ELITE MEMBER #${r.user_id}`}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+                                                <span style={{ color: 'var(--gold)', fontWeight: 'bold' }}>[{r.service_category?.toUpperCase() || "ELITE"}] {r.service_name || "Luxury Ritual"}</span> by <span style={{ color: 'var(--gold)', fontWeight: 'bold' }}>{r.worker_name}</span> • {new Date(r.created_at).toLocaleDateString()}
+                                            </div>
                                         </div>
                                     </div>
                                     <div style={{ display: 'flex', gap: '4px' }}>

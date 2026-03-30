@@ -9,17 +9,22 @@
   --glass-border: rgba(212, 175, 55, 0.2);
   --text-cream: #f2efe9;
   --text-dim: rgba(242, 239, 233, 0.7);
+  --glass-tint: rgba(255, 255, 255, 0.03);
+  --glass-tint-gold: rgba(212, 175, 55, 0.05);
   --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 [data-theme='light'] {
-  --bg-dark: #f8f9fa;
-  --bg-gradient: linear-gradient(135deg, #ffffff 0%, #f1f3f5 100%);
-  --glass: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(212, 175, 55, 0.3);
-  --text-cream: #1a1b1e;
-  --text-dim: rgba(0, 0, 0, 0.6);
-  --gold-glow: rgba(212, 175, 55, 0.2);
+  --bg-dark: #fdfcfb;
+  --bg-gradient: linear-gradient(160deg, #ffffff 0%, #f7f3f0 100%);
+  --glass: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(212, 175, 55, 0.4); /* Stronger gold border in light mode */
+  --text-cream: #121212; /* Deep charcoal for better legibility */
+  --text-dim: #5c5c5c; /* Subdued grey */
+  --gold-glow: rgba(212, 175, 55, 0.15);
+  --shadow-premium: 0 10px 40px rgba(212, 175, 55, 0.1);
+  --glass-tint: rgba(0, 0, 0, 0.04);
+  --glass-tint-gold: rgba(212, 175, 55, 0.08);
 }
 
 * {
@@ -62,7 +67,7 @@ h1, h2, h3, h4, .serif {
 .glass-card:hover {
   transform: translateY(-10px) scale(1.02);
   border-color: var(--gold);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px var(--gold-glow);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2), 0 0 20px var(--gold-glow); /* Softer shadow for light mode */
 }
 
 /* Gold button */
@@ -141,7 +146,7 @@ h1, h2, h3, h4, .serif {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-dark);
+  background: var(--bg-dark, #050408);
 }
 
 ::-webkit-scrollbar-thumb {

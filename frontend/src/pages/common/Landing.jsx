@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { Shield, Award, Users, BookOpen, Clock, Crown, Sparkles, Zap, Smartphone, Layers, Layout, HandMetal, Heart, ArrowRight, Star, Scissors, CheckCircle, ShieldCheck, Armchair, Flower, MapPin, Tablet, Trophy, Gem, Moon } from 'lucide-react';
 
 const Landing = () => {
+  const { api } = useAuth();
   const navigate = useNavigate();
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
@@ -38,8 +40,10 @@ const Landing = () => {
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:8000/reviews/').then(res => res.json()).then(data => setReviews(data.slice(0, 3)));
-  }, []);
+    api.get('/reviews/')
+      .then(res => setReviews(res.data.slice(0, 3)))
+      .catch(err => console.error("Elite testimonials unavailable at this time.", err));
+  }, [api]);
 
   return (
     <div className="landing-page-elite fade-in">
@@ -100,7 +104,7 @@ const Landing = () => {
         <div className="marquee-container">
           <div className="marquee-content">
             {marqueeCards.map((card, idx) => (
-              <div key={idx} className="glass-card" style={{ minWidth: '400px', padding: '0', overflow: 'hidden', border: '1px solid var(--glass-border)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', transition: '0.5s', flexShrink: 0 }}>
+              <div key={idx} className="glass-card" style={{ minWidth: '400px', padding: '0', overflow: 'hidden', border: '1px solid var(--glass-border)', boxShadow: '0 20px 50px rgba(0,0,0,0.15)', transition: '0.5s', flexShrink: 0 }}>
                 <img src={card.img} alt={card.title} style={{ width: '100%', height: '300px', objectFit: 'cover', opacity: 0.8 }} />
                 <div style={{ padding: '2.5rem', textAlign: 'left' }}>
                   <h3 className="serif" style={{ fontSize: '2rem', marginBottom: '0.8rem' }}>{card.title}</h3>
@@ -113,61 +117,61 @@ const Landing = () => {
       </section>
 
       {/* 2.5 SERVICE CIRCLE MARQUEE (20+ SERVICES) */}
-      <section style={{ padding: '4rem 0', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid var(--glass-border)', borderBottom: '1px solid var(--glass-border)', overflow: 'hidden' }}>
+      <section style={{ padding: '4rem 0', background: 'var(--glass-tint)', borderTop: '1px solid var(--glass-border)', borderBottom: '1px solid var(--glass-border)', overflow: 'hidden' }}>
         <div style={{ color: 'var(--gold)', textAlign: 'center', letterSpacing: '8px', fontSize: '0.8rem', fontWeight: 'bold', marginBottom: '3rem' }}>CURATED CUTSLOT SERVICES</div>
         <div className="marquee-container">
-           <div className="marquee-content" style={{ gap: '4rem', animationDuration: '60s' }}>
-              {[
-                { name: "ROYAL BEARD SCULPT", icon: <Scissors size={20} /> },
-                { name: "GOLDEN GLOW FACIAL", icon: <Sparkles size={20} /> },
-                { name: "ELITE KERATIN INFUSION", icon: <Zap size={20} /> },
-                { name: "SILVER SCISSORS CUT", icon: <Scissors size={20} /> },
-                { name: "DIAMOND SKIN POLISH", icon: <Gem size={20} /> },
-                { name: "DETOX SCALP RITUAL", icon: <Heart size={20} /> },
-                { name: "IMPERIAL PEDICURE", icon: <Flower size={20} /> },
-                { name: "AESTHETIC EYE LIFT", icon: <Star size={20} /> },
-                { name: "SILK THREADING", icon: <Shield size={20} /> },
-                { name: "DEEP TISSUE ESCAPE", icon: <HandMetal size={20} /> },
-                { name: "ARTISAN HAIR COLOR", icon: <Layers size={20} /> },
-                { name: "MIDNIGHT SKIN CLARITY", icon: <Moon size={20} /> },
-                { name: "PLATINUM BRIDAL", icon: <Crown size={20} /> },
-                { name: "GROOM'S ELITE PREP", icon: <Trophy size={20} /> },
-                { name: "OZONE HAIR THERAPY", icon: <Zap size={20} /> },
-                { name: "MOROCCAN CLAY", icon: <Flower size={20} /> },
-                { name: "CRYO-FACIAL BOOST", icon: <Sparkles size={20} /> },
-                { name: "VELVET SHAVE", icon: <Scissors size={20} /> },
-                { name: "PRECISION HIGH-FADE", icon: <Scissors size={20} /> },
-                { name: "FOOT REFLEXOLOGY", icon: <Heart size={20} /> }
-              ].concat([
-                { name: "ROYAL BEARD SCULPT", icon: <Scissors size={20} /> },
-                { name: "GOLDEN GLOW FACIAL", icon: <Sparkles size={20} /> },
-                { name: "ELITE KERATIN INFUSION", icon: <Zap size={20} /> },
-                { name: "SILVER SCISSORS CUT", icon: <Scissors size={20} /> },
-                { name: "DIAMOND SKIN POLISH", icon: <Gem size={20} /> },
-                { name: "DETOX SCALP RITUAL", icon: <Heart size={20} /> },
-                { name: "IMPERIAL PEDICURE", icon: <Flower size={20} /> },
-                { name: "AESTHETIC EYE LIFT", icon: <Star size={20} /> },
-                { name: "SILK THREADING", icon: <Shield size={20} /> },
-                { name: "DEEP TISSUE ESCAPE", icon: <HandMetal size={20} /> },
-                { name: "ARTISAN HAIR COLOR", icon: <Layers size={20} /> },
-                { name: "MIDNIGHT SKIN CLARITY", icon: <Moon size={20} /> },
-                { name: "PLATINUM BRIDAL", icon: <Crown size={20} /> },
-                { name: "GROOM'S ELITE PREP", icon: <Trophy size={20} /> },
-                { name: "OZONE HAIR THERAPY", icon: <Zap size={20} /> },
-                { name: "MOROCCAN CLAY", icon: <Flower size={20} /> },
-                { name: "CRYO-FACIAL BOOST", icon: <Sparkles size={20} /> },
-                { name: "VELVET SHAVE", icon: <Scissors size={20} /> },
-                { name: "PRECISION HIGH-FADE", icon: <Scissors size={20} /> },
-                { name: "FOOT REFLEXOLOGY", icon: <Heart size={20} /> }
-              ]).map((s, idx) => (
-                <div key={idx} style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '15px', color: 'var(--text-cream)', opacity: 0.7 }}>
-                   <div style={{ width: '50px', height: '50px', borderRadius: '50%', border: '1px solid var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)' }}>
-                      {s.icon}
-                   </div>
-                   <span style={{ fontWeight: 'bold', fontSize: '0.9rem', whiteSpace: 'nowrap', letterSpacing: '2px' }}>{s.name}</span>
+          <div className="marquee-content" style={{ gap: '4rem', animationDuration: '60s' }}>
+            {[
+              { name: "ROYAL BEARD SCULPT", icon: <Scissors size={20} /> },
+              { name: "GOLDEN GLOW FACIAL", icon: <Sparkles size={20} /> },
+              { name: "ELITE KERATIN INFUSION", icon: <Zap size={20} /> },
+              { name: "SILVER SCISSORS CUT", icon: <Scissors size={20} /> },
+              { name: "DIAMOND SKIN POLISH", icon: <Gem size={20} /> },
+              { name: "DETOX SCALP RITUAL", icon: <Heart size={20} /> },
+              { name: "IMPERIAL PEDICURE", icon: <Flower size={20} /> },
+              { name: "AESTHETIC EYE LIFT", icon: <Star size={20} /> },
+              { name: "SILK THREADING", icon: <Shield size={20} /> },
+              { name: "DEEP TISSUE ESCAPE", icon: <HandMetal size={20} /> },
+              { name: "ARTISAN HAIR COLOR", icon: <Layers size={20} /> },
+              { name: "MIDNIGHT SKIN CLARITY", icon: <Moon size={20} /> },
+              { name: "PLATINUM BRIDAL", icon: <Crown size={20} /> },
+              { name: "GROOM'S ELITE PREP", icon: <Trophy size={20} /> },
+              { name: "OZONE HAIR THERAPY", icon: <Zap size={20} /> },
+              { name: "MOROCCAN CLAY", icon: <Flower size={20} /> },
+              { name: "CRYO-FACIAL BOOST", icon: <Sparkles size={20} /> },
+              { name: "VELVET SHAVE", icon: <Scissors size={20} /> },
+              { name: "PRECISION HIGH-FADE", icon: <Scissors size={20} /> },
+              { name: "FOOT REFLEXOLOGY", icon: <Heart size={20} /> }
+            ].concat([
+              { name: "ROYAL BEARD SCULPT", icon: <Scissors size={20} /> },
+              { name: "GOLDEN GLOW FACIAL", icon: <Sparkles size={20} /> },
+              { name: "ELITE KERATIN INFUSION", icon: <Zap size={20} /> },
+              { name: "SILVER SCISSORS CUT", icon: <Scissors size={20} /> },
+              { name: "DIAMOND SKIN POLISH", icon: <Gem size={20} /> },
+              { name: "DETOX SCALP RITUAL", icon: <Heart size={20} /> },
+              { name: "IMPERIAL PEDICURE", icon: <Flower size={20} /> },
+              { name: "AESTHETIC EYE LIFT", icon: <Star size={20} /> },
+              { name: "SILK THREADING", icon: <Shield size={20} /> },
+              { name: "DEEP TISSUE ESCAPE", icon: <HandMetal size={20} /> },
+              { name: "ARTISAN HAIR COLOR", icon: <Layers size={20} /> },
+              { name: "MIDNIGHT SKIN CLARITY", icon: <Moon size={20} /> },
+              { name: "PLATINUM BRIDAL", icon: <Crown size={20} /> },
+              { name: "GROOM'S ELITE PREP", icon: <Trophy size={20} /> },
+              { name: "OZONE HAIR THERAPY", icon: <Zap size={20} /> },
+              { name: "MOROCCAN CLAY", icon: <Flower size={20} /> },
+              { name: "CRYO-FACIAL BOOST", icon: <Sparkles size={20} /> },
+              { name: "VELVET SHAVE", icon: <Scissors size={20} /> },
+              { name: "PRECISION HIGH-FADE", icon: <Scissors size={20} /> },
+              { name: "FOOT REFLEXOLOGY", icon: <Heart size={20} /> }
+            ]).map((s, idx) => (
+              <div key={idx} style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '15px', color: 'var(--text-cream)', opacity: 0.7 }}>
+                <div style={{ width: '50px', height: '50px', borderRadius: '50%', border: '1px solid var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)' }}>
+                  {s.icon}
                 </div>
-              ))}
-           </div>
+                <span style={{ fontWeight: 'bold', fontSize: '0.9rem', whiteSpace: 'nowrap', letterSpacing: '2px' }}>{s.name}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -194,11 +198,11 @@ const Landing = () => {
             <div style={{ color: 'var(--gold)', fontWeight: 'bold', marginTop: '1.5rem', letterSpacing: '4px' }}>FROM ₹4500</div>
           </div>
           <div className="glass-card" style={{ padding: '4rem', borderRight: '6px solid var(--gold)', background: 'rgba(212,175,55,0.02)' }}>
-             <Crown size={40} color="var(--gold)" />
-             <h3 className="serif" style={{ fontSize: '2.5rem', marginTop: '2rem' }}>MEMBERSHIP</h3>
-             <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Get 30% extra value with our plans.</p>
-             <div style={{ color: 'var(--gold)', fontWeight: 'bold', marginTop: '1.5rem', letterSpacing: '4px' }}>FROM ₹15000</div>
-           </div>
+            <Crown size={40} color="var(--gold)" />
+            <h3 className="serif" style={{ fontSize: '2.5rem', marginTop: '2rem' }}>MEMBERSHIP</h3>
+            <p style={{ color: 'var(--text-dim)', fontSize: '1.1rem' }}>Get 30% extra value with our plans.</p>
+            <div style={{ color: 'var(--gold)', fontWeight: 'bold', marginTop: '1.5rem', letterSpacing: '4px' }}>FROM ₹15000</div>
+          </div>
         </div>
       </section>
 
@@ -208,28 +212,28 @@ const Landing = () => {
           ATELIER <span style={{ color: 'var(--gold)' }}>MEMBERSHIPS</span>
         </h2>
         <p style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '1.1rem', letterSpacing: '4px', marginBottom: '5rem' }}>UNLOCATED LUXURY BENEFITS</p>
-        
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
-           {[
-              { name: "SILVER", price: "₹10,000", benefits: ["20% OFF ALL RITUALS", "MONTHLY HAIR CARE", "FLEXIBLE SLOTS"], color: "#c0c0c0" },
-              { name: "GOLD", price: "₹15,000", benefits: ["30% OFF ALL RITUALS", "VIP LOUNGE ACCESS", "PRIVATE STYLIST"], color: "var(--gold)" },
-              { name: "ELITE", price: "₹25,000", benefits: ["50% OFF BEST RITUALS", "PRIORITY BOOKING", "PRODUCT CONCIERGE"], color: "#e5e4e2" },
-              { name: "ROYAL", price: "₹50,000", benefits: ["UNLIMITED ACCESS", "DOORSTEP LUXURY", "PRIVATE ESTATE BOX"], color: "#ffab40" }
-           ].map((tier, i) => (
-              <div key={i} className="glass-card hover-lift" style={{ padding: '4rem 3rem', textAlign: 'center', border: `1px solid ${tier.color}33`, position: 'relative' }}>
-                 <div style={{ position: 'absolute', top: '0', left: '50%', transform: 'translateX(-50%)', width: '80px', height: '4px', background: tier.color }}></div>
-                 <div className="serif" style={{ fontSize: '1.2rem', color: tier.color, letterSpacing: '6px', marginBottom: '1.5rem' }}>{tier.name}</div>
-                 <div className="serif" style={{ fontSize: '3.5rem', marginBottom: '2.5rem' }}>{tier.price}</div>
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', marginBottom: '3rem' }}>
-                    {tier.benefits.map((b, j) => (
-                       <div key={j} style={{ fontSize: '0.85rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                          <ShieldCheck size={14} color={tier.color} /> {b}
-                       </div>
-                    ))}
-                 </div>
-                 <button onClick={() => navigate('/auth')} className="btn-gold" style={{ background: 'transparent', border: `1px solid ${tier.color}`, color: tier.color, width: '100%', padding: '1.2rem' }}>ELEVATE STATUS</button>
+          {[
+            { name: "SILVER", price: "₹10,000", benefits: ["20% OFF ALL RITUALS", "MONTHLY HAIR CARE", "FLEXIBLE SLOTS"], color: "#c0c0c0" },
+            { name: "GOLD", price: "₹15,000", benefits: ["30% OFF ALL RITUALS", "VIP LOUNGE ACCESS", "PRIVATE STYLIST"], color: "var(--gold)" },
+            { name: "ELITE", price: "₹25,000", benefits: ["50% OFF BEST RITUALS", "PRIORITY BOOKING", "PRODUCT CONCIERGE"], color: "#e5e4e2" },
+            { name: "ROYAL", price: "₹50,000", benefits: ["UNLIMITED ACCESS", "DOORSTEP LUXURY", "PRIVATE ESTATE BOX"], color: "#ffab40" }
+          ].map((tier, i) => (
+            <div key={i} className="glass-card hover-lift" style={{ padding: '4rem 3rem', textAlign: 'center', border: `1px solid ${tier.color}33`, position: 'relative' }}>
+              <div style={{ position: 'absolute', top: '0', left: '50%', transform: 'translateX(-50%)', width: '80px', height: '4px', background: tier.color }}></div>
+              <div className="serif" style={{ fontSize: '1.2rem', color: tier.color, letterSpacing: '6px', marginBottom: '1.5rem' }}>{tier.name}</div>
+              <div className="serif" style={{ fontSize: '3.5rem', marginBottom: '2.5rem' }}>{tier.price}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', marginBottom: '3rem' }}>
+                {tier.benefits.map((b, j) => (
+                  <div key={j} style={{ fontSize: '0.85rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                    <ShieldCheck size={14} color={tier.color} /> {b}
+                  </div>
+                ))}
               </div>
-           ))}
+              <button onClick={() => navigate('/auth')} className="btn-gold" style={{ background: 'transparent', border: `1px solid ${tier.color}`, color: tier.color, width: '100%', padding: '1.2rem' }}>ELEVATE STATUS</button>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -239,35 +243,35 @@ const Landing = () => {
           EXCLUSIVE <span style={{ color: 'var(--gold)' }}>OFFERS</span>
         </h2>
         <p style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '1.1rem', letterSpacing: '4px', marginBottom: '5rem' }}>LIMITED TIME ELITE DEALS</p>
-        
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem', maxWidth: '1400px', margin: '0 auto' }}>
-           <div className="glass-card hover-lift" style={{ padding: '3rem', border: '1px solid var(--gold)', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: '1.5rem', right: '-2.5rem', background: 'var(--gold)', color: 'var(--bg-dark)', padding: '0.5rem 3rem', transform: 'rotate(45deg)', fontWeight: 'bold', fontSize: '0.8rem' }}>40% OFF</div>
-              <h3 className="serif" style={{ fontSize: '2rem', marginBottom: '1rem' }}>GUEST SPECIAL</h3>
-              <p style={{ color: 'var(--text-dim)', marginBottom: '2rem' }}>Hair Ritual + Deep Facial Spa for first-time elite guests.</p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                 <div className="serif" style={{ fontSize: '2.2rem', color: 'var(--gold)' }}>₹1,999</div>
-                 <button onClick={handleBookNow} className="btn-gold" style={{ padding: '0.8rem 1.5rem' }}>CLAIM</button>
-              </div>
-           </div>
-           <div className="glass-card hover-lift" style={{ padding: '3rem', border: '1px solid var(--gold)', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: '1.5rem', right: '-2.5rem', background: 'var(--gold)', color: 'var(--bg-dark)', padding: '0.5rem 3rem', transform: 'rotate(45deg)', fontWeight: 'bold', fontSize: '0.8rem' }}>HOT DEAL</div>
-              <h3 className="serif" style={{ fontSize: '2rem', marginBottom: '1rem' }}>BRIDAL COMBO</h3>
-              <p style={{ color: 'var(--text-dim)', marginBottom: '2rem' }}>Full Makeup + Hair Styling + Luxury Spa Experience.</p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                 <div className="serif" style={{ fontSize: '2.2rem', color: 'var(--gold)' }}>₹12,499</div>
-                 <button onClick={handleBookNow} className="btn-gold" style={{ padding: '0.8rem 1.5rem' }}>CLAIM</button>
-              </div>
-           </div>
-           <div className="glass-card hover-lift" style={{ padding: '3rem', border: '1px solid var(--gold)', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: '1.5rem', right: '-2.5rem', background: 'var(--gold)', color: 'var(--bg-dark)', padding: '0.5rem 3rem', transform: 'rotate(45deg)', fontWeight: 'bold', fontSize: '0.8rem' }}>MEMBERS ONLY</div>
-              <h3 className="serif" style={{ fontSize: '2rem', marginBottom: '1rem' }}>WEEKEND SPA</h3>
-              <p style={{ color: 'var(--text-dim)', marginBottom: '2rem' }}>Unlimited weekend access to Floor 2 Wellness Rituals.</p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                 <div className="serif" style={{ fontSize: '2.2rem', color: 'var(--gold)' }}>₹4,999</div>
-                 <button onClick={handleBookNow} className="btn-gold" style={{ padding: '0.8rem 1.5rem' }}>CLAIM</button>
-              </div>
-           </div>
+          <div className="glass-card hover-lift" style={{ padding: '3rem', border: '1px solid var(--gold)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: '1.5rem', right: '-2.5rem', background: 'var(--gold)', color: 'var(--bg-dark)', padding: '0.5rem 3rem', transform: 'rotate(45deg)', fontWeight: 'bold', fontSize: '0.8rem' }}>40% OFF</div>
+            <h3 className="serif" style={{ fontSize: '2rem', marginBottom: '1rem' }}>GUEST SPECIAL</h3>
+            <p style={{ color: 'var(--text-dim)', marginBottom: '2rem' }}>Hair Ritual + Deep Facial Spa for first-time elite guests.</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="serif" style={{ fontSize: '2.2rem', color: 'var(--gold)' }}>₹1,999</div>
+              <button onClick={handleBookNow} className="btn-gold" style={{ padding: '0.8rem 1.5rem' }}>CLAIM</button>
+            </div>
+          </div>
+          <div className="glass-card hover-lift" style={{ padding: '3rem', border: '1px solid var(--gold)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: '1.5rem', right: '-2.5rem', background: 'var(--gold)', color: 'var(--bg-dark)', padding: '0.5rem 3rem', transform: 'rotate(45deg)', fontWeight: 'bold', fontSize: '0.8rem' }}>HOT DEAL</div>
+            <h3 className="serif" style={{ fontSize: '2rem', marginBottom: '1rem' }}>BRIDAL COMBO</h3>
+            <p style={{ color: 'var(--text-dim)', marginBottom: '2rem' }}>Full Makeup + Hair Styling + Luxury Spa Experience.</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="serif" style={{ fontSize: '2.2rem', color: 'var(--gold)' }}>₹12,499</div>
+              <button onClick={handleBookNow} className="btn-gold" style={{ padding: '0.8rem 1.5rem' }}>CLAIM</button>
+            </div>
+          </div>
+          <div className="glass-card hover-lift" style={{ padding: '3rem', border: '1px solid var(--gold)', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: '1.5rem', right: '-2.5rem', background: 'var(--gold)', color: 'var(--bg-dark)', padding: '0.5rem 3rem', transform: 'rotate(45deg)', fontWeight: 'bold', fontSize: '0.8rem' }}>MEMBERS ONLY</div>
+            <h3 className="serif" style={{ fontSize: '2rem', marginBottom: '1rem' }}>WEEKEND SPA</h3>
+            <p style={{ color: 'var(--text-dim)', marginBottom: '2rem' }}>Unlimited weekend access to Floor 2 Wellness Rituals.</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="serif" style={{ fontSize: '2.2rem', color: 'var(--gold)' }}>₹4,999</div>
+              <button onClick={handleBookNow} className="btn-gold" style={{ padding: '0.8rem 1.5rem' }}>CLAIM</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -282,8 +286,16 @@ const Landing = () => {
               <div style={{ display: 'flex', gap: '5px', marginBottom: '1.5rem' }}>
                 {[...Array(r.rating)].map((_, j) => <Star key={j} size={16} fill="var(--gold)" color="var(--gold)" />)}
               </div>
+              <div style={{ color: 'var(--gold)', fontSize: '0.75rem', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '0.8rem', display: 'flex', gap: '10px' }}>
+                <span>{r.service_category?.toUpperCase() || "ELITE"}</span>
+                <span style={{ opacity: 0.4 }}>|</span>
+                <span>{r.service_name?.toUpperCase() || "RITUAL"}</span>
+              </div>
               <p style={{ fontStyle: 'italic', color: 'var(--text-dim)', fontSize: '1.1rem', marginBottom: '2rem' }}>"{r.comment}"</p>
-              <div style={{ fontWeight: 'bold', color: 'var(--gold)', letterSpacing: '2px' }}>GUEST #{r.user_id}</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                <div style={{ fontWeight: 'bold', color: 'var(--gold)', letterSpacing: '2px', fontSize: '0.85rem' }}>{r.user_name || `GUEST #${r.user_id}`}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontStyle: 'normal' }}>for <span style={{ color: 'var(--gold)' }}>{r.worker_name}</span></div>
+              </div>
             </div>
           )) : (
             <p style={{ textAlign: 'center', color: 'var(--text-dim)', gridColumn: 'span 3' }}>No reviews yet. Be the first to share your experience!</p>
@@ -294,41 +306,41 @@ const Landing = () => {
       {/* 4. LOYALTY PROGRAM */}
       <section style={{ padding: '8rem 2rem', background: 'var(--bg-dark)' }}>
         <div className="glass-card" style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '5rem', padding: '5rem', border: '1px solid var(--gold)', borderRadius: '40px' }}>
-           <div style={{ flex: 1, textAlign: 'left' }}>
-              <div style={{ color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '8px', fontSize: '0.9rem', marginBottom: '1.5rem' }}>ELITE REWARDS</div>
-              <h2 className="serif" style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>BECOME A <span style={{ color: 'var(--gold)' }}>LOYAL GUEST</span></h2>
-              <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', lineHeight: '1.8', marginBottom: '3rem' }}>
-                 Every month you visit the atelier, you accumulate **Loyalty points**. 
-                 Once you complete **40 points**, you can unlock an **Exclusive 15% Discount** on your next premium ritual.
-              </p>
-              <div style={{ display: 'flex', gap: '3rem' }}>
-                 <div style={{ textAlign: 'center' }}>
-                    <div className="serif" style={{ fontSize: '2.5rem', color: 'var(--gold)' }}>10</div>
-                    <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>POINTS / VISIT</div>
-                 </div>
-                 <div style={{ textAlign: 'center' }}>
-                    <div className="serif" style={{ fontSize: '2.5rem', color: 'var(--gold)' }}>40</div>
-                    <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>FOR CLAIM</div>
-                 </div>
-                 <div style={{ textAlign: 'center' }}>
-                    <div className="serif" style={{ fontSize: '2.5rem', color: 'var(--gold)' }}>15%</div>
-                    <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>OFF RITUALS</div>
-                 </div>
+          <div style={{ flex: 1, textAlign: 'left' }}>
+            <div style={{ color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '8px', fontSize: '0.9rem', marginBottom: '1.5rem' }}>ELITE REWARDS</div>
+            <h2 className="serif" style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>BECOME A <span style={{ color: 'var(--gold)' }}>LOYAL GUEST</span></h2>
+            <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', lineHeight: '1.8', marginBottom: '3rem' }}>
+              Every month you visit the atelier, you accumulate **Loyalty points**.
+              Once you complete **40 points**, you can unlock an **Exclusive 15% Discount** on your next premium ritual.
+            </p>
+            <div style={{ display: 'flex', gap: '3rem' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div className="serif" style={{ fontSize: '2.5rem', color: 'var(--gold)' }}>10</div>
+                <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>POINTS / VISIT</div>
               </div>
-           </div>
-           <div style={{ flex: 1, position: 'relative' }}>
-              <div className="pulse-gold" style={{ width: '300px', height: '300px', borderRadius: '50%', background: 'var(--gold-glow)', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--gold)' }}>
-                 <Trophy size={120} color="var(--gold)" />
+              <div style={{ textAlign: 'center' }}>
+                <div className="serif" style={{ fontSize: '2.5rem', color: 'var(--gold)' }}>40</div>
+                <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>FOR CLAIM</div>
               </div>
-           </div>
+              <div style={{ textAlign: 'center' }}>
+                <div className="serif" style={{ fontSize: '2.5rem', color: 'var(--gold)' }}>15%</div>
+                <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', letterSpacing: '2px' }}>OFF RITUALS</div>
+              </div>
+            </div>
+          </div>
+          <div style={{ flex: 1, position: 'relative' }}>
+            <div className="pulse-gold" style={{ width: '300px', height: '300px', borderRadius: '50%', background: 'var(--gold-glow)', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--gold)' }}>
+              <Trophy size={120} color="var(--gold)" />
+            </div>
+          </div>
         </div>
       </section>
 
       {/* 5. APP FEATURES */}
       <section style={{ padding: '8rem 2rem' }}>
         <div className="glass-card" style={{ maxWidth: '1400px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4rem', textAlign: 'center', padding: '5rem' }}>
-           {/* ... existing content ... */}
-           <div>
+          {/* ... existing content ... */}
+          <div>
             <Zap size={32} color="var(--gold)" style={{ marginBottom: '1.5rem' }} />
             <h4 className="serif" style={{ fontSize: '2.5rem' }}>100%</h4>
             <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem', letterSpacing: '3px' }}>ON TIME</p>
@@ -346,7 +358,7 @@ const Landing = () => {
           <div>
             <Star size={32} color="var(--gold)" style={{ marginBottom: '1.5rem' }} />
             <h4 className="serif" style={{ fontSize: '2.5rem' }}>5 STAR</h4>
-            <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem', letterSpacing: '3px' }}>SERVICES</p>
+            <p style={{ color: 'var(--text-dim)', fontSize: '0.8rem', letterSpacing: '3px' }}>Services Real Time Review Based </p>
           </div>
         </div>
       </section>
