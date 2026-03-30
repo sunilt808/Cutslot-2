@@ -81,5 +81,3 @@ npm install
 npm run dev
 ```
 
----
-*Developed & Stabilized by Antigravity*
