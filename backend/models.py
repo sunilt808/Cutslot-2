@@ -17,6 +17,13 @@ class BookingStatus:
     RESCHEDULED = "rescheduled"
     ABSENT = "absent"
 
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    action = Column(String)
+    details = Column(String)
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
@@ -121,6 +128,8 @@ class Review(Base):
     __tablename__ = "reviews"
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
+    booking_id = Column(Integer, ForeignKey("bookings.id"), nullable=True)
+    service_id = Column(Integer, ForeignKey("services.id"), nullable=True)
     worker_name = Column(String)
     rating = Column(Integer)
     comment = Column(Text)

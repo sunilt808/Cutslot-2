@@ -105,6 +105,8 @@ class ReviewBase(BaseModel):
     worker_name: str
     rating: int
     comment: str
+    booking_id: Optional[int] = None
+    service_id: Optional[int] = None
 
 class ReviewCreate(ReviewBase):
     pass
@@ -135,3 +137,13 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+class AuditLogInDB(BaseModel):
+    id: int
+    user_id: int
+    action: str
+    details: str
+    timestamp: datetime.datetime
+
+    class Config:
+        from_attributes = True

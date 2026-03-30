@@ -107,21 +107,21 @@ const ProfileSettings = () => {
     const daysLeft = calculateDaysLeft(user.subscription_expiry);
 
     return (
-        <div className="profile-page fade-in" style={{ padding: '6rem 2rem', maxWidth: '1400px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <header style={{ marginBottom: '8rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+        <div className="profile-page fade-in" style={{ padding: '6rem 4rem', maxWidth: '1600px', margin: '0 auto', display: 'flex', flexDirection: 'column' }}>
+            <header style={{ marginBottom: '8rem', display: 'flex', flexDirection: 'column', alignItems: 'start', width: '100%' }}>
                 <div style={{ position: 'relative', display: 'inline-block', marginBottom: '3.5rem' }}>
-                    <div style={{ width: '220px', height: '220px', borderRadius: '50%', background: 'linear-gradient(45deg, var(--gold), #f9d976)', padding: '5px', boxShadow: '0 0 70px rgba(212,175,55,0.2)' }}>
+                    <div style={{ width: '180px', height: '180px', borderRadius: '50%', background: 'linear-gradient(45deg, var(--gold), #f9d976)', padding: '5px', boxShadow: '0 0 70px rgba(212,175,55,0.2)' }}>
                         <div style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--bg-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', border: '8px solid var(--bg-dark)' }}>
-                            <UserIcon size={120} color="var(--gold)" />
+                            <UserIcon size={100} color="var(--gold)" />
                         </div>
                     </div>
                 </div>
-                <h1 className="serif gradient-text" style={{ fontSize: '5.5rem', margin: 0, letterSpacing: '-3px' }}>{fullName || user?.username}</h1>
-                <p style={{ color: 'var(--text-dim)', fontSize: '1.4rem', marginTop: '1rem', letterSpacing: '6px', fontWeight: 'bold' }}>
+                <h1 className="serif gradient-text" style={{ fontSize: '6rem', margin: 0, letterSpacing: '-4px', lineHeight: '1.2' }}>{fullName || user?.username}</h1>
+                <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', marginTop: '1rem', letterSpacing: '8px', fontWeight: 'bold' }}>
                     {user?.role?.toUpperCase()} | {user?.customer_category?.toUpperCase() || "ELITE"} ESTATE MEMBER
                 </p>
-                <div style={{ marginTop: '2rem', display: 'flex', gap: '20px' }}>
-                    <span style={{ padding: '1rem 2.5rem', background: 'var(--gold-glow)', color: 'var(--gold)', borderRadius: '30px', fontWeight: 'bold', fontSize: '1rem' }}>ID: #{user.id}</span>
+                <div style={{ marginTop: '2.5rem', display: 'flex', gap: '20px' }}>
+                    <span style={{ padding: '0.8rem 2.5rem', background: 'var(--gold-glow)', color: 'var(--gold)', borderRadius: '30px', fontWeight: 'bold', fontSize: '0.9rem', border: '1px solid var(--gold)' }}>ESTATE ID: #{user.id}</span>
                 </div>
             </header>
 

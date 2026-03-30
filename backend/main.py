@@ -253,10 +253,12 @@ async def create_booking(booking_in: schemas.BookingCreate, current_user: models
     # Compute end_time from service duration
     end_dt = booking_in.booking_time + datetime.timedelta(minutes=service.duration) if service.duration else None
 
-    # Artisan commission — look up the artisan's rate if they exist
+    # Artisan commission — ALWAYS based on base_price even if membership makes it 0 for client
     artisan = db.query(models.User).filter(models.User.username == booking_in.stylist_name, models.User.role == "staff").first()
     commission_rate = artisan.commission_rate if artisan else 15.0
-    commission_amount = total_price * (commission_rate / 100.0)
+    # Use the ORIGINAL service price if it was 0 for client (membership)
+    actual_commissionable_amount = service.price if base_price == 0.0 else total_price
+    commission_amount = actual_commissionable_amount * (commission_rate / 100.0)
 
     new_booking = models.Booking(
         user_id=current_user.id,
@@ -337,7 +339,20 @@ async def subscribe(data: schemas.SubscriptionPurchase, current_user: models.Use
         current_user.monthly_limit = 25
     else:
         current_user.monthly_limit = 10
-        
+
+    # Store in revenue via a 'subscription' booking entry
+    new_sub_booking = models.Booking(
+        user_id=current_user.id,
+        service_id=service.id,
+        floor=4, # Subscriptions on VIP Floor 4
+        stylist_name="ESTATE_SYSTEM",
+        category="subscription",
+        gender="N/A",
+        booking_time=datetime.datetime.utcnow(),
+        price_paid=service.price,
+        status="completed"
+    )
+    db.add(new_sub_booking)
     db.commit()
     return {"msg": f"Successfully subscribed to {service.name}"}
 
@@ -427,7 +442,12 @@ async def list_workers_public(floor: Optional[int] = None, db: Session = Depends
 @app.get("/reviews/", response_model=List[schemas.ReviewInDB])
 async def list_reviews(db: Session = Depends(get_db)):
     try:
-        return db.query(models.Review).order_by(models.Review.created_at.desc()).all()
+        reviews = db.query(models.Review).order_by(models.Review.created_at.desc()).all()
+        # Add user_name mock field for UI
+        for r in reviews:
+            user = db.query(models.User).filter(models.User.id == r.user_id).first()
+            r.__dict__['user_name'] = user.full_name or user.username if user else "Elite Guest"
+        return reviews
     except Exception:
         return []
 
@@ -452,6 +472,8 @@ async def create_review(
         
     db_review = models.Review(
         user_id=current_user.id,
+        booking_id=review.get('booking_id'),
+        service_id=review.get('service_id'),
         worker_name=review['worker_name'],
         rating=review.get('rating', 5),
         comment=review.get('comment', ''),
@@ -581,9 +603,25 @@ async def get_worker_stats(current_user: models.User = Depends(get_current_user)
 
 # --- ADMIN CRUD & REPORTS ---
 
-@app.get("/admin/audits")
-async def get_audits(current_user: models.User = Depends(get_admin_user)):
-    return []  # Audit table stub to resolve dashboard 404
+# --- AUDIT ENDPOINT ---
+@app.get("/admin/audits", response_model=List[schemas.AuditLogInDB])
+async def get_audits(current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    return db.query(models.AuditLog).order_by(models.AuditLog.timestamp.desc()).all()
+
+# --- WORKER QUEUE ENDPOINT ---
+@app.get("/worker/queue", response_model=List[schemas.BookingInDB])
+async def get_worker_queue(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.role != "staff":
+        raise HTTPException(status_code=403, detail="Staff access only")
+    bookings = db.query(models.Booking).filter(
+        models.Booking.stylist_name == current_user.username,
+        models.Booking.status != "completed",
+        models.Booking.status != "cancelled"
+    ).all()
+    for b in bookings:
+        if b.user:
+            b.__dict__['user_name'] = b.user.full_name or b.user.username
+    return bookings
 
 @app.post("/admin/services/")
 async def create_service(service: schemas.ServiceBase, current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
