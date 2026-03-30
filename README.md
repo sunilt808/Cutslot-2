@@ -1,42 +1,64 @@
-# CUTSLOT - Luxury Elite Salon Ecosystem
+# CUTSLOT — Elite Atelier & Digital Salon Orchestrator
 
-Welcome to the **Lumière Atelier**, a sophisticated digital orchestrator for high-end grooming and beauty rituals.
+Welcome to the **CutSlot Platform**, an exclusive, state-of-the-art web application engineered to manage high-end luxury salon operations. The platform offers a seamless digital ecosystem integrating the needs of **Elite Clients**, **Skilled Artisans**, and the **General Directorate (Administrators)**.
+
+---
 
 ## 🏛️ System Architecture
 
-### 👤 Guest Experience (Client)
-- **Elite Dashboard**: Real-time spending logs, loyalty points tracking (₹100 = 1 Point), and ritual history.
-- **Advance Scheduling**: Secure future slots for standard Atelier Rituals, bespoke Custom services, or Doorstep Luxury (Home).
-- **Membership Directorate**: Four tiers of estate clearance (Silver, Gold, Elite, Royal) with automated billing and expiration tracking.
-- **Digital Receipts**: Token-based access IDs (`CS-ID-YEAR`) for every reservation.
+### 👑 The Estate Directorate (Admin)
+Full systemic control over the entire CutSlot business platform.
+- **Advanced Revenue Intelligence:** Tracks real-time, mathematically accurate revenue lines. Extracts total booking payouts, calculates exact tax collected, deducts fixed 15% Artisan Commissions, and maps the absolute **net profit** directly to the Directorate.
+- **Artisan Credential Vetting:** New Artisans cannot automatically book clients. The Admin commands a strict approval pipeline where new worker registrations are flagged as "PENDING" and require explicit verification.
+- **Service Inventory System:** Dynamic oversight of over 60+ meticulously seeded luxury rituals ranging across Grooming, VIP Skincare, Wellnes, and Subscriptions.
+- **Central Dispatch Queue:** View, manage, or dynamically re-allocate high-priority bookings happening globally across the estate.
 
-### ✂️ Artisan Terminal (Worker)
-- **Personal Priority Queue**: Filtered ritual lists ensuring artisans see only their assigned sessions.
-- **Service Classification**: Visual flags for Standard, Bespoke, and Doorstep rituals.
-- **Performance Analytics**: Personal revenue tracking and public guest feedback logs.
-- **Ritual Management**: Full control over session status (Confirm, Mark Done, Absent, or Reschedule).
+### ✂️ The Skilled Artisans (Staff)
+A dedicated, distraction-free environment for professional cosmetologists and therapists.
+- **Locked Commission Architecture:** Revenue transparency built-in. Every concluded ritual instantly deposits a strict, mathematically absolute **15.0% commission payout** securely into the Artisan's performance trackers.
+- **Personal Dispatch Queue:** Utilizing an assigned-floor logic structure (Floors 1-4). Artisans only see clients bound to their precise domain, automatically preventing overlap and chaos.
+- **Dynamic Ritual Flags:** Workers manage states through `Pending` -> `En-Route` (for doorstep/home visits) -> `Confirmed` -> `Completed`. 
+- **Performance Analytics:** Real-time feedback tracking generated uniquely from clients they have *specifically engaged with*.
 
-### 👑 Estate Directorate (Admin)
-- **Central Dispatch**: Allocate specialized artisans to high-priority Home and Custom rituals.
-- **Staff Management**: Full CRUD interface for artisan onboarding, vetting (approval), and decommissioning.
-- **Service Inventory**: Dynamic creation of standard, bespoke, and doorstep service offerings.
-- **Revenue Intelligence**: Real-time reporting by floor, service category, and guest membership tier.
-- **Security Audits**: Continuous monitoring of all administrative and financial actions.
+### 👤 The Elite Guest Experience (Client)
+A glassmorphic, premium front-end delivering unparalleled booking luxury.
+- **Authenticated Feedback Guard:** Clients are structurally locked from writing fake or arbitrary reviews. The backend ensures a Client can *only* evaluate Artisans they have successfully concluded a scheduled ritual with.
+- **Smart Booking Flow:** Service limits, premium doorstep fees, timeline overlaps, and penalty-math (based on <6 hour cancellation bounds).
+- **Client Wallet & Activity:** Direct portal highlighting Loyalty Points mapping, Subscription Renewals (Elite vs Gold packages), total Estate expenditure, and advance slot scheduling.
+- **Membership Subscriptions:** Active memberships (like the 30-Day Elite Tier) bypass certain service fees or apply 20% discounts dynamically at checkout.
 
-## 🛠️ Technology Stack
-- **Frontend**: React.js with `lucide-react` for iconography.
-- **Aesthetic**: Custom "Luxury Dark" CSS with glassmorphism, gold accents, and serif typography.
-- **Backend**: FastAPI (Python) with JWT-based security.
-- **Database**: SQLAlchemy ORM with SQLite (Current Development State).
+---
+
+## 🛠️ Technology Stack & Environment
+
+**Frontend Protocol:**
+- **Core:** `React.js` powered by `Vite`.
+- **Aesthetic DNA:** Completely custom "Luxury Dark-Mode" CSS featuring sweeping glassmorphism (`backdrop-filter: blur`), animated neon-gold glows, and serif typography (`Inter` / `Playfair Display`).
+- **Iconography:** `lucide-react`.
+- **Routing:** Deep `react-router-dom` role-based protection stopping role spillage.
+
+**Backend Services:**
+- **Engine:** `FastAPI` (Python)
+- **Database:** `SQLAlchemy` mapping flawlessly into `SQLite` (running in Write-Ahead-Log architecture to eliminate concurrency locks).
+- **Security:** Case-insensitive `JWT-Bearer` tokens running through `Passlib Bcrypt` hashing. 
+
+---
 
 ## 🚀 Execution Guide
+
+### Database Seeding & Resetting
+To initialize the estate with the 60+ new luxury services, 10 active seeded clients, and pre-vetted Artisans, perform a pristine database reset:
+```bash
+python main.py --reset-db --seed-all
+```
 
 ### Backend Initiation
 ```powershell
 cd backend
 pip install -r requirements.txt
-uvicorn main:app --reload
+uvicorn main:app --port 8000 --reload --limit-concurrency 100
 ```
+*(The CORS middleware natively supports frontend connections originating from `http://localhost:5173`, `5174`, and `5175`.)*
 
 ### Frontend Initiation
 ```powershell
@@ -45,11 +67,5 @@ npm install
 npm run dev
 ```
 
-## 📜 Membership Categories
-1. **Silver (Essential)**: Standard salon access with base monthly limits.
-2. **Gold (Bespoke)**: Priority queue access and artisan name-requests.
-3. **Elite (Luxury)**: Access to bespoke "Custom" services and VIP lounge floor.
-4. **Royal (Imperial)**: Doorstep "Home" service included with unlimited artisan dispatch.
-
 ---
-*Created with Excellence by Antigravity*
+*Developed & Stabilized by Antigravity*
