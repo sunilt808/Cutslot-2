@@ -79,6 +79,9 @@ const Layout = ({ children }) => {
               <Link to="/admin/revenue" className={`nav-button ${isActive('/admin/revenue') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin/revenue') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin/revenue') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
                 <TrendingUp size={14} /> REVENUE
               </Link>
+              <Link to="/admin/allocations" className={`nav-button ${isActive('/admin/allocations') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/admin/allocations') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/admin/allocations') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <Shield size={14} /> DISPATCH
+              </Link>
             </>
           )}
 
@@ -111,6 +114,12 @@ const Layout = ({ children }) => {
               </Link>
               <Link to="/profile/revenue" className={`nav-button ${isActive('/profile/revenue') || isActive('/profile/wallet') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/profile/revenue') || isActive('/profile/wallet') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/profile/revenue') || isActive('/profile/wallet') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
                 <TrendingUp size={14} /> REVENUE
+              </Link>
+              <Link to="/profile/subscriptions" className={`nav-button ${isActive('/profile/subscriptions') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/profile/subscriptions') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/profile/subscriptions') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <Crown size={14} /> MEMBERSHIPS
+              </Link>
+              <Link to="/profile/advance-booking" className={`nav-button ${isActive('/profile/advance-booking') ? 'active' : ''}`} style={{ textDecoration: 'none', padding: '10px 18px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '8px', color: isActive('/profile/advance-booking') ? 'var(--bg-dark)' : 'var(--text-cream)', background: isActive('/profile/advance-booking') ? 'var(--gold)' : 'transparent', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                <Zap size={14} /> ADVANCE
               </Link>
             </>
           )}

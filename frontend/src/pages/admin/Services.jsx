@@ -119,6 +119,18 @@ const AdminServices = () => {
                             <option value="4">FLOOR 04 (MEMBERSHIP)</option>
                         </select>
                     </div>
+                    <div className="input-field">
+                        <label style={{ color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '1rem' }}>SAC CODE (GST)</label>
+                        <input className="glass-input" value={formData.sac_code || '9983'} onChange={e => setFormData({...formData, sac_code: e.target.value})} style={{ width: '100%' }} />
+                    </div>
+                    <div className="input-field">
+                        <label style={{ color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '1rem' }}>HSN CODE (GST)</label>
+                        <input className="glass-input" value={formData.hsn_code || '3304'} onChange={e => setFormData({...formData, hsn_code: e.target.value})} style={{ width: '100%' }} />
+                    </div>
+                    <div className="input-field" style={{ gridColumn: 'span 2' }}>
+                        <label style={{ color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '1rem' }}>UPSELL SUGGESTIONS (COMMA SEPARATED IDs)</label>
+                        <input className="glass-input" placeholder="e.g. 5, 12, 18" value={formData.upsell_suggestions || ''} onChange={e => setFormData({...formData, upsell_suggestions: e.target.value})} style={{ width: '100%' }} />
+                    </div>
                     <div className="input-field" style={{ gridColumn: 'span 2' }}>
                         <label style={{ color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '1rem' }}>CATEGORY KEY</label>
                         <select className="glass-input" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} style={{ width: '100%', padding: '1.2rem' }}>
@@ -127,6 +139,7 @@ const AdminServices = () => {
                             <option value="subscription">SUBSCRIPTION / PLAN</option>
                             <option value="advance">ADVANCE / VIP</option>
                             <option value="custom">CUSTOM</option>
+                            <option value="home">HOME SERVICE</option>
                         </select>
                     </div>
                 </div>

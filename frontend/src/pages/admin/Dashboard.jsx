@@ -48,64 +48,63 @@ const AdminDashboard = () => {
       </header>
 
       {/* 📊 CORE METRICS GRID */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem', marginBottom: '4rem' }}>
-         <div className="glass-card hover-lift" style={{ textAlign: 'center', padding: '3.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginBottom: '4rem' }}>
+         <div className="glass-card hover-lift" style={{ textAlign: 'center', padding: '3.5rem', background: 'linear-gradient(135deg, rgba(212,175,55,0.08), transparent)' }}>
             <TrendingUp size={30} color="var(--gold)" style={{ marginBottom: '1.5rem' }} />
-            <div style={{ color: 'var(--text-dim)', fontSize: '0.85rem', letterSpacing: '3px', fontWeight: 'bold' }}>TOTAL REVENUE</div>
+            <div style={{ color: 'var(--text-dim)', fontSize: '0.85rem', letterSpacing: '3px', fontWeight: 'bold' }}>ESTATE REVENUE</div>
             <div className="serif" style={{ fontSize: '3.8rem', margin: '0.5rem 0' }}>₹{stats.total_revenue}</div>
-            <div style={{ fontSize: '0.7rem', color: '#4caf50', fontWeight: 'bold' }}>+12.4% PERFORMANCE</div>
-         </div>
-         <div className="glass-card hover-lift" style={{ textAlign: 'center', padding: '3.5rem' }}>
-            <Calendar size={30} color="var(--gold)" style={{ marginBottom: '1.5rem' }} />
-            <div style={{ color: 'var(--text-dim)', fontSize: '0.85rem', letterSpacing: '3px', fontWeight: 'bold' }}>BOOKINGS</div>
-            <div className="serif" style={{ fontSize: '3.8rem', margin: '0.5rem 0' }}>{stats.total_bookings}</div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--gold)', fontWeight: 'bold' }}>ESTATE RITUALS</div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', fontSize: '0.7rem', fontWeight: 'bold' }}>
+               <span style={{ color: '#4caf50' }}>NET PROFIT: ₹{stats.net_profit?.toFixed(0) || '0'}</span>
+            </div>
          </div>
          <div className="glass-card hover-lift" style={{ textAlign: 'center', padding: '3.5rem' }}>
             <Users size={30} color="var(--gold)" style={{ marginBottom: '1.5rem' }} />
-            <div style={{ color: 'var(--text-dim)', fontSize: '0.85rem', letterSpacing: '3px', fontWeight: 'bold' }}>ACTIVE USERS</div>
-            <div className="serif" style={{ fontSize: '3.8rem', margin: '0.5rem 0' }}>{stats.active_users}</div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-cream)', fontWeight: 'bold' }}>VETTED ACCOUNTS</div>
+            <div style={{ color: 'var(--text-dim)', fontSize: '0.85rem', letterSpacing: '3px', fontWeight: 'bold' }}>ESTATE GUESTS</div>
+            <div className="serif" style={{ fontSize: '3.8rem', margin: '0.5rem 0' }}>{stats.client_count || '0'}</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--gold)', fontWeight: 'bold' }}>REGISTERED CLIENTS</div>
          </div>
          <div className="glass-card hover-lift" style={{ textAlign: 'center', padding: '3.5rem' }}>
-            <Star size={30} color="var(--gold)" style={{ marginBottom: '1.5rem' }} />
-            <div style={{ color: 'var(--text-dim)', fontSize: '0.85rem', letterSpacing: '3px', fontWeight: 'bold' }}>AVG RATING</div>
-            <div className="serif" style={{ fontSize: '3.8rem', margin: '0.5rem 0' }}>{stats.avg_rating}</div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--gold)', fontWeight: 'bold' }}>EXCELLENCE SCORE</div>
+            <Calendar size={30} color="var(--gold)" style={{ marginBottom: '1.5rem' }} />
+            <div style={{ color: 'var(--text-dim)', fontSize: '0.85rem', letterSpacing: '3px', fontWeight: 'bold' }}>TOTAL RITUALS</div>
+            <div className="serif" style={{ fontSize: '3.8rem', margin: '0.5rem 0' }}>{stats.total_bookings}</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-cream)', fontWeight: 'bold' }}>ALL-TIME SESSIONS</div>
+         </div>
+         <div className="glass-card hover-lift" style={{ textAlign: 'center', padding: '3.5rem' }}>
+            <Activity size={30} color="var(--gold)" style={{ marginBottom: '1.5rem' }} />
+            <div style={{ color: 'var(--text-dim)', fontSize: '0.85rem', letterSpacing: '3px', fontWeight: 'bold' }}>SERVICE DIVERSITY</div>
+            <div className="serif" style={{ fontSize: '3.8rem', margin: '0.5rem 0' }}>{stats.service_breakdown?.length || '0'}</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: 'bold' }}>UNIQUE RITUALS</div>
          </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr', gap: '3rem', marginBottom: '4rem' }}>
-         {/* 🕋 REVENUE BY FLOOR CHART */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3rem', marginBottom: '4rem' }}>
+         {/* 👥 CLIENT DIRECTORY (V3.1) */}
          <div className="glass-card" style={{ padding: '4rem' }}>
-            <h3 className="serif" style={{ fontSize: '2.5rem', marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '15px' }}><PieChart size={24} color="var(--gold)" /> REVENUE <span style={{ color: 'var(--gold)' }}>DISTRIBUTION</span></h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-               {Object.entries(stats.revenue_by_floor || {}).map(([floor, rev]) => (
-                  <div key={floor} style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', alignItems: 'center' }}>
-                     <div style={{ minWidth: '100px', fontWeight: 'bold', letterSpacing: '2px', color: 'var(--gold)' }}>FLOOR {floor}</div>
-                     <div style={{ flex: 1, height: '12px', background: 'rgba(212,175,55,0.05)', borderRadius: '6px', position: 'relative', overflow: 'hidden' }}>
-                        <div className="pulse-gold-static" style={{ position: 'absolute', top: 0, left: 0, height: '100%', background: 'var(--gold)', width: `${(rev / (stats.total_revenue || 1)) * 100}%` }}></div>
+            <h3 className="serif" style={{ fontSize: '2.5rem', marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '15px' }}><Users size={24} color="var(--gold)" /> GUEST <span style={{ color: 'var(--gold)' }}>DIRECTORY</span></h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+               {(stats.client_list || []).map((c, i) => (
+                  <div key={i} className="hover-lift" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'rgba(255,255,255,0.01)', borderBottom: '1px solid var(--glass-border)' }}>
+                     <div>
+                        <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{c.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{c.email}</div>
                      </div>
-                     <div className="serif" style={{ minWidth: '120px', textAlign: 'right', fontSize: '1.5rem' }}>₹{rev}</div>
+                     <div style={{ fontStyle: 'italic', color: 'var(--gold)', fontSize: '0.8rem', letterSpacing: '1px' }}>{c.category?.toUpperCase()}</div>
                   </div>
                ))}
-               {!Object.keys(stats.revenue_by_floor).length && <p style={{ color: 'var(--text-dim)', textAlign: 'center' }}>Awaiting initial revenue recordings...</p>}
+               {!stats.client_list?.length && <p style={{ color: 'var(--text-dim)', textAlign: 'center' }}>Awaiting initial guest registrations...</p>}
             </div>
          </div>
 
-         {/* 💎 POPULAR SERVICES */}
+         {/* 🕋 POPULAR DEMAND */}
          <div className="glass-card" style={{ padding: '4rem' }}>
-            <h3 className="serif" style={{ fontSize: '2.5rem', marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '15px' }}><Crown size={24} color="var(--gold)" /> ELITE <span style={{ color: 'var(--gold)' }}>DEMAND</span></h3>
+            <h3 className="serif" style={{ fontSize: '2.2rem', marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '15px' }}><Crown size={22} color="var(--gold)" /> TOP <span style={{ color: 'var(--gold)' }}>DEMAND</span></h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-               {(stats.popular_services || []).length > 0 ? stats.popular_services.map((s, i) => (
-                  <div key={i} className="hover-lift" style={{ display: 'flex', justifyContent: 'space-between', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
-                     <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--gold-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)', fontWeight: 'bold' }}>{i+1}</div>
-                         <div style={{ fontWeight: 'bold' }}>{s.name}</div>
-                     </div>
-                     <div style={{ color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '1px' }}>{s.bookings} RITUALS</div>
+               {(stats.popular_services || []).map((s, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', padding: '1rem', borderLeft: '3px solid var(--gold)', background: 'rgba(212,175,55,0.02)' }}>
+                     <span style={{ fontWeight: 'bold' }}>{s.name}</span>
+                     <span style={{ color: 'var(--gold)' }}>{s.bookings} BUZZ</span>
                   </div>
-               )) : <p style={{ color: 'var(--text-dim)', textAlign: 'center' }}>Generating demand data...</p>}
+               ))}
             </div>
          </div>
       </div>

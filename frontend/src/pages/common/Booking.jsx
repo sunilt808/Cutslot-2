@@ -97,16 +97,22 @@ const Booking = () => {
       </section>
 
       <div className="services-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2.5rem' }}>
-        {services.length === 0 && !loading && (
+        {!user ? (
+            <div style={{ gridColumn: 'span 3', textAlign: 'center', padding: '10rem 5rem', border: '1px dashed var(--gold)', borderRadius: '30px', background: 'rgba(212,175,55,0.02)' }}>
+                <Crown size={80} color="var(--gold)" style={{ opacity: 0.1, marginBottom: '2.5rem' }} />
+                <h2 className="serif" style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>ELITE ACCESS <span style={{ color: 'var(--gold)' }}>RESTRICTED</span></h2>
+                <p style={{ color: 'var(--text-dim)', fontSize: '1.2rem', marginBottom: '3rem' }}>To view our curated rituals and reserve your seat at the estate, please authenticate your profile.</p>
+                <button onClick={() => navigate('/auth')} className="btn-gold" style={{ padding: '1.8rem 5rem', fontSize: '1.2rem', borderRadius: '50px' }}>CREATE ESTATE ACCOUNT</button>
+            </div>
+        ) : services.length === 0 && !loading ? (
             <div style={{ gridColumn: 'span 3', textAlign: 'center', padding: '5rem', color: 'var(--text-dim)' }}>
                 <Scissors size={50} style={{ opacity: 0.1, marginBottom: '1rem' }} />
                 <p>No services found for this floor. Please select another floor.</p>
             </div>
-        )}
-        {services.map(service => (
-          <div key={service.id} className="glass-card hover-lift" style={{ padding: '3rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', border: '1px solid var(--glass-border)' }}>
+        ) : services.map(service => (
+          <div key={service.id} className="glass-card hover-lift" style={{ padding: '3.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', border: '1px solid var(--glass-border)' }}>
              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--gold)', letterSpacing: '2px' }}>
-                <span>{service.category.toUpperCase()}</span>
+                <span>{service.category?.toUpperCase() || 'COMMON'}</span>
                 <span>{service.duration} MIN</span>
              </div>
              <h3 className="serif" style={{ fontSize: '2rem', margin: 0 }}>{service.name}</h3>
@@ -125,33 +131,67 @@ const Booking = () => {
              <button onClick={() => setBookingService(null)} style={{ position: 'absolute', right: '2rem', top: '2rem', background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', fontSize: '1rem', fontWeight: 'bold' }}>CLOSE [X]</button>
              
              {paymentStep ? (
-               <div className="fade-in">
-                  <h2 className="serif" style={{ fontSize: '3rem', marginBottom: '3rem', textAlign: 'center' }}>
-                    {user?.subscription_plan ? 'MEMBERSHIP PAYMENT' : 'SERVICE PAYMENT'}
-                  </h2>
-                  
-                  <div className="glass-card" style={{ background: 'rgba(255,255,255,0.03)', padding: '3rem', marginBottom: '3rem', textAlign: 'center' }}>
-                     {user?.subscription_plan ? (
-                        <>
-                           <div style={{ fontSize: '0.9rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '3px', marginBottom: '1rem' }}>MEMBERSHIP STATUS</div>
-                           <div className="serif" style={{ fontSize: '2.5rem', color: 'var(--text-cream)' }}>{user.subscription_plan?.toUpperCase()}</div>
-                           <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '2rem' }}>This booking is covered by your plan.</div>
-                        </>
-                     ) : (
-                        <>
-                           <div style={{ fontSize: '0.9rem', color: 'var(--text-dim)', fontWeight: 'bold', marginBottom: '1rem' }}>TOTAL AMOUNT</div>
-                           <div className="serif" style={{ fontSize: '4.5rem', color: 'var(--gold)' }}>₹{bookingService.price}</div>
-                           <div style={{ fontSize: '0.75rem', color: '#4caf50', marginTop: '2rem', fontWeight: 'bold' }}>SECURE PAYMENT GATEWAY</div>
-                        </>
-                     )}
-                  </div>
+                <div className="fade-in">
+                   <h2 className="serif" style={{ fontSize: '3rem', marginBottom: '3rem', textAlign: 'center' }}>
+                     {user?.subscription_plan ? 'MEMBERSHIP PAYMENT' : 'SERVICE PAYMENT'}
+                   </h2>
+                   
+                   <div className="glass-card" style={{ background: 'rgba(255,255,255,0.03)', padding: '3rem', marginBottom: '3rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ color: 'var(--text-dim)' }}>BASE RITUAL PRICE</span>
+                            <span style={{ fontWeight: 'bold' }}>₹{user?.subscription_plan ? 0 : bookingService.price}</span>
+                         </div>
+                         {bookingService.service_type === 'home' && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--gold)' }}>
+                               <span>TRAVEL PREMIUM (DOORSTEP)</span>
+                               <span>+₹{bookingService.travel_premium || 500}</span>
+                            </div>
+                         )}
+                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+                            <span>ESTATE TAX (GST 18%)</span>
+                            <span>₹{((user?.subscription_plan ? 0 : bookingService.price) + (bookingService.service_type === 'home' ? 500 : 0)) * 0.18}</span>
+                         </div>
+                         <div style={{ height: '1px', background: 'var(--glass-border)', margin: '1rem 0' }}></div>
+                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.8rem' }}>
+                            <span className="serif">FINAL TOTAL</span>
+                            <span className="serif" style={{ color: 'var(--gold)' }}>
+                               ₹{((user?.subscription_plan ? 0 : bookingService.price) + (bookingService.service_type === 'home' ? 500 : 0)) * 1.18}
+                            </span>
+                         </div>
+                      </div>
+                   </div>
 
-                  <button onClick={handleFinalBooking} className="btn-gold" style={{ width: '100%', padding: '1.8rem', fontSize: '1.3rem', fontWeight: 'bold', borderRadius: '50px' }}>
-                    <Wallet size={24} style={{ marginRight: '15px' }} /> 
-                    {user?.subscription_plan ? 'CONFIRM BOOKING' : 'PAY NOW'}
-                  </button>
-                  <button onClick={() => setPaymentStep(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', width: '100%', padding: '2rem', cursor: 'pointer', fontSize: '1rem' }}>GO BACK</button>
-               </div>
+                   {/* ⚡ CONTEXTUAL UPSELL (V3.0 Intelligence) */}
+                   <div className="glass-card" style={{ padding: '2.5rem', marginBottom: '3rem', border: '1px dashed var(--gold)', background: 'rgba(212,175,55,0.02)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                         <div style={{ background: 'var(--gold-glow)', padding: '12px', borderRadius: '50%' }}><Sparkles size={20} color="var(--gold)" /></div>
+                         <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '0.9rem', color: 'var(--gold)', fontWeight: 'bold' }}>EXECUTIVE RECOMMENDATION</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '4px' }}>Guests booking {bookingService.name} often add a **Bespoke Scalp Massage** (+15m).</div>
+                         </div>
+                         <label className="switch" style={{ position: 'relative', display: 'inline-block', width: '50px', height: '26px' }}>
+                            <input type="checkbox" style={{ opacity: 0, width: 0, height: 0 }} />
+                            <span className="slider round" style={{ position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(255,255,255,0.1)', transition: '.4s', borderRadius: '34px' }}></span>
+                         </label>
+                      </div>
+                   </div>
+
+                   <button onClick={handleFinalBooking} disabled={loading} className="btn-gold" style={{ width: '100%', padding: '1.8rem', fontSize: '1.3rem', fontWeight: 'bold', borderRadius: '50px', opacity: loading ? 0.5 : 1, cursor: loading ? 'not-allowed' : 'pointer' }}>
+                     <Wallet size={24} style={{ marginRight: '15px' }} /> 
+                     {loading ? 'AUTHENTICATING RITUAL...' : (user?.subscription_plan ? 'CONFIRM RITUAL' : 'AUTHORIZE PAYMENT')}
+                   </button>
+                   
+                   {/* 🛡️ PROGRESSIVE PENALTY TRANSPARENCY (V3.0) */}
+                   <div style={{ display: 'flex', gap: '15px', marginTop: '3rem', padding: '1.5rem', background: 'rgba(244,67,54,0.05)', borderRadius: '15px', border: '1px solid rgba(244,67,54,0.2)' }}>
+                      <ShieldAlert size={20} color="#f44336" style={{ flexShrink: 0 }} />
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', lineHeight: '1.4' }}>
+                         <span style={{ color: '#f44336', fontWeight: 'bold' }}>LUXURY PENALTY PROTOCOL:</span> Retraction 24h+ (Free), <span style={{ color: 'var(--gold)' }}>12h-24h (30%)</span>, &lt;12h (50-100%). Estate protection active.
+                      </div>
+                   </div>
+                   
+                   <button onClick={() => setPaymentStep(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', width: '100%', padding: '2rem', cursor: 'pointer', fontSize: '1rem' }}>GO BACK</button>
+                </div>
             ) : (
               <>
                 <h2 className="serif" style={{ fontSize: '3rem', marginBottom: '3rem', textAlign: 'center' }}>BOOKING <span style={{ color: 'var(--gold)' }}>DETAILS</span></h2>

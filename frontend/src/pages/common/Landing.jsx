@@ -202,7 +202,38 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* 3.5 EXCLUSIVE OFFERS */}
+      {/* 3.5 ESTATE MEMBERSHIPS (SPECIAL SUBSCRIPTIONS) */}
+      <section style={{ padding: '8rem 2rem', background: 'var(--bg-dark)', borderTop: '1px solid var(--glass-border)' }}>
+        <h2 className="serif" style={{ fontSize: '4rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+          ATELIER <span style={{ color: 'var(--gold)' }}>MEMBERSHIPS</span>
+        </h2>
+        <p style={{ textAlign: 'center', color: 'var(--text-dim)', fontSize: '1.1rem', letterSpacing: '4px', marginBottom: '5rem' }}>UNLOCATED LUXURY BENEFITS</p>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+           {[
+              { name: "SILVER", price: "₹10,000", benefits: ["20% OFF ALL RITUALS", "MONTHLY HAIR CARE", "FLEXIBLE SLOTS"], color: "#c0c0c0" },
+              { name: "GOLD", price: "₹15,000", benefits: ["30% OFF ALL RITUALS", "VIP LOUNGE ACCESS", "PRIVATE STYLIST"], color: "var(--gold)" },
+              { name: "ELITE", price: "₹25,000", benefits: ["50% OFF BEST RITUALS", "PRIORITY BOOKING", "PRODUCT CONCIERGE"], color: "#e5e4e2" },
+              { name: "ROYAL", price: "₹50,000", benefits: ["UNLIMITED ACCESS", "DOORSTEP LUXURY", "PRIVATE ESTATE BOX"], color: "#ffab40" }
+           ].map((tier, i) => (
+              <div key={i} className="glass-card hover-lift" style={{ padding: '4rem 3rem', textAlign: 'center', border: `1px solid ${tier.color}33`, position: 'relative' }}>
+                 <div style={{ position: 'absolute', top: '0', left: '50%', transform: 'translateX(-50%)', width: '80px', height: '4px', background: tier.color }}></div>
+                 <div className="serif" style={{ fontSize: '1.2rem', color: tier.color, letterSpacing: '6px', marginBottom: '1.5rem' }}>{tier.name}</div>
+                 <div className="serif" style={{ fontSize: '3.5rem', marginBottom: '2.5rem' }}>{tier.price}</div>
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', marginBottom: '3rem' }}>
+                    {tier.benefits.map((b, j) => (
+                       <div key={j} style={{ fontSize: '0.85rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                          <ShieldCheck size={14} color={tier.color} /> {b}
+                       </div>
+                    ))}
+                 </div>
+                 <button onClick={() => navigate('/auth')} className="btn-gold" style={{ background: 'transparent', border: `1px solid ${tier.color}`, color: tier.color, width: '100%', padding: '1.2rem' }}>ELEVATE STATUS</button>
+              </div>
+           ))}
+        </div>
+      </section>
+
+      {/* 3.6 EXCLUSIVE OFFERS */}
       <section style={{ padding: '8rem 2rem', borderTop: '1px solid var(--glass-border)', background: 'radial-gradient(circle at bottom left, rgba(212,175,55,0.05), transparent)' }}>
         <h2 className="serif" style={{ fontSize: '4rem', textAlign: 'center', marginBottom: '1.5rem' }}>
           EXCLUSIVE <span style={{ color: 'var(--gold)' }}>OFFERS</span>

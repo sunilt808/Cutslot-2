@@ -6,9 +6,22 @@ const WorkerQueue = () => {
     const { user, api } = useAuth();
     const [queue, setQueue] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [wsStatus, setWsStatus] = useState('offline');
 
     useEffect(() => {
         fetchQueue();
+        
+        // 🌐 LIVE ESTATE SYNC (WebSockets)
+        const ws = new WebSocket(`ws://${window.location.host.includes('localhost') ? 'localhost:8000' : window.location.host}/ws/estate`);
+        ws.onopen = () => setWsStatus('online');
+        ws.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            if (data.type === 'STATUS_UPDATE' || data.type === 'TRANSIT_UPDATE') {
+                fetchQueue();
+            }
+        };
+        ws.onclose = () => setWsStatus('offline');
+        return () => ws.close();
     }, [api]);
 
     const fetchQueue = async () => {
@@ -18,6 +31,13 @@ const WorkerQueue = () => {
             setQueue(res.data);
         } catch (err) { console.error(err); }
         finally { setLoading(false); }
+    };
+
+    const updateTransit = async (id, status) => {
+        try {
+            await api.put(`/bookings/${id}/transit`, { status });
+            fetchQueue();
+        } catch (err) { alert("Failed to update transit status."); }
     };
 
     const updateStatus = async (id, status) => {
@@ -45,11 +65,15 @@ const WorkerQueue = () => {
     return (
         <div className="worker-queue-page fade-in" style={{ padding: '2rem' }}>
             <header className="glass-card" style={{ padding: '5rem 4rem', marginBottom: '4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '4px solid var(--gold)', background: 'radial-gradient(circle at top, rgba(212,175,55,0.05), transparent)' }}>
-                 <div>
+                 <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
+                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: wsStatus === 'online' ? '#4caf50' : '#f44336' }}></div>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--gold)', letterSpacing: '2px', fontWeight: 'bold' }}>LIVE SYNC: {wsStatus.toUpperCase()}</span>
+                    </div>
                     <h1 className="serif gradient-text" style={{ fontSize: '4.5rem', margin: 0, letterSpacing: '-2px' }}>MY <span style={{ color: 'var(--text-cream)' }}>QUEUE</span></h1>
                     <p style={{ color: 'var(--text-dim)', fontSize: '1.4rem', marginTop: '1rem' }}>Active appointments and upcoming bookings for you on Floor 0{user?.assigned_floor}.</p>
                  </div>
-                 <div style={{ display: 'flex', gap: '1.5rem' }}>
+                 <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                     <button onClick={fetchQueue} className="btn-gold" style={{ padding: '1.2rem 2.5rem', fontWeight: 'bold' }}><Clock size={16} /> REFRESH LIST</button>
                     <div className="glass-card" style={{ padding: '1rem 2rem', border: '1px solid var(--gold)', color: 'var(--gold)', fontWeight: 'bold', fontSize: '0.8rem' }}>ASSIGNED FLOOR: 0{user?.assigned_floor}</div>
                  </div>
@@ -74,34 +98,55 @@ const WorkerQueue = () => {
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(450px, 1fr))', gap: '2.5rem' }}>
                                 {groupedQueue[date].sort((a,b) => new Date(a.booking_time) - new Date(b.booking_time)).map(b => (
                                     <div key={b.id} className="glass-card hover-lift" style={{ border: b.status === 'confirmed' ? '1px solid var(--gold)' : '1px solid var(--glass-border)', padding: '3rem', position: 'relative', overflow: 'hidden' }}>
-                                        {b.status === 'confirmed' && <div style={{ position: 'absolute', top: '1.5rem', right: '-3rem', background: 'var(--gold)', color: 'black', padding: '0.5rem 4rem', transform: 'rotate(45deg)', fontWeight: 'bold', fontSize: '0.7rem' }}>CONFIRMED</div>}
+                                        {b.status === 'confirmed' && <div style={{ position: 'absolute', top: '1.5rem', right: '-3rem', background: 'var(--gold)', color: 'black', padding: '0.5rem 4rem', transform: 'rotate(45deg)', fontWeight: 'bold', fontSize: '0.7rem', zIndex: 10 }}>CONFIRMED</div>}
                                         
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                                             <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
                                                 <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>{new Date(b.booking_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                                                 <div style={{ padding: '0.6rem 1.2rem', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold', letterSpacing: '1px' }}>BOOKING #{b.id}</div>
+                                                {b.service_type === 'home' && (
+                                                    <div style={{ padding: '0.6rem 1.2rem', background: 'rgba(212,175,55,0.1)', borderRadius: '10px', fontSize: '0.75rem', color: 'var(--gold)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <ArrowRight size={14} /> TRANSIT: {b.transit_status?.toUpperCase()}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         
-                                        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', marginBottom: '3rem', background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '20px' }}>
-                                            <div style={{ background: 'var(--gold-glow)', padding: '15px', borderRadius: '50%' }}><User size={30} color="var(--gold)" /></div>
-                                            <div>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '5px' }}>GUEST NAME</div>
-                                                <div className="serif" style={{ fontSize: '1.8rem' }}>{b.user_name}</div>
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--gold)', letterSpacing: '1px', marginTop: '5px' }}>TOKEN: CS-{b.id}-{new Date().getFullYear()}</div>
-                                            </div>
-                                        </div>
+                                        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', marginBottom: '2.5rem', background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '20px' }}>
+                                             <div style={{ background: 'var(--gold-glow)', padding: '15px', borderRadius: '50%' }}><User size={30} color="var(--gold)" /></div>
+                                             <div style={{ flex: 1 }}>
+                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                     <div>
+                                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '5px' }}>GUEST NAME</div>
+                                                         <div className="serif" style={{ fontSize: '1.8rem' }}>{b.user_name}</div>
+                                                     </div>
+                                                     <div style={{ textAlign: 'right' }}>
+                                                         <div style={{ fontSize: '0.7rem', color: 'var(--gold)', fontWeight: 'bold' }}>EARNING (COMMISSION)</div>
+                                                         <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>₹{b.artisan_commission?.toFixed(2) || '0.00'}</div>
+                                                     </div>
+                                                 </div>
+                                             </div>
+                                         </div>
 
-                                        <div style={{ display: 'flex', gap: '1rem' }}>
-                                            {b.status === 'pending' && (
-                                                <button onClick={() => updateStatus(b.id, 'confirmed')} className="btn-gold" style={{ background: '#4caf50', border: 'none', color: 'white', flex: 1, padding: '1.2rem', fontWeight: 'bold', borderRadius: '15px' }}><Check size={18} /> CONFIRM</button>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            {/* LOGISTICS CONTROLS (V3.0) */}
+                                            {b.service_type === 'home' && b.status === 'confirmed' && (
+                                                <div style={{ display: 'flex', gap: '1rem', borderTop: '1px solid var(--glass-border)', paddingTop: '2rem', marginBottom: '1rem' }}>
+                                                    <button onClick={() => updateTransit(b.id, 'en_route')} disabled={b.transit_status === 'en_route'} className="btn-gold" style={{ flex: 1, padding: '1rem', background: b.transit_status === 'en_route' ? 'var(--gold)' : 'transparent', border: '1px solid var(--gold)', color: b.transit_status === 'en_route' ? 'black' : 'var(--gold)', fontSize: '0.75rem' }}>EN ROUTE</button>
+                                                    <button onClick={() => updateTransit(b.id, 'arrived')} disabled={b.transit_status === 'arrived'} className="btn-gold" style={{ flex: 1, padding: '1rem', background: b.transit_status === 'arrived' ? 'var(--gold)' : 'transparent', border: '1px solid var(--gold)', color: b.transit_status === 'arrived' ? 'black' : 'var(--gold)', fontSize: '0.75rem' }}>ARRIVED</button>
+                                                </div>
                                             )}
-                                            {b.status === 'confirmed' && (
-                                                <button onClick={() => updateStatus(b.id, 'completed')} className="btn-gold" style={{ flex: 2, padding: '1.2rem', fontWeight: 'bold', borderRadius: '15px' }}><Scissors size={18} /> MARK AS DONE</button>
-                                            )}
-                                            <button onClick={() => updateStatus(b.id, 'absent')} style={{ flex: 1, padding: '1.2rem', background: 'transparent', border: '1px solid var(--text-dim)', color: 'var(--text-dim)', borderRadius: '15px', fontSize: '0.8rem', fontWeight: 'bold' }}>ABSENT</button>
-                                            <button onClick={() => updateStatus(b.id, 'rescheduled')} style={{ flex: 1, padding: '1.2rem', background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: '15px', fontSize: '0.8rem', fontWeight: 'bold' }}>MOVE</button>
-                                            <button onClick={() => updateStatus(b.id, 'cancelled')} style={{ padding: '1.2rem', background: 'transparent', border: '1px solid #f44336', color: '#f44336', borderRadius: '15px' }} title="Cancel Booking"><X size={18} /></button>
+
+                                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                                {b.status === 'pending' && (
+                                                    <button onClick={() => updateStatus(b.id, 'confirmed')} className="btn-gold" style={{ background: '#4caf50', border: 'none', color: 'white', flex: 1, padding: '1.2rem', fontWeight: 'bold', borderRadius: '15px' }}><Check size={18} /> CONFIRM</button>
+                                                )}
+                                                {b.status === 'confirmed' && (
+                                                    <button onClick={() => updateStatus(b.id, 'completed')} className="btn-gold" style={{ flex: 2, padding: '1.2rem', fontWeight: 'bold', borderRadius: '15px' }}><Scissors size={18} /> MARK AS DONE</button>
+                                                )}
+                                                <button onClick={() => updateStatus(b.id, 'absent')} style={{ flex: 1, padding: '1.2rem', background: 'transparent', border: '1px solid var(--text-dim)', color: 'var(--text-dim)', borderRadius: '15px', fontSize: '0.8rem', fontWeight: 'bold' }}>ABSENT</button>
+                                                <button onClick={() => updateStatus(b.id, 'cancelled')} style={{ padding: '1.2rem', background: 'transparent', border: '1px solid #f44336', color: '#f44336', borderRadius: '15px' }} title="Cancel Booking"><X size={18} /></button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -114,7 +159,7 @@ const WorkerQueue = () => {
             <footer style={{ marginTop: '6rem', textAlign: 'center', color: 'var(--text-dim)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
                     <Shield size={16} color="var(--gold)" />
-                    <span style={{ fontSize: '0.75rem', letterSpacing: '3px', fontWeight: 'bold' }}>PERSONAL WORKER TERMINAL V2.4</span>
+                    <span style={{ fontSize: '0.75rem', letterSpacing: '3px', fontWeight: 'bold' }}>LUXURY ESTATE TERMINAL V3.0</span>
                 </div>
             </footer>
         </div>

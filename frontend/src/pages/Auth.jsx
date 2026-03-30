@@ -156,18 +156,23 @@ const Auth = () => {
               </div>
 
               {role === 'customer' && (
-                  <div className="subscription-choice slide-in" style={{ background: 'rgba(212,175,55,0.03)', padding: '2rem', borderRadius: '25px', border: '1px solid var(--gold-glow)' }}>
-                      <label style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
-                          <Crown size={16} /> SELECT YOUR ELITE MEMBERSHIP (OPTIONAL)
+                  <div className="subscription-choice slide-in" style={{ background: 'rgba(212,175,55,0.03)', padding: '2.5rem', borderRadius: '25px', border: '1px solid var(--gold-glow)' }}>
+                      <label style={{ fontSize: '0.9rem', color: 'var(--gold)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2rem' }}>
+                          <Crown size={20} /> SELECT YOUR ELITE MEMBERSHIP (OPTIONAL)
                       </label>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                          {plans.slice(0, 4).map(p => (
-                              <div key={p.id} onClick={() => setSelectedPlan(selectedPlan === p.id ? null : p.id)} style={{ padding: '1.2rem', borderRadius: '15px', border: selectedPlan === p.id ? '2px solid var(--gold)' : '1px solid var(--glass-border)', background: selectedPlan === p.id ? 'rgba(212,175,55,0.1)' : 'transparent', cursor: 'pointer', position: 'relative', transition: '0.2s' }}>
-                                  <div style={{ fontWeight: 'bold', fontSize: '0.9rem', color: selectedPlan === p.id ? 'var(--gold)' : 'var(--text-cream)' }}>{p.name}</div>
-                                  <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>₹{p.price} / Month</div>
-                                  {selectedPlan === p.id && <CheckCircle size={16} color="var(--gold)" style={{ position: 'absolute', right: '1rem', top: '1.2rem' }} />}
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem' }}>
+                          {plans.length > 0 ? plans.map(p => (
+                              <div key={p.id} onClick={() => setSelectedPlan(selectedPlan === p.id ? null : p.id)} style={{ padding: '1.5rem', borderRadius: '18px', border: selectedPlan === p.id ? '2px solid var(--gold)' : '1px solid var(--glass-border)', background: selectedPlan === p.id ? 'rgba(212,175,55,0.12)' : 'rgba(255,255,255,0.02)', cursor: 'pointer', position: 'relative', transition: 'all 0.3s ease', transform: selectedPlan === p.id ? 'scale(1.02)' : 'scale(1)' }}>
+                                  <div style={{ fontWeight: 'bold', fontSize: '1rem', color: selectedPlan === p.id ? 'var(--gold)' : 'var(--text-cream)', marginBottom: '5px' }}>{p.name.split(' ')[0]}</div>
+                                  <div style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold' }}>₹{p.price}</div>
+                                  <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '8px' }}>{p.description.slice(0, 30)}...</div>
+                                  {selectedPlan === p.id && <CheckCircle size={18} color="var(--gold)" style={{ position: 'absolute', right: '1rem', top: '1.2rem' }} />}
                               </div>
-                          ))}
+                          )) : (
+                              <div style={{ gridColumn: 'span 2', textAlign: 'center', padding: '1rem', color: 'var(--text-dim)', fontSize: '0.8rem', border: '1px dashed var(--glass-border)', borderRadius: '10px' }}>
+                                 SYNCHRONIZING MEMBERSHIP REGISTRY...
+                              </div>
+                          )}
                       </div>
                   </div>
               )}

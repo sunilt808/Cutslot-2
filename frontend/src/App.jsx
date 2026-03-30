@@ -32,6 +32,9 @@ import ClientDashboard from './pages/client/Dashboard';
 import ClientWallet from './pages/client/Wallet';
 import ClientRevenue from './pages/client/Revenue';
 import MyAppointments from './pages/client/MyAppointments';
+import Subscriptions from './pages/client/Subscriptions';
+import AdvanceBooking from './pages/client/AdvanceBooking';
+import AdminAllocations from './pages/admin/Allocations';
 
 import './index.css';
 
@@ -74,6 +77,7 @@ function AppRoutes() {
       <Route path="/admin/revenue" element={<ProtectedRoute roles={['admin']}><AdminRevenue /></ProtectedRoute>} />
       <Route path="/admin/audits" element={<ProtectedRoute roles={['admin']}><AdminAudits /></ProtectedRoute>} />
       <Route path="/admin/profile" element={<ProtectedRoute roles={['admin']}><AdminProfile /></ProtectedRoute>} />
+      <Route path="/admin/allocations" element={<ProtectedRoute roles={['admin']}><AdminAllocations /></ProtectedRoute>} />
 
       {/* WORKER ROUTES */}
       <Route path="/staff" element={<ProtectedRoute roles={['staff']}><WorkerDashboard /></ProtectedRoute>} />
@@ -85,6 +89,8 @@ function AppRoutes() {
       <Route path="/profile/appointments" element={<ProtectedRoute roles={['customer']}><MyAppointments /></ProtectedRoute>} />
       <Route path="/profile/wallet" element={<ProtectedRoute roles={['customer']}><ClientWallet /></ProtectedRoute>} />
       <Route path="/profile/revenue" element={<ProtectedRoute roles={['customer']}><ClientRevenue /></ProtectedRoute>} />
+      <Route path="/profile/subscriptions" element={<ProtectedRoute roles={['customer']}><Subscriptions /></ProtectedRoute>} />
+      <Route path="/profile/advance-booking" element={<ProtectedRoute roles={['customer']}><AdvanceBooking /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
