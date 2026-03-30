@@ -431,6 +431,37 @@ async def list_reviews(db: Session = Depends(get_db)):
     except Exception:
         return []
 
+@app.post("/reviews/", response_model=schemas.ReviewInDB)
+async def create_review(
+    review: dict = Body(...),
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if current_user.role != "customer":
+        raise HTTPException(status_code=403, detail="Only elite members can submit rituals.")
+    
+    # Must have completed a booking with this worker
+    past_booking = db.query(models.Booking).filter(
+        models.Booking.user_id == current_user.id,
+        models.Booking.stylist_name == review['worker_name'],
+        models.Booking.status == "completed"
+    ).first()
+    
+    if not past_booking:
+        raise HTTPException(status_code=403, detail="Aesthetic protocol violation: You can only review artisans you have completed a ritual with.")
+        
+    db_review = models.Review(
+        user_id=current_user.id,
+        worker_name=review['worker_name'],
+        rating=review.get('rating', 5),
+        comment=review.get('comment', ''),
+        created_at=datetime.datetime.utcnow()
+    )
+    db.add(db_review)
+    db.commit()
+    db.refresh(db_review)
+    return db_review
+
 @app.get("/bookings/", response_model=List[schemas.BookingInDB])
 async def list_bookings(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     q = db.query(models.Booking)
