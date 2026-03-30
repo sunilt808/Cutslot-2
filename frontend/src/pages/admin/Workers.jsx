@@ -149,13 +149,13 @@ const AdminWorkers = () => {
                             </div>
                         </div>
                     )}
-                    <div className="input-field">
+                    <div className="input-field" style={{ gridColumn: 'span 1' }}>
                         <label style={{ color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '1rem' }}>ASSIGNED FLOOR</label>
-                        <input type="number" min="1" max="4" className="glass-input" required value={formData.assigned_floor} onChange={e => setFormData({...formData, assigned_floor: parseInt(e.target.value)})} style={{ width: '100%', padding: '1.5rem', borderRadius: '15px' }} />
+                        <input type="number" min="1" max="4" className="glass-input" required value={formData.assigned_floor} onChange={e => setFormData({...formData, assigned_floor: e.target.value === '' ? '' : parseInt(e.target.value)})} style={{ width: '100%', padding: '1.5rem', borderRadius: '15px' }} />
                     </div>
-                    <div className="input-field">
+                    <div className="input-field" style={{ gridColumn: 'span 1' }}>
                       <label style={{ color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '1rem' }}>COMMISSION %</label>
-                      <input type="number" step="0.1" className="glass-input" required value={formData.commission_rate} onChange={e => setFormData({...formData, commission_rate: parseFloat(e.target.value)})} style={{ width: '100%', padding: '1.5rem', borderRadius: '15px' }} />
+                      <input type="number" step="0.1" className="glass-input" required value={formData.commission_rate} onChange={e => setFormData({...formData, commission_rate: e.target.value === '' ? '' : parseFloat(e.target.value)})} style={{ width: '100%', padding: '1.5rem', borderRadius: '15px' }} />
                     </div>
                 </div>
 

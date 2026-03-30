@@ -548,6 +548,88 @@ async def get_worker_stats(current_user: models.User = Depends(get_current_user)
         "total_bookings": len(my_bookings)
     }
 
+# --- ADMIN CRUD & REPORTS ---
+
+@app.get("/admin/audits")
+async def get_audits(current_user: models.User = Depends(get_admin_user)):
+    return []  # Audit table stub to resolve dashboard 404
+
+@app.post("/admin/services/")
+async def create_service(service: schemas.ServiceBase, current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    db_svc = models.Service(**service.dict())
+    db.add(db_svc)
+    db.commit()
+    return db_svc
+
+@app.put("/admin/services/{id}")
+async def update_service(id: int, service: schemas.ServiceBase, current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    db_svc = db.query(models.Service).filter(models.Service.id == id).first()
+    if not db_svc: raise HTTPException(status_code=404)
+    for k, v in service.dict().items():
+        setattr(db_svc, k, v)
+    db.commit()
+    return db_svc
+
+@app.delete("/admin/services/{id}")
+async def delete_service(id: int, current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    db_svc = db.query(models.Service).filter(models.Service.id == id).first()
+    if not db_svc: raise HTTPException(status_code=404)
+    db.delete(db_svc)
+    db.commit()
+    return {"msg": "Service deleted"}
+
+@app.post("/admin/workers/")
+async def create_worker(worker: dict = Body(...), current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    db_user = models.User(
+        username=worker['username'],
+        email=worker['email'],
+        full_name=worker['full_name'],
+        password_hash=auth.get_password_hash(worker['password']),
+        role="staff",
+        is_approved=True,
+        assigned_floor=worker.get('assigned_floor', 1),
+        commission_rate=worker.get('commission_rate', 15.0)
+    )
+    db.add(db_user)
+    db.commit()
+    return {"msg": "Worker registered"}
+
+@app.put("/admin/workers/{id}")
+async def update_worker(id: int, worker: dict = Body(...), current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == id).first()
+    if not db_user: raise HTTPException(status_code=404)
+    for k, v in worker.items():
+        if k not in ['id', 'password'] and hasattr(db_user, k):
+            setattr(db_user, k, v)
+    if worker.get('password'):
+        db_user.password_hash = auth.get_password_hash(worker['password'])
+    db.commit()
+    return {"msg": "Worker updated"}
+
+@app.delete("/admin/workers/{id}")
+async def delete_worker(id: int, current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == id).first()
+    if not db_user: raise HTTPException(status_code=404)
+    db.delete(db_user)
+    db.commit()
+    return {"msg": "Worker deleted"}
+
+@app.get("/admin/revenue/report")
+async def get_revenue_report(current_user: models.User = Depends(get_admin_user), db: Session = Depends(get_db)):
+    bookings = db.query(models.Booking).filter(models.Booking.status == "completed").all()
+    total = sum(b.price_paid for b in bookings) if bookings else 0
+    by_floor = {}
+    by_category = {}
+    by_member = {}
+    for b in bookings:
+        floor = f"Floor {b.floor}"
+        by_floor[floor] = by_floor.get(floor, 0) + b.price_paid
+        by_category[b.category] = by_category.get(b.category, 0) + b.price_paid
+        mtype = b.user.customer_category if b.user else 'guest'
+        by_member[mtype] = by_member.get(mtype, 0) + b.price_paid
+            
+    return {"total": total, "by_floor": by_floor, "by_category": by_category, "by_member_type": by_member}
+
 def seed_database(db: Session):
     # ✂️ CORE SERVICES
     rituals = [

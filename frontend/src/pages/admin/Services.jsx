@@ -100,7 +100,7 @@ const AdminServices = () => {
                     </div>
                     <div className="input-field">
                         <label style={{ color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '1rem' }}>PRICE (INR)</label>
-                        <input type="number" className="glass-input" required value={formData.price} onChange={e => setFormData({...formData, price: parseInt(e.target.value)})} style={{ width: '100%' }} />
+                        <input type="number" className="glass-input" required value={formData.price} onChange={e => setFormData({...formData, price: e.target.value === '' ? '' : parseInt(e.target.value)})} style={{ width: '100%' }} />
                     </div>
                     <div className="input-field" style={{ gridColumn: 'span 2' }}>
                         <label style={{ color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '1rem' }}>DESCRIPTION</label>
@@ -108,11 +108,11 @@ const AdminServices = () => {
                     </div>
                     <div className="input-field">
                         <label style={{ color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '1rem' }}>DURATION (MINS)</label>
-                        <input type="number" className="glass-input" required value={formData.duration} onChange={e => setFormData({...formData, duration: parseInt(e.target.value)})} style={{ width: '100%' }} />
+                        <input type="number" className="glass-input" required value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value === '' ? '' : parseInt(e.target.value)})} style={{ width: '100%' }} />
                     </div>
                     <div className="input-field">
                         <label style={{ color: 'var(--gold)', fontSize: '0.8rem', fontWeight: 'bold', display: 'block', marginBottom: '1rem' }}>ASSIGNED FLOOR</label>
-                        <select className="glass-input" value={formData.floor} onChange={e => setFormData({...formData, floor: parseInt(e.target.value)})} style={{ width: '100%', padding: '1.2rem' }}>
+                        <select className="glass-input" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value === '' ? '' : parseInt(e.target.value)})} style={{ width: '100%', padding: '1.2rem' }}>
                             <option value="1">FLOOR 01 (GENERAL)</option>
                             <option value="2">FLOOR 02 (VIP)</option>
                             <option value="3">FLOOR 03 (BEAUTY)</option>
