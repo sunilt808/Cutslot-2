@@ -74,8 +74,12 @@ const Auth = () => {
       if (isLogin) {
         await login(username, password);
       } else {
-        await signup(username, fullName, email, password, role, floor, gender, phone, customerCategory);
-        // If customer chose a plan, subscribe them right after login
+        await signup(username, fullName, email, password, role, floor);
+        if (role === 'staff') {
+            alert("Artisan application submitted. Please wait for administrative approval.");
+            setIsLogin(true);
+            return;
+        }
         await login(username, password); 
         if (role === 'customer' && selectedPlan) {
             await subscribe(selectedPlan);

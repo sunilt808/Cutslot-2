@@ -82,8 +82,8 @@ export const AuthProvider = ({ children }) => {
     return true;
   };
 
-  const signup = async (username, full_name, email, password, role = 'customer') => {
-    await api.post('/users/', { username, full_name, email, password, role });
+  const signup = async (username, full_name, email, password, role = 'customer', floor = 1) => {
+    await api.post('/users/', { username, full_name, email, password, role, assigned_floor: floor });
   };
 
   const subscribe = async (service_id) => {

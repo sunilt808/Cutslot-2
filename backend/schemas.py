@@ -11,6 +11,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     role: str = "customer"
+    assigned_floor: Optional[int] = 1
 
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None

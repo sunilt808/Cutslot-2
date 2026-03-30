@@ -197,6 +197,7 @@ async def signup(user: schemas.UserCreate, background_tasks: BackgroundTasks, db
         email=user.email,
         password_hash=auth.get_password_hash(user.password),
         role=user.role,
+        assigned_floor=user.assigned_floor if user.role == "staff" else 1,
         is_approved=(user.role != "staff"),
         member_since=datetime.datetime.utcnow()
     )
