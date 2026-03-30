@@ -6,17 +6,52 @@
 
 ## 🖼️ Estate Visual Gallery
 
-### 👑 The Directorate Command
-![Admin Dashboard](./screenshots/10_admin_dashboard_1774892987237.png)
-*Real-time business intelligence and financial oversight.*
+### 🏠 The Grand Entrance
+![Landing Page](./Screenshots/landing.png)
+*The premium landing experience — first impressions of the CutSlot estate.*
+
+![Authentication](./Screenshots/auth.png)
+*Secure portal for Guests, Artisans, and Directorate members.*
 
 ### 👤 Guest Experience
-![Client Dashboard](./screenshots/04_client_dashboard_1774892742516.png)
+![Client Dashboard](./Screenshots/client_dashboard.png)
 *A personalized vista for ritual history, wallet tracking, and bookings.*
 
+![Client Booking](./Screenshots/client_booking.png)
+*The ritual booking flow — selecting services, artisans, and time slots.*
+
+![Client Wallet](./Screenshots/client_wallet.png)
+*Financial overview with wallet balance, transactions, and top-up options.*
+
+![Client Profile](./Screenshots/client_profile.png)
+*Profile management and personalization settings.*
+
 ### ✂️ Artisan Dispatch
-![Staff Dashboard](./screenshots/08_worker_dashboard_1774892875449.png)
+![Worker Dashboard](./Screenshots/worker_dashboard.png)
 *The professional queue for managing floor operations and client rituals.*
+
+![Worker Reviews](./Screenshots/worker_reviews.png)
+*Artisan performance feedback and client ratings.*
+
+### 👑 The Directorate Command
+![Admin Dashboard](./Screenshots/admin_dashboard.png)
+*Real-time business intelligence and financial oversight.*
+
+![Admin Workers](./Screenshots/admin_workers.png)
+*Workforce management — onboarding, scheduling, and performance tracking.*
+
+![Admin Services](./Screenshots/admin_services.png)
+*Service catalog administration across all ritual categories.*
+
+![Admin Revenue](./Screenshots/admin_revenue.png)
+*Revenue analytics and financial reporting dashboard.*
+
+![Admin Audits](./Screenshots/admin_audits.png)
+*Audit trail for security, compliance, and operational transparency.*
+
+### ⭐ Common Modules
+![Reviews](./Screenshots/reviews.png)
+*Verified ritual feedback — contextual reviews tied to specific services and artisans.*
 
 ---
 
@@ -109,4 +144,4 @@ npm run dev
 ```
 
 ---
-*Developed & Stabilized by Antigravity*
+*Developed & Stabilized by Sunil*
