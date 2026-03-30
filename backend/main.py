@@ -177,7 +177,7 @@ async def read_users_me(current_user: models.User = Depends(get_current_user)):
 
 @app.post("/token", response_model=schemas.Token)
 async def login(background_tasks: BackgroundTasks, db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
-    user = db.query(models.User).filter(models.User.username == form_data.username).first()
+    user = db.query(models.User).filter(func.lower(models.User.username) == form_data.username.lower()).first()
     if not user or not auth.verify_password(form_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid elite credentials")
     if not user.is_approved:
