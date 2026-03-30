@@ -1,11 +1,30 @@
-node_modules
-dist
+node_modules/
+dist/
 .env
+__pycache__/
+venv/
+.venv/
+.vscode/
+frontend/dist/
+.gemini/
+
+# Databases
 *.db
-__pycache__
-venv
-.venv
-.vscode
-frontend/dist
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
 backend/lumiere.db
-.gemini
+backend/cutslot.db
+
+# Logs and OS files
+*.log
+backend/uvicorn-log*.txt
+.DS_Store
+Thumbs.db
+
+# Local project garbage
+gap.txt
+review.txt
+todo.md
+start.ps1
