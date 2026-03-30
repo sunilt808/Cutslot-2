@@ -4,7 +4,7 @@ Welcome to the **CutSlot Platform**, an exclusive, state-of-the-art web applicat
 
 ---
 
-## 🏛️ System Architecture
+## 🏗️ System Architecture
 
 ### 👑 The Estate Directorate (Admin)
 Full systemic control over the entire CutSlot business platform.
@@ -16,16 +16,31 @@ Full systemic control over the entire CutSlot business platform.
 ### ✂️ The Skilled Artisans (Staff)
 A dedicated, distraction-free environment for professional cosmetologists and therapists.
 - **Locked Commission Architecture:** Revenue transparency built-in. Every concluded ritual instantly deposits a strict, mathematically absolute **15.0% commission payout** securely into the Artisan's performance trackers.
-- **Personal Dispatch Queue:** Utilizing an assigned-floor logic structure (Floors 1-4). Artisans only see clients bound to their precise domain, automatically preventing overlap and chaos.
-- **Dynamic Ritual Flags:** Workers manage states through `Pending` -> `En-Route` (for doorstep/home visits) -> `Confirmed` -> `Completed`. 
-- **Performance Analytics:** Real-time feedback tracking generated uniquely from clients they have *specifically engaged with*.
+- **Personal Dispatch Queue:** Utilizing an assigned-floor logic structure (Floors 1-4). Artisans only see clients bound to their precise domain.
+- **Dynamic Ritual Flags:** Workers manage states through `Pending` -> `En-Route` -> `Confirmed` -> `Completed`. 
+- **Enhanced Accountability:** Detailed performance metrics and guest evaluations directly linked to their profile.
 
 ### 👤 The Elite Guest Experience (Client)
-A glassmorphic, premium front-end delivering unparalleled booking luxury.
-- **Authenticated Feedback Guard:** Clients are structurally locked from writing fake or arbitrary reviews. The backend ensures a Client can *only* evaluate Artisans they have successfully concluded a scheduled ritual with.
+A premium front-end delivering unparalleled booking luxury.
+- **Enhanced Guest Testimonials:** A fully transparent review system where guests evaluate specific **Rituals** (e.g., Hair Cut, Skincare) performed by specific **Artisans**. Reviews are now available to all registered clients, ensuring a comprehensive community voice.
 - **Smart Booking Flow:** Service limits, premium doorstep fees, timeline overlaps, and penalty-math (based on <6 hour cancellation bounds).
 - **Client Wallet & Activity:** Direct portal highlighting Loyalty Points mapping, Subscription Renewals (Elite vs Gold packages), total Estate expenditure, and advance slot scheduling.
 - **Membership Subscriptions:** Active memberships (like the 30-Day Elite Tier) bypass certain service fees or apply 20% discounts dynamically at checkout.
+
+---
+
+## ✨ Core Modernizations (New)
+
+### 🌓 Dynamic Theme Versatility
+The CutSlot UI now supports a **seamless Light/Dark Mode** switch. 
+- **Premium Aesthetics:** Both themes utilize custom glassmorphism and theme-aware variables (`--glass-tint`, `--glass-tint-gold`) to ensure visual depth and legibility across all backgrounds.
+- **Consistent Luxury:** Whether in High-Contrast Dark or Sophisticated Light, the "Estate" aesthetic remains premium, utilizing Playfair Display typography and animated gold glows.
+
+### 📝 Verified Review Protocols
+We have stabilized the review submission architecture:
+- **Verified Linkage:** Reviews now bridge the **Guest Name**, the **Artisan Name**, and the specific **Ritual Category**.
+- **Public Transparency:** Reviews on the Landing page and dedicated feed provide granular insights into service quality.
+- **Inclusive Vetting:** All registered users with completed sessions can now "Vette an Artisan" directly from their **Experience History** on the Profile page.
 
 ---
 
@@ -33,21 +48,21 @@ A glassmorphic, premium front-end delivering unparalleled booking luxury.
 
 **Frontend Protocol:**
 - **Core:** `React.js` powered by `Vite`.
-- **Aesthetic DNA:** Completely custom "Luxury Dark-Mode" CSS featuring sweeping glassmorphism (`backdrop-filter: blur`), animated neon-gold glows, and serif typography (`Inter` / `Playfair Display`).
+- **Aesthetic DNA:** Completely custom responsive CSS with theme-aware tokens.
 - **Iconography:** `lucide-react`.
-- **Routing:** Deep `react-router-dom` role-based protection stopping role spillage.
+- **Routing:** Deep `react-router-dom` role-based protection.
 
 **Backend Services:**
-- **Engine:** `FastAPI` (Python)
-- **Database:** `SQLAlchemy` mapping flawlessly into `SQLite` (running in Write-Ahead-Log architecture to eliminate concurrency locks).
-- **Security:** Case-insensitive `JWT-Bearer` tokens running through `Passlib Bcrypt` hashing. 
+- **Engine:** `FastAPI` (Python).
+- **Database:** `SQLAlchemy` mapping into `SQLite` (Write-Ahead-Log architecture).
+- **Security:** CSRF-protected `JWT-Bearer` tokens with `Passlib Bcrypt`.
 
 ---
 
 ## 🚀 Execution Guide
 
 ### Database Seeding & Resetting
-To initialize the estate with the 60+ new luxury services, 10 active seeded clients, and pre-vetted Artisans, perform a pristine database reset:
+To initialize the estate with 60+ new luxury services and pre-vetted Artisans:
 ```bash
 python main.py --reset-db --seed-all
 ```
@@ -56,9 +71,8 @@ python main.py --reset-db --seed-all
 ```powershell
 cd backend
 pip install -r requirements.txt
-uvicorn main:app --port 8000 --reload --limit-concurrency 100
+uvicorn main:app --port 8000 --reload
 ```
-*(The CORS middleware natively supports frontend connections originating from `http://localhost:5173`, `5174`, and `5175`.)*
 
 ### Frontend Initiation
 ```powershell
