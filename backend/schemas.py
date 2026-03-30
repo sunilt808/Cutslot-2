@@ -51,6 +51,7 @@ class UserInDB(UserBase):
 # --- SERVICE ---
 class ServiceBase(BaseModel):
     name: str
+    description: Optional[str] = None
     price: float
     duration: int
     floor: int
