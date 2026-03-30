@@ -165,7 +165,7 @@ const Auth = () => {
                               <div key={p.id} onClick={() => setSelectedPlan(selectedPlan === p.id ? null : p.id)} style={{ padding: '1.5rem', borderRadius: '18px', border: selectedPlan === p.id ? '2px solid var(--gold)' : '1px solid var(--glass-border)', background: selectedPlan === p.id ? 'rgba(212,175,55,0.12)' : 'rgba(255,255,255,0.02)', cursor: 'pointer', position: 'relative', transition: 'all 0.3s ease', transform: selectedPlan === p.id ? 'scale(1.02)' : 'scale(1)' }}>
                                   <div style={{ fontWeight: 'bold', fontSize: '1rem', color: selectedPlan === p.id ? 'var(--gold)' : 'var(--text-cream)', marginBottom: '5px' }}>{p.name.split(' ')[0]}</div>
                                   <div style={{ fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold' }}>₹{p.price}</div>
-                                  <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '8px' }}>{p.description.slice(0, 30)}...</div>
+                                  <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '8px' }}>{(p.description || '').slice(0, 30)}...</div>
                                   {selectedPlan === p.id && <CheckCircle size={18} color="var(--gold)" style={{ position: 'absolute', right: '1rem', top: '1.2rem' }} />}
                               </div>
                           )) : (
