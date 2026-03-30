@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Scissors, User as UserIcon, LogOut, Shield, Briefcase, Calendar, Home, Crown, Armchair, Sparkles, Wallet, History, TrendingUp, Settings, Sun, Moon, Database, MessageSquare, PieChart, Users, Bookmark } from 'lucide-react';
+import { Scissors, User as UserIcon, LogOut, Shield, Briefcase, Calendar, Home, Crown, Armchair, Sparkles, Wallet, History, TrendingUp, Settings, Sun, Moon, Database, MessageSquare, PieChart, Users, Bookmark, Zap } from 'lucide-react';
 
 const Layout = ({ children }) => {
   const { user, logout, theme, toggleTheme } = useAuth();

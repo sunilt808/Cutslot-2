@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Layers, Scissors, Heart, Flower, Crown, Clock, CreditCard, ChevronRight, Check, Shield, Info, Smartphone, Wallet, User as UserIcon, Calendar as CalendarIcon, MapPin } from 'lucide-react';
+import { Layers, Scissors, Heart, Flower, Crown, Clock, CreditCard, ChevronRight, Check, Shield, ShieldAlert, Info, Smartphone, Wallet, User as UserIcon, Calendar as CalendarIcon, MapPin, Sparkles } from 'lucide-react';
 
 const Booking = () => {
   const { api, user, refreshUser } = useAuth();

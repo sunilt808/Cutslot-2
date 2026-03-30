@@ -8,6 +8,7 @@ const Reviews = () => {
     const [loading, setLoading] = useState(true);
     const [newComment, setNewComment] = useState("");
     const [newRating, setNewRating] = useState(5);
+    const [newWorkerName, setNewWorkerName] = useState("");
     const [stats, setStats] = useState({ average: 0, total: 0 });
 
     useEffect(() => {
@@ -31,27 +32,22 @@ const Reviews = () => {
             alert("Please login to share your elite feedback.");
             return;
         }
+        if (!newWorkerName.trim()) {
+            alert("Please enter the artisan's name.");
+            return;
+        }
         try {
-            // In a real app, we'd pick a booking_id and service_id. 
-            // For now, let's look for the last completed booking of this user.
-            const bookingsRes = await api.get('/bookings/');
-            const lastBooking = bookingsRes.data.find(b => b.status === 'completed');
-            
-            if (!lastBooking) {
-                alert("You need a completed ritual to leave an elite review.");
-                return;
-            }
-
             await api.post('/reviews/', {
-                booking_id: lastBooking.id,
-                service_id: lastBooking.service_id,
+                worker_name: newWorkerName,
                 rating: newRating,
                 comment: newComment
             });
             setNewComment("");
+            setNewWorkerName("");
+            setNewRating(5);
             fetchReviews();
             alert("Thank you! Your feedback has been synchronized with the CUTSLOT database.");
-        } catch(err) { alert("Error submitting review. Please try again."); }
+        } catch(err) { alert(err.response?.data?.detail || "Error submitting review. Please try again."); }
     };
 
     return (
@@ -78,6 +74,17 @@ const Reviews = () => {
                         <div className="glass-card" style={{ padding: '4rem' }}>
                             <h3 className="serif" style={{ fontSize: '2rem', marginBottom: '2.5rem' }}>SHARE YOUR <span style={{ color: 'var(--gold)' }}>EXPERIENCE</span></h3>
                             <form onSubmit={handleSubmitReview} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold', marginBottom: '1rem' }}>ARTISAN NAME</label>
+                                    <input
+                                        type="text"
+                                        value={newWorkerName}
+                                        onChange={(e) => setNewWorkerName(e.target.value)}
+                                        placeholder="Artisan who served you..."
+                                        required
+                                        style={{ width: '100%', padding: '1.2rem', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', color: 'var(--text-cream)', borderRadius: '15px' }}
+                                    />
+                                </div>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 'bold', marginBottom: '1rem' }}>RATING</label>
                                     <div style={{ display: 'flex', gap: '15px' }}>

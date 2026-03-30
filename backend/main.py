@@ -20,7 +20,14 @@ app = FastAPI(title="LUMIÈRE Atelier - Luxury Elite API", version="3.0.0")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+        "http://localhost:5175",
+        "http://127.0.0.1:5175",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -292,6 +299,47 @@ async def get_notifications(current_user: models.User = Depends(get_current_user
         models.Notification.status == "sent"
     ).order_by(models.Notification.created_at.desc()).all()
 
+@app.get("/client/wallet")
+async def get_wallet(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.role != "customer":
+        raise HTTPException(status_code=403, detail="Customer access required.")
+    
+    # Calculate total spent
+    total_spent = db.query(func.sum(models.Booking.price_paid)).filter(
+        models.Booking.user_id == current_user.id,
+        models.Booking.status == "completed"
+    ).scalar() or 0.0
+
+    return {
+        "balance": current_user.balance,
+        "loyalty_points": current_user.loyalty_points,
+        "total_spent": total_spent,
+        "subscription_plan": current_user.subscription_plan,
+        "subscription_expiry": current_user.subscription_expiry
+    }
+
+@app.post("/subscribe/")
+async def subscribe(data: schemas.SubscriptionPurchase, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.role != "customer":
+        raise HTTPException(status_code=403, detail="Customer access required.")
+    
+    service = db.query(models.Service).filter(models.Service.id == data.service_id).first()
+    if not service or service.category != "subscription":
+        raise HTTPException(status_code=404, detail="Subscription plan not found")
+        
+    current_user.subscription_plan = service.name
+    current_user.subscription_expiry = datetime.datetime.utcnow() + datetime.timedelta(days=30)
+    
+    if "Elite" in service.name:
+        current_user.monthly_limit = 50
+    elif "Gold" in service.name:
+        current_user.monthly_limit = 25
+    else:
+        current_user.monthly_limit = 10
+        
+    db.commit()
+    return {"msg": f"Successfully subscribed to {service.name}"}
+
 @app.put("/bookings/{id}/cancel")
 async def cancel_booking(id: int, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     booking = db.query(models.Booking).filter(models.Booking.id == id).first()
@@ -366,6 +414,21 @@ async def list_services(floor: Optional[int] = None, db: Session = Depends(get_d
     q = db.query(models.Service)
     if floor: q = q.filter(models.Service.floor == floor)
     return q.all()
+
+@app.get("/workers/", response_model=List[schemas.UserInDB])
+async def list_workers_public(floor: Optional[int] = None, db: Session = Depends(get_db)):
+    """Public endpoint for Booking and AdvanceBooking pages to list approved workers."""
+    q = db.query(models.User).filter(models.User.role == "staff", models.User.is_approved == True)
+    if floor:
+        q = q.filter(models.User.assigned_floor == floor)
+    return q.all()
+
+@app.get("/reviews/", response_model=List[schemas.ReviewInDB])
+async def list_reviews(db: Session = Depends(get_db)):
+    try:
+        return db.query(models.Review).order_by(models.Review.created_at.desc()).all()
+    except Exception:
+        return []
 
 @app.get("/bookings/", response_model=List[schemas.BookingInDB])
 async def list_bookings(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
