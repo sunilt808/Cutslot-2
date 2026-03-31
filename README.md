@@ -99,25 +99,60 @@ Explore the platform's premium UI and role-based modules below. All images are f
 
 ## 5. Project Structure
 
+
 ```
 Cutslot-2/
-├── backend/         # FastAPI backend (Python)
-│   ├── main.py      # API entrypoint
-│   ├── models.py    # SQLAlchemy models
-│   ├── schemas.py   # Pydantic schemas
-│   ├── auth.py      # Auth logic (JWT, Bcrypt)
-│   ├── database.py  # DB config
+├── backend/                     # FastAPI backend (Python)
+│   ├── api/
+│   │   └── v1/
+│   │       └── endpoints/
+│   ├── auth.py                  # Auth logic (JWT, Bcrypt)
+│   ├── database.py              # DB config
+│   ├── main.py                  # API entrypoint
+│   ├── models.py                # SQLAlchemy models
+│   ├── schemas.py               # Pydantic schemas
+│   ├── requirements.txt         # Backend dependencies
 │   └── ...
-├── frontend/        # React + Vite frontend
+├── frontend/                    # React + Vite frontend
+│   ├── public/
+│   │   └── assets/              # Static assets (images)
 │   ├── src/
-│   │   ├── pages/   # Role-based pages (admin, worker, client, common)
-│   │   ├── components/
-│   │   └── ...
+│   │   ├── api/                 # (empty or for future API helpers)
+│   │   ├── assets/              # App-specific images
+│   │   ├── components/          # Shared UI components
+│   │   ├── context/             # AuthContext, global state
+│   │   ├── pages/
+│   │   │   ├── admin/           # Admin role pages
+│   │   │   ├── client/          # Client role pages
+│   │   │   ├── common/          # Shared/common pages
+│   │   │   └── worker/          # Worker role pages
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── index.css
+│   ├── package.json
 │   └── ...
-├── Screenshots/     # UI screenshots
-├── README.md
+├── Screenshots/                 # UI screenshots for documentation
+│   ├── admin_audits.png
+│   ├── admin_dashboard.png
+│   ├── admin_revenue.png
+│   ├── admin_services.png
+│   ├── admin_workers.png
+│   ├── auth.png
+│   ├── client_booking.png
+│   ├── client_dashboard.png
+│   ├── client_profile.png
+│   ├── client_wallet.png
+│   ├── landing.png
+│   ├── reviews.png
+│   ├── worker_dashboard.png
+│   └── worker_reviews.png
 ├── LICENSE
-└── ...
+├── README.md
+├── CONTRIBUTING.md
+├── gap.txt
+├── review.txt
+└── tmp/
+  └── regression_test.py
 ```
 
 ---
