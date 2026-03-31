@@ -10,14 +10,14 @@ pipeline {
 
         stage('Check Python') {
             steps {
-                bat 'python --version'
+                bat 'C:\\Users\\sunil\\AppData\\Local\\Programs\\Python\\Python312\\python.exe --version'
             }
         }
 
         stage('Install Backend Dependencies') {
             steps {
                 dir('backend') {
-                    bat 'pip install -r requirements.txt'
+                    bat 'C:\\Users\\sunil\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m pip install -r requirements.txt'
                 }
             }
         }
