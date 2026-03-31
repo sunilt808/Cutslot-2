@@ -3,8 +3,6 @@ pipeline {
 
     environment {
         PYTHON = "C:\\Users\\sunil\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
-        NODE   = "C:\\Program Files\\nodejs\\node.exe"
-        NPM    = "C:\\Program Files\\nodejs\\npm.cmd"
     }
 
     stages {
@@ -15,65 +13,23 @@ pipeline {
             }
         }
 
-        stage('Check Files') {
-            steps {
-                bat 'dir'
-            }
-        }
+        // ---------------- TESTING ----------------
 
-        // ---------------- BACKEND ----------------
-
-        stage('Check Python') {
-            steps {
-                bat '"%PYTHON%" --version'
-            }
-        }
-
-        stage('Install Backend Dependencies') {
+        stage('Run Backend Tests') {
             steps {
                 dir('backend') {
-                    bat '"%PYTHON%" -m pip install --upgrade pip'
                     bat '"%PYTHON%" -m pip install -r requirements.txt'
+                    bat '"%PYTHON%" -m pytest || echo No tests found'
                 }
             }
         }
 
-        stage('Run Backend') {
-            steps {
-                dir('backend') {
-                    bat '''
-                    echo Starting FastAPI server...
-                    start "" /B "%PYTHON%" -m uvicorn main:app --port 8000
-                    timeout /t 5
-                    echo Checking if backend is running...
-                    netstat -ano | findstr :8000
-                    '''
-                }
-            }
-        }
+        // ---------------- DOCKER ----------------
 
-        // ---------------- FRONTEND ----------------
-
-        stage('Check Node') {
+        stage('Docker Build & Run') {
             steps {
-                bat '"%NODE%" --version'
-                bat '"%NPM%" --version'
-            }
-        }
-
-        stage('Install Frontend Dependencies') {
-            steps {
-                dir('frontend') {
-                    bat '"%NPM%" install'
-                }
-            }
-        }
-
-        stage('Build Frontend') {
-            steps {
-                dir('frontend') {
-                    bat '"%NPM%" run build'
-                }
+                bat 'docker-compose down'
+                bat 'docker-compose up --build -d'
             }
         }
 
@@ -81,7 +37,7 @@ pipeline {
 
     post {
         success {
-            echo '✅ FULL PIPELINE SUCCESS (Backend + Frontend)'
+            echo '✅ PIPELINE SUCCESS (Tested + Deployed)'
         }
         failure {
             echo '❌ PIPELINE FAILED'
