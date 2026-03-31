@@ -33,6 +33,16 @@ pipeline {
             }
         }
 
+        // ---------------- INSTALL ADDITIONAL LIBRARIES ----------------
+
+        stage('Install Additional Libraries') {
+            steps {
+                dir('backend') {
+                    bat '"%PYTHON%" -m pip install requests flask numpy pandas'
+                }
+            }
+        }
+
         // ---------------- TESTING ----------------
 
         stage('Run Backend Tests') {
