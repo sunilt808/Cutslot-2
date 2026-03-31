@@ -19,6 +19,7 @@ pipeline {
             steps {
                 dir('backend') {
                     bat '"%PYTHON%" -m pip install -r requirements.txt'
+                    bat '"%PYTHON%" -m pip install pytest'
                     bat '"%PYTHON%" -m pytest || echo No tests found'
                 }
             }
